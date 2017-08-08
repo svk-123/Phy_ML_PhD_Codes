@@ -1,0 +1,16 @@
+#document
+*.txt
+
+#py-o-file
+*.pyc
+*.pyo
+
+#image files
+*.png
+*.jpeg
+
+#data file
+*.pkl
+*.hdf5
+*.h5
+

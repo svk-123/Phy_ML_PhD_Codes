@@ -91,7 +91,7 @@ T6=T[5,:,:]
 N= len(L)
 I = np.arange(N)
 np.random.shuffle(I)
-n=5000
+n=4000
 
 ## Training sets
 xtr0 = L[I][:n]
@@ -114,7 +114,6 @@ ttr6 = bD6[I][:n]
 # create model
 aa=Input(shape=(5,))
 xx =Dense(10,  kernel_initializer='random_normal', activation='relu')(aa)
-xx =Dense(10, activation='relu')(xx)
 xx =Dense(10, activation='relu')(xx)
 xx =Dense(10, activation='relu')(xx)
 xx =Dense(10, activation='relu')(xx)
@@ -159,7 +158,7 @@ os.system("rm ./graph/* ")
 tb = TensorBoard(log_dir='./graph', histogram_freq=0, write_graph=True, write_images=True)
 
 # Compile model
-opt = Adam(lr=2.50e-6,decay=1.0e-6)
+opt = Adam(lr=2.50e-6,decay=1.0e-9)
 
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 

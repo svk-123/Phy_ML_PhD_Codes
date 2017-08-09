@@ -14,3 +14,17 @@
 *.hdf5
 *.h5
 
+#
+ccx
+ccy
+ccz
+U
+p
+phi
+turbulenceProperties:R
+k
+epsilon
+grad(U)
+nut
+time
+RANS_ml_cr

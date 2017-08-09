@@ -29,7 +29,9 @@ from keras.layers.advanced_activations import LeakyReLU, PReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 import cPickle as pickle
 import seaborn as sns
-#
+
+from scipy import interpolate
+
 import os,sys
 scriptpath = "/home/vino/miniconda2/mypy"
 sys.path.append(os.path.abspath(scriptpath))
@@ -59,13 +61,13 @@ z=[]
 for ii in range(len(flist)):
    
     # for ref: data1 = [UUDi,bD,L,bR]
-    with open('./tbnn_data/data_out/ml_data1_%s.pkl'%flist[ii], 'rb') as infile1:
+    with open('../tbnn_data/data_out/ml_data1_%s.pkl'%flist[ii], 'rb') as infile1:
         result1 = pickle.load(infile1)
     # ref: data2 = [T1m,T2m,T3m,T4m,T5m,T6m]
-    with open('./tbnn_data/data_out/ml_data2_%s.pkl'%flist[ii], 'rb') as infile2:
+    with open('../tbnn_data/data_out/ml_data2_%s.pkl'%flist[ii], 'rb') as infile2:
         result2 = pickle.load(infile2)
     # ref: data2 = [x,y,z]
-    with open('./tbnn_data/data_out/ml_data3_%s.pkl'%flist[ii], 'rb') as infile3:
+    with open('../tbnn_data/data_out/ml_data3_%s.pkl'%flist[ii], 'rb') as infile3:
         result3 = pickle.load(infile3)
     
     bD.extend(result1[1])
@@ -92,39 +94,38 @@ T=[T1,T2,T3,T4,T5,T6]
 T=np.asarray(T)
 
 #load model
-model_test = load_model('./model/model_9999_0.170_0.177.hdf5') 
+model_test = load_model('../model/model_9999_0.170_0.177.hdf5') 
 out=model_test.predict([L,T[0,:,:],T[1,:,:],T[2,:,:],T[3,:,:],T[4,:,:],T[5,:,:]])
 
 # inverse scaler & reshape
 out=np.asarray(out)
 out=out.reshape(6,len(L))
 
-#plot
-def plot(x,y,z,nc,name):
-    fig=plt.figure(figsize=(6, 5), dpi=100)
-    ax=fig.add_subplot(111)
-    #cp = ax.tricontourf(x, y, z,np.linspace(-0.3,0.3,30),extend='both')
-    cp = ax.tricontourf(x, y, z,30,extend='both')
-    #cp.set_clim(-0.2,0.2)
-    plt.xlim([-1, 0])
-    plt.ylim([-1, 0])
-     
-    cbar=plt.colorbar(cp)
-    plt.title(name)
-    plt.xlabel('Z ')
-    plt.ylabel('Y ')
-    plt.savefig(name +'.png', format='png', dpi=100)
-    plt.show()
+with open('../rans_data/duct_rans_data1_%s.pkl'%flist[0], 'rb') as infile1:
+    result4 = pickle.load(infile1)
+k=result4[6]
+
+a11=out[0,:]*2*k
+a12=out[1,:]*2*k
+a13=out[2,:]*2*k
+a22=out[3,:]*2*k
+a23=out[4,:]*2*k
+a33=out[5,:]*2*k
+
+t11=a11+(2./3.)*k
+t12=a12
+t13=a13
+t22=a22+(2./3.)*k
+t23=a23
+t33=a33+(2./3.)*k
+
+
+from ml_Rey_write import write_R_ml
+write_R_ml(t11,t12,t13,t22,t23,t33)
 
 
 
-nbD=['uu-bD','uv-bD','uw-bD','vv-bD','vw-bD','ww-bD']
-nbp=['uu-pred','uv-pred','uw-pred','vv-pred','vw-pred','ww-pred']
-nbR=['uu-bR','uv-bR','uw-bR','vv-bR','vw-bR','ww-bR']
-for i in range(0,6):
-    plot(z,y,bD[:,i],20,'%s'%(nbD[i]))
-    plot(z,y,bR[:,i],20,'%s'%(nbR[i]))   
-    plot(z,y,out[i,:],20,'%s'%(nbp[i]))   
+
 
 
 

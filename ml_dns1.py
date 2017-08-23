@@ -91,7 +91,7 @@ T6=T[5,:,:]
 N= len(L)
 I = np.arange(N)
 np.random.shuffle(I)
-n=4000
+n=7000
 
 ## Training sets
 xtr0 = L[I][:n]
@@ -113,12 +113,13 @@ ttr6 = bD6[I][:n]
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(5,))
-xx =Dense(10,  kernel_initializer='random_normal', activation='relu')(aa)
-xx =Dense(10, activation='relu')(xx)
-xx =Dense(10, activation='relu')(xx)
-xx =Dense(10, activation='relu')(xx)
-xx =Dense(10, activation='relu')(xx)
-xx =Dense(10, activation='relu')(xx)
+xx=keras.layers.noise.GaussianNoise(0.01)(aa)
+xx =Dense(30,  kernel_initializer='random_normal', activation='relu')(xx)
+xx =Dense(30, activation='relu')(xx)
+xx =Dense(30, activation='relu')(xx)
+xx =Dense(30, activation='relu')(xx)
+xx =Dense(30, activation='relu')(xx)
+xx =Dense(30, activation='relu')(xx)
 g =Dense(10, activation='linear')(xx)
 
 
@@ -139,6 +140,8 @@ y5= dot([g, t5], 1)
 
 t6=Input(shape=(10,))
 y6= dot([g, t6], 1)
+
+#model save dir
 
 
 #model = Model(inputs=a, outputs=g)
@@ -167,7 +170,7 @@ hist = model.fit([xtr0,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6], [ttr1,ttr2,ttr3,ttr4,ttr5
                  epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1)
 
 #save model
-model.save('tauPred1.h5') 
+model.save('./model/final.hdf5') 
 
 
 print"\n"

@@ -30,9 +30,9 @@ start_time = time.time()
                                  
 
 # duct - list
-#flist=['Re2200','Re2600','Re2900','Re3500']
+flist=['Re2200','Re2600','Re2900','Re3500']
 
-flist=['Re3500']
+#flist=['Re3500']
 # import functions
 from calc_rans import calc_rans
 from calc_dns import calc_dns
@@ -53,9 +53,9 @@ for ii in range(len(flist)):
     ZD, YD = np.meshgrid(zD, yD, copy=False)
     
     '''
-    x,z,y,UUR,Rey,aR,bR,L,T1m,T2m,T3m,T4m,T5m,T6m=calc_rans(flist[ii])
+    x,z,y,UUR,Rey,aR,bR,L,T1m,T2m,T3m,T4m,T5m,T6m,S,R=calc_rans(flist[ii])
     
-    UUDi,aD,bD=calc_dns(flist[ii],z,y)
+    #UUDi,aD,bD=calc_dns(flist[ii],z,y)
     
     
     '''
@@ -76,7 +76,7 @@ for ii in range(len(flist)):
         plot(z,y,aD[:,i],20,'%s-%s'%(naD[i],flist[ii]))
         plot(z,y,aR[:,i],20,'%s-%s'%(naR[i],flist[ii]))
     '''
-
+    '''
     # Plot-Rxx from OF with DNS    
     nUUDi=['uu-Di','uv-Di','uw-Di','vv-Di','vw-Di','ww-Di']
     nUUR=['uu-UUR','uv-UUR','uw-UUR','vv-UUR','vw-UUR','ww-UUR']
@@ -85,7 +85,7 @@ for ii in range(len(flist)):
         plot(z,y,UUDi[:,i],20,'%s_%s'%(nUUDi[i],flist[ii]))
         plot(z,y,UUR[:,i],20,'%s_%s'%(nUUR[i],flist[ii]))
         plot(z,y,Rey[:,i],20,'%s_%s'%(nRey[i],flist[ii]))
-
+        '''
 
     '''
     # write data to ml
@@ -101,6 +101,9 @@ for ii in range(len(flist)):
     with open('./data_out/ml_data3_%s.pkl'%flist[ii], 'wb') as outfile3:
         pickle.dump(data3, outfile3, pickle.HIGHEST_PROTOCOL)     
     '''
+    data4 = [S,R]
+    with open('./data_out/ml_data4_%s.pkl'%flist[ii], 'wb') as outfile4:
+        pickle.dump(data4, outfile4, pickle.HIGHEST_PROTOCOL)
         
     # print time  
     print("--- %s seconds ---" % (time.time() - start_time))

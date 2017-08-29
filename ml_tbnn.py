@@ -13,7 +13,6 @@ start_time = time.time()
 # Python 3.5
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 
 import keras
 from keras.models import Sequential, Model
@@ -31,6 +30,22 @@ from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 from keras.callbacks import TensorBoard
 import cPickle as pickle
 #
+
+
+import os, shutil
+folder = './model/'
+for the_file in os.listdir(folder):
+    file_path = os.path.join(folder, the_file)
+    try:
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
+        #elif os.path.isdir(file_path): shutil.rmtree(file_path)
+    except Exception as e:
+        print(e)
+
+
+
+
 
 #load
 # duct - list
@@ -91,7 +106,7 @@ T6=T[5,:,:]
 N= len(L)
 I = np.arange(N)
 np.random.shuffle(I)
-n=7000
+n=4000
 
 ## Training sets
 xtr0 = L[I][:n]
@@ -110,16 +125,17 @@ ttr5 = bD5[I][:n]
 ttr6 = bD6[I][:n]
 
 
+
+
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(5,))
-xx=keras.layers.noise.GaussianNoise(0.01)(aa)
-xx =Dense(30,  kernel_initializer='random_normal', activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
+xx =Dense(20,  kernel_initializer='random_normal', activation='relu')(aa)
+xx =Dense(20, activation='relu')(xx)
+xx =Dense(20, activation='relu')(xx)
+xx =Dense(20, activation='relu')(xx)
+xx =Dense(20, activation='relu')(xx)
+xx =Dense(20, activation='relu')(xx)
 g =Dense(10, activation='linear')(xx)
 
 
@@ -167,7 +183,7 @@ model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 
 hist = model.fit([xtr0,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6], [ttr1,ttr2,ttr3,ttr4,ttr5,ttr6], validation_split=0.2,\
-                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1)
+                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=False)
 
 #save model
 model.save('./model/final.hdf5') 

@@ -53,6 +53,8 @@ T6= []
 x=[]
 y=[]
 z=[]
+S=[]
+R=[]
 
 
 for ii in range(len(flist)):
@@ -66,6 +68,9 @@ for ii in range(len(flist)):
     # ref: data2 = [x,y,z]
     with open('./tbnn_data/data_out/ml_data3_%s.pkl'%flist[ii], 'rb') as infile3:
         result3 = pickle.load(infile3)
+    # ref: data2 = [S,R]
+    with open('./tbnn_data/data_out/ml_data4_%s.pkl'%flist[ii], 'rb') as infile4:
+        result4=pickle.load(infile4)
     
     bD.extend(result1[1])
     bR.extend(result1[3])
@@ -79,24 +84,35 @@ for ii in range(len(flist)):
     x.extend(result3[0])
     y.extend(result3[1])
     z.extend(result3[2])
+    S.extend(result4[0])
+    R.extend(result4[1])    
+  
+
+
+S=np.asarray(S)
+R=np.asarray(R)
+S=S.reshape(len(S),9)
+S[:,3]=R[:,0,1]
+S[:,6]=R[:,0,2]
+S[:,7]=R[:,1,2]
     
 bD=np.asarray(bD)
 bR=np.asarray(bR)
-L=np.asarray(L)
+
 x=np.asarray(x)
 y=np.asarray(y)
 z=np.asarray(z)
 
-T=[T1,T2,T3,T4,T5,T6]
-T=np.asarray(T)
 
 #load model
 model_test = load_model('./model/final.hdf5') 
-out=model_test.predict([L,T[0,:,:],T[1,:,:],T[2,:,:],T[3,:,:],T[4,:,:],T[5,:,:]])
+#out=model_test.predict([L,T[0,:,:],T[1,:,:],T[2,:,:],T[3,:,:],T[4,:,:],T[5,:,:]])
+out=model_test.predict(S)
+
 
 # inverse scaler & reshape
 out=np.asarray(out)
-out=out.reshape(6,len(L))
+out=out.reshape(6,len(S))
 
 #plot
 def plot(x,y,z,nc,name):
@@ -114,26 +130,17 @@ def plot(x,y,z,nc,name):
     plt.ylabel('Y ')
     #plt.savefig(name +'.png', format='png', dpi=100)
     plt.show()
-    
-t=np.zeros((len(L),6))
 
-    
-for i in range(len(L)):
-    t[i,0]=sum(T[0,i,:])
-    t[i,1]=sum(T[1,i,:])
-    t[i,2]=sum(T[2,i,:])
-    t[i,3]=sum(T[3,i,:])
-    t[i,4]=sum(T[4,i,:])
-    t[i,5]=sum(T[5,i,:])
 
 nbD=['uu-bD','uv-bD','uw-bD','vv-bD','vw-bD','ww-bD']
 nbp=['uu-pred','uv-pred','uw-pred','vv-pred','vw-pred','ww-pred']
 nbR=['uu-bR','uv-bR','uw-bR','vv-bR','vw-bR','ww-bR']
 
 for i in range(0,6):
-    plot(z,y,bD[:,i],20,'%s'%(nbD[i]))
+    #plot(z,y,bD[:,i],20,'%s'%(nbD[i]))
     plot(z,y,bR[:,i],20,'%s'%(nbR[i]))   
-    plot(z,y,out[i,:],20,'%s'%(nbp[i]))   
+    plot(z,y,out[i,:],20,'%s'%(nbp[i]))
+    #plot(z,y,S[:,i],20,'%s'%(nbp[i])) 
     #plot(z,y,t[:,i],20,'%s'%(nbp[i])) 
 
 

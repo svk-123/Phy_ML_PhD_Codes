@@ -38,18 +38,37 @@ plt.register_cmap(name='viridis', cmap=cmaps.viridis)
 plt.set_cmap(cmaps.viridis)
 
 #load
-from main_tau import L,T1m,T2m,T3m,T4m,T5m,T6m,aD,bD
+from main_tau import L,T,bD
 
 l=len(L)
 
+xtr1 = T[:,:,0]
+xtr2 = T[:,:,1]
+xtr3 = T[:,:,2]
+xtr4 = T[:,:,4]
+xtr5 = T[:,:,5]
+xtr6 = T[:,:,8]
+
+bDt=np.zeros((l,6))
+
+bDt[:,0]=bD[:,0]
+bDt[:,1]=bD[:,1]
+bDt[:,2]=bD[:,2]
+bDt[:,3]=bD[:,4]
+bDt[:,4]=bD[:,5]
+bDt[:,5]=bD[:,8]
+
+
+
 #load model
 model_test = load_model('./model/final.hdf5') 
-out=model_test.predict([L,T1m,T2m,T3m,T4m,T5m,T6m])
+#out=model_test.predict([L,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6])
+out=model_test.predict([L,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6])
+#out=model_test.predict([L,T1m])
 
-# inverse scaler & reshape
+#  reshape
 out=np.asarray(out)
-out=out.reshape(6,l)
-out=out.reshape(l,6)
+
 
 def plot_results(predicted_stresses, true_stresses):
     """
@@ -67,7 +86,7 @@ def plot_results(predicted_stresses, true_stresses):
             ax = fig.gca()
             ax.set_aspect('equal')
             plt.plot([-1., 1.], [-1., 1.], 'r--')
-            plt.scatter(true_stresses[:, i], predicted_stresses[:, i])
+            plt.scatter(true_stresses[:,i], predicted_stresses[:, i])
             plt.xlabel('True value')
             plt.ylabel('Predicted value')
             idx_1 = i / 3
@@ -82,20 +101,5 @@ def plot_results(predicted_stresses, true_stresses):
     plt.tight_layout()
     plt.show()
 
-plot_results(bD,out)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+plot_results(out[:,:,0].transpose(),bDt)
 

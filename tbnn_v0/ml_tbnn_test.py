@@ -92,15 +92,15 @@ T=np.asarray(T)
 
 #load model
 model_test = load_model('./model/final.hdf5') 
-out=model_test.predict([L,T[0,:,:],T[1,:,:],T[2,:,:],T[3,:,:],T[4,:,:],T[5,:,:],])
-
+#out=model_test.predict([L,T[0,:,:],T[1,:,:],T[2,:,:],T[3,:,:],T[4,:,:],T[5,:,:]])
+out=model_test.predict([L,T[0,:,:]])
 
 # no of dot layers
-l=6
+l=1
 
 # inverse scaler & reshape
 out=np.asarray(out)
-out=out.reshape(l,len(L))
+#out=out.reshape(l,len(L))
 
 #plot
 def plot(x,y,z,nc,name):
@@ -124,11 +124,11 @@ nbD=['uu-bD','uv-bD','uw-bD','vv-bD','vw-bD','ww-bD']
 nbp=['uu-pred','uv-pred','uw-pred','vv-pred','vw-pred','ww-pred']
 nbR=['uu-bR','uv-bR','uw-bR','vv-bR','vw-bR','ww-bR']
 
-for i in range(0,l):
+for i in range(0,1):
     plot(z,y,bD[:,i],20,'%s'%(nbD[i]))
     #plot(z,y,bR[:,i],20,'%s'%(nbR[i]))   
-    plot(z,y,out[i,:],20,'%s'%(nbp[i]))   
-    #plot(z,y,t[:,i],20,'%s'%(nbp[i])) 
+    plot(z,y,out[:,i],20,'%s'%(nbp[i]))   
+   # plot(z,y,sum(T[i,:,:].transpose()),20,'%s'%(nbp[i])) 
 
 
 

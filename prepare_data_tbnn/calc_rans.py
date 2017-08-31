@@ -42,7 +42,7 @@ def calc_rans(name):
     ryy,ryz,rzz=result3[3],result3[4],result3[5]
     
 
-    return (k,ep,ux,uy,uz,ux,uy,uz,wx,wy,wz)
+    return (k,ep,ux,uy,uz,ux,uy,uz,wx,wy,wz,x,y,z)
   
     
     

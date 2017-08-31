@@ -50,6 +50,18 @@ ep = data[:, 1]
 grad_u_flat = data[:, 2:11]
 stresses_flat = data[:, 11:]
 
-UUDi,aD,bD = calc_dns(stresses_flat)
+#UUDi,aD,bD = calc_dns(stresses_flat)
 
-L,T1m,T2m,T3m,T4m,T5m,T6m,S,R = calc_rans(k,ep,grad_u_flat)
+#L,T1m,T2m,T3m,T4m,T5m,T6m,S,R = calc_rans(k,ep,grad_u_flat)
+
+#data3 = [x,tb,y]
+with open('re3500.pkl', 'rb') as outfile3:
+	ch_data=pickle.load(outfile3) 
+
+L=ch_data[0]
+T=ch_data[1]
+bD=ch_data[2]
+
+
+
+

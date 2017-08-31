@@ -33,62 +33,64 @@ import cPickle as pickle
 #
 
 
-from main_tau import L,T1m,T2m,T3m,T4m,T5m,T6m,aD,bD
+from main_tau import L,T,bD
 
-
-bD1=bD[:,0]
-bD2=bD[:,1]
-bD3=bD[:,2]
-bD4=bD[:,3]
-bD5=bD[:,4]
-bD6=bD[:,5]
 
 # ---------ML PART:-----------#
 #shuffle data
 N= len(L)
 I = np.arange(N)
 np.random.shuffle(I)
-n=59
+n=1200
 '''
 ## Training sets
 xtr0 = L[I][:n]
-xtr1 = T1m[I][:n]
-xtr2 = T2m[I][:n]
-xtr3 = T3m[I][:n]
-xtr4 = T4m[I][:n]
-xtr5 = T5m[I][:n]
-xtr6 = T6m[I][:n]
+xtr1 = T[I][:n][0]
+xtr2 = T[I][:n][1]
+xtr3 = T[I][:n][2]
+xtr4 = T[I][:n][3]
+xtr5 = T[I][:n][4]
+xtr6 = T[I][:n][5]
 
-ttr1 = bD1[I][:n]
-ttr2 = bD2[I][:n]
-ttr3 = bD3[I][:n]
-ttr4 = bD4[I][:n]
-ttr5 = bD5[I][:n]
-ttr6 = bD6[I][:n]
+ttr1 = bD[I][:n][0]
+ttr2 = bD[I][:n][1]
+ttr3 = bD[I][:n][2]
+ttr4 = bD[I][:n][3]
+ttr5 = bD[I][:n][4]
+ttr6 = bD[I][:n][5]
 '''
 
 xtr0 = L
-xtr1 = T1m
-xtr2 = T2m
-xtr3 = T3m
-xtr4 = T4m
-xtr5 = T5m
-xtr6 = T6m
 
-ttr1 = bD1
-ttr2 = bD2
-ttr3 = bD3
-ttr4 = bD4
-ttr5 = bD5
-ttr6 = bD6
+xtr1 = T[:,:,0]
+xtr2 = T[:,:,1]
+xtr3 = T[:,:,2]
+xtr4 = T[:,:,4]
+xtr5 = T[:,:,5]
+xtr6 = T[:,:,8]
+
+ttr1 = bD[:,0]
+ttr2 = bD[:,1]
+ttr3 = bD[:,2]
+ttr4 = bD[:,4]
+ttr5 = bD[:,5]
+ttr6 = bD[:,8]
 
 
 
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(5,))
-xx =Dense(20,  kernel_initializer='random_normal', activation='tanh')(aa)
-xx =Dense(20, activation='tanh')(xx)
+xx =Dense(10,  kernel_initializer='random_normal', activation='relu')(aa)
+xx =Dense(10, activation='relu')(xx)
+xx =Dense(10, activation='relu')(xx)
+xx =Dense(10, activation='relu')(xx)
+xx =Dense(10, activation='relu')(xx)
+xx =Dense(10, activation='relu')(xx)
+xx =Dense(10, activation='relu')(xx)
+xx =Dense(10, activation='relu')(xx)
+xx =Dense(10, activation='relu')(xx)
+xx =Dense(10, activation='relu')(xx)
 g =Dense(10, activation='linear')(xx)
 
 
@@ -117,26 +119,30 @@ y6= dot([g, t6], 1)
 model = Model(inputs=[aa,t1,t2,t3,t4,t5,t6], outputs=[y1,y2,y3,y4,y5,y6])
 
 #callbacks
-reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, mode='min',verbose=1 ,patience=10, min_lr=1.0e-8)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, mode='min',verbose=1 ,patience=100, min_lr=1.0e-8)
 
-e_stop = EarlyStopping(monitor='val_loss', min_delta=1.0e-6, patience=100, verbose=1, mode='auto')
+e_stop = EarlyStopping(monitor='val_loss', min_delta=1.0e-6, patience=1000, verbose=1, mode='auto')
 
 filepath="./model/model_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
 
 chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
-                                save_best_only=False, save_weights_only=False, mode='auto', period=5000)
+                                save_best_only=False, save_weights_only=False, mode='auto', period=1000)
 
-os.system("rm ./graph/* ")
-tb = TensorBoard(log_dir='./graph', histogram_freq=0, write_graph=True, write_images=True)
+#os.system("rm ./graph/* ")
+#tb = TensorBoard(log_dir='./graph', histogram_freq=0, write_graph=True, write_images=True)
 
 # Compile model
-opt = Adam(lr=2.50e-6,decay=1.0e-9)
+opt = Adam(lr=2.5e-4,decay=1.0e-9)
 
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 
 hist = model.fit([xtr0,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6], [ttr1,ttr2,ttr3,ttr4,ttr5,ttr6], validation_split=0.2,\
-                 epochs=30000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)
+                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=True)
+
+#hist = model.fit([xtr0,xtr1], [ttr1], validation_split=0.2,\
+#                 epochs=30000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)
+
 
 #save model
 model.save('./model/final.hdf5') 

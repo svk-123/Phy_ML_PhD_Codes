@@ -41,9 +41,9 @@ from plot_tau import plot,plotD
 for ii in range(len(flist)):
 
     u00,u01,u02,u03,u04,u05,u06,u07,u08=calc_dns(flist[ii])
-    k,ep,ux,uy,uz,vx,vy,vz,wx,wy,wz=calc_rans(flist[ii])    
+    k,ep,ux,uy,uz,vx,vy,vz,wx,wy,wz,x,y,z=calc_rans(flist[ii])    
 
-
+'''
 #shuffle data
 N= len(k)
 I = np.arange(N)
@@ -70,7 +70,7 @@ u05=u05[I][:n]
 u06=u06[I][:n]
 u07=u07[I][:n]
 u08=u08[I][:n]
-
+'''
 
    
 
@@ -81,7 +81,7 @@ print("--- %s seconds ---" % (time.time() - start_time))
 l=len(k)     
 
 print 'writing..'
-fp= open("to_tbnn.txt","w+")
+fp= open("re2900.txt","w+")
 
 fp.write('line to skip\n')
 fp.write('line to skip\n')
@@ -93,4 +93,9 @@ for i in range(l):
              %(k[i],ep[i],ux[i],uy[i],uz[i],vx[i],vy[i],vz[i],wx[i],wy[i],wz[i],u00[i],u01[i],u02[i],u03[i],u04[i],u05[i],u06[i],u07[i],u08[i]))        
     
 fp.close()
-    
+
+print 'writing..'
+fp= open("xyz.txt","w+")    
+for i in range(l):
+    fp.write("%s %s %s\n"%(x,y,z))
+fp.close()    

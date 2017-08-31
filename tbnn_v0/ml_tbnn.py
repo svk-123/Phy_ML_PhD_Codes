@@ -44,9 +44,6 @@ for the_file in os.listdir(folder):
         print(e)
 
 
-
-
-
 #load
 # duct - list
 flist=['Re2200','Re2600','Re2900']
@@ -105,8 +102,9 @@ T6=T[5,:,:]
 #shuffle data
 N= len(L)
 I = np.arange(N)
+np.random.seed(12345)
 np.random.shuffle(I)
-n=4000
+n=5000
 
 ## Training sets
 xtr0 = L[I][:n]
@@ -124,18 +122,17 @@ ttr4 = bD4[I][:n]
 ttr5 = bD5[I][:n]
 ttr6 = bD6[I][:n]
 
-
-
-
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(5,))
-xx =Dense(20,  kernel_initializer='random_normal', activation='relu')(aa)
-xx =Dense(20, activation='relu')(xx)
-xx =Dense(20, activation='relu')(xx)
-xx =Dense(20, activation='relu')(xx)
-xx =Dense(20, activation='relu')(xx)
-xx =Dense(20, activation='relu')(xx)
+xx =Dense(50,  kernel_initializer='random_normal', activation='relu')(aa)
+xx =Dense(50, activation='relu')(xx)
+xx =Dense(50, activation='relu')(xx)
+xx =Dense(50, activation='relu')(xx)
+xx =Dense(50, activation='relu')(xx)
+xx =Dense(50, activation='relu')(xx)
+xx =Dense(50, activation='relu')(xx)
+xx =Dense(50, activation='relu')(xx)
 g =Dense(10, activation='linear')(xx)
 
 
@@ -161,8 +158,8 @@ y6= dot([g, t6], 1)
 
 
 #model = Model(inputs=a, outputs=g)
-model = Model(inputs=[aa,t1,t2,t3,t4,t5,t6], outputs=[y1,y2,y3,y4,y5,y6])
-
+#model = Model(inputs=[aa,t1,t2,t3,t4,t5,t6], outputs=[y1,y2,y3,y4,y5,y6])
+model = Model(inputs=[aa,t1], outputs=[y1])
 #callbacks
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, mode='min',verbose=1 ,patience=10, min_lr=1.0e-8)
 
@@ -182,9 +179,11 @@ opt = Adam(lr=2.50e-6,decay=1.0e-9)
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 
-hist = model.fit([xtr0,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6], [ttr1,ttr2,ttr3,ttr4,ttr5,ttr6], validation_split=0.2,\
-                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=False)
+#hist = model.fit([xtr0,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6], [ttr1,ttr2,ttr3,ttr4,ttr5,ttr6], validation_split=0.2,\
+#                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=False)
 
+hist = model.fit([xtr0,xtr1], [ttr1], validation_split=0.3,\
+                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=False)
 #save model
 model.save('./model/final.hdf5') 
 

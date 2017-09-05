@@ -40,77 +40,100 @@ plt.register_cmap(name='viridis', cmap=cmaps.viridis)
 plt.set_cmap(cmaps.viridis)
 
 
-#load
-# duct - list
-flist=['Re3500']
+Ltmp=[]
+Ttmp=[]
+bDtmp=[]
+xyz=[]
+k=[]
+ep=[]
 
-bD=[]
-bR=[]
-L=[]
-T1= []
-T2= []
-T3= []
-T4= []
-T5= []
-T6= []
-x=[]
-y=[]
-z=[]
+# for ref: data=[L,T,bD,Coord]
+with open('../tbnn_v1/datafile/to_ml/ml_Re3500_l1_r1.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+Ltmp.extend(result[0])
+Ttmp.extend(result[1])
+bDtmp.extend(result[2])
+xyz.extend(result[3])
+k.extend(result[4])
+ep.extend(result[5])
 
-
-for ii in range(len(flist)):
-   
-    # for ref: data1 = [UUDi,bD,L,bR]
-    with open('../tbnn_data/data_out/ml_data1_%s.pkl'%flist[ii], 'rb') as infile1:
-        result1 = pickle.load(infile1)
-    # ref: data2 = [T1m,T2m,T3m,T4m,T5m,T6m]
-    with open('../tbnn_data/data_out/ml_data2_%s.pkl'%flist[ii], 'rb') as infile2:
-        result2 = pickle.load(infile2)
-    # ref: data2 = [x,y,z]
-    with open('../tbnn_data/data_out/ml_data3_%s.pkl'%flist[ii], 'rb') as infile3:
-        result3 = pickle.load(infile3)
     
-    bD.extend(result1[1])
-    bR.extend(result1[3])
-    L.extend(result1[2])
-    T1.extend(result2[0])
-    T2.extend(result2[1])
-    T3.extend(result2[2])
-    T4.extend(result2[3])
-    T5.extend(result2[4])
-    T6.extend(result2[5])
-    x.extend(result3[0])
-    y.extend(result3[1])
-    z.extend(result3[2])
-    
-bD=np.asarray(bD)
-bR=np.asarray(bR)
-L=np.asarray(L)
-x=np.asarray(x)
-y=np.asarray(y)
-z=np.asarray(z)
+bDtmp=np.asarray(bDtmp)
+Ltmp=np.asarray(Ltmp)
+Ttmp=np.asarray(Ttmp)
+xyz=np.asarray(xyz)
+k=np.asarray(k)
+ep=np.asarray(ep)
 
-T=[T1,T2,T3,T4,T5,T6]
-T=np.asarray(T)
+# reduce to 6 components
+l=len(Ltmp)
+
+L=Ltmp
+
+bD=np.zeros((l,6))
+bD[:,0]=bDtmp[:,0]
+bD[:,1]=bDtmp[:,1]
+bD[:,2]=bDtmp[:,2]
+bD[:,3]=bDtmp[:,4]
+bD[:,4]=bDtmp[:,5]
+bD[:,5]=bDtmp[:,8]
+
+T=np.zeros((l,10,6))
+T[:,:,0]=Ttmp[:,:,0]
+T[:,:,1]=Ttmp[:,:,1]
+T[:,:,2]=Ttmp[:,:,2]
+T[:,:,3]=Ttmp[:,:,4]
+T[:,:,4]=Ttmp[:,:,5]
+T[:,:,5]=Ttmp[:,:,8]
+
+
+#stdscaler
+#L  = L_ss.transform(L)
+
 
 #load model
-model_test = load_model('../model/model_9999_0.170_0.177.hdf5') 
-out=model_test.predict([L,T[0,:,:],T[1,:,:],T[2,:,:],T[3,:,:],T[4,:,:],T[5,:,:]])
+model_test = load_model('../tbnn_v1/model/final.hdf5') 
+outtmp=model_test.predict([L,T[:,:,0],T[:,:,1],T[:,:,2],T[:,:,3],T[:,:,4],T[:,:,5]])
+    
+#out=model_test.predict([L,T[:,:,5]])
+
+# no of dot layers
+#l=1
 
 # inverse scaler & reshape
-out=np.asarray(out)
-out=out.reshape(6,len(L))
+outtmp=np.asarray(outtmp)
+outtmp=outtmp[:,:,0].transpose()
 
-with open('../rans_data/duct_rans_data1_%s.pkl'%flist[0], 'rb') as infile1:
-    result4 = pickle.load(infile1)
-k=result4[6]
+out=np.zeros((len(outtmp),9))
 
-a11=out[0,:]*2*k
-a12=out[1,:]*2*k
-a13=out[2,:]*2*k
-a22=out[3,:]*2*k
-a23=out[4,:]*2*k
-a33=out[5,:]*2*k
+out[:,0]=outtmp[:,0]
+out[:,1]=outtmp[:,1]
+out[:,2]=outtmp[:,2]
+out[:,3]=outtmp[:,1]
+out[:,4]=outtmp[:,3]
+out[:,5]=outtmp[:,4]
+out[:,6]=outtmp[:,2]
+out[:,7]=outtmp[:,4]
+out[:,8]=outtmp[:,5]
+
+
+
+import sys
+sys.path.insert(0, '/home/vino/ml_test/ml_dns/tbnn_v1/')
+
+from turbulencekepspreprocessor_v1 import TurbulenceKEpsDataProcessor
+tdp=TurbulenceKEpsDataProcessor()
+
+# Enforce realizability
+for i in range(5):
+    y = tdp.make_realizable(out)
+
+a11=out[:,0]*2*k
+a12=out[:,1]*2*k
+a13=out[:,2]*2*k
+a22=out[:,4]*2*k
+a23=out[:,5]*2*k
+a33=out[:,8]*2*k
 
 t11=a11+(2./3.)*k
 t12=a12
@@ -120,6 +143,9 @@ t23=a23
 t33=a33+(2./3.)*k
 
 
+
+
+
 from ml_Rey_write import write_R_ml
 write_R_ml(t11,t12,t13,t22,t23,t33)
 
@@ -127,7 +153,38 @@ write_R_ml(t11,t12,t13,t22,t23,t33)
 
 
 
+#plot
+def plot(x,y,z,nc,name):
+    fig=plt.figure(figsize=(6, 5), dpi=100)
+    ax=fig.add_subplot(111)
+    #cp = ax.tricontourf(x, y, z,np.linspace(-0.3,0.3,30),extend='both')
+    cp = ax.tricontourf(x, y, z,30,extend='both')
+    #cp.set_clim(-0.2,0.2)
+    #plt.xlim([-1, 0])
+    #plt.ylim([-1, 0])
+     
+    cbar=plt.colorbar(cp)
+    plt.title(name)
+    plt.xlabel('Z ')
+    plt.ylabel('Y ')
+    #plt.savefig(name +'.png', format='png', dpi=100)
+    plt.show()
 
+
+
+#import scipy
+#out=scipy.ndimage.filters.gaussian_filter(out,0.1,mode='nearest')
+
+z=xyz[:,2]
+y=xyz[:,1]
+
+plot(z,y,t11,20,'t11')
+plot(z,y,t12,20,'t12')
+plot(z,y,t13,20,'t13')
+plot(z,y,t22,20,'t22')
+plot(z,y,t23,20,'t23')
+plot(z,y,t33,20,'t33')
+  
 
 
 

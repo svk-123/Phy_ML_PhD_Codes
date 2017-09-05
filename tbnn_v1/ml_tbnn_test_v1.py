@@ -37,71 +37,63 @@ import colormaps as cmaps
 plt.register_cmap(name='viridis', cmap=cmaps.viridis)
 plt.set_cmap(cmaps.viridis)
 
-#load
-# duct - list
-flist=['Re3500']
 
-bD=[]
-bR=[]
-L=[]
-T1= []
-T2= []
-T3= []
-T4= []
-T5= []
-T6= []
-x=[]
-y=[]
-z=[]
+Ltmp=[]
+Ttmp=[]
+bDtmp=[]
+xyz=[]
 
-
-for ii in range(len(flist)):
-   
-    # for ref: data1 = [UUDi,bD,L,bR]
-    with open('./tbnn_data/data_out/ml_data1_%s.pkl'%flist[ii], 'rb') as infile1:
-        result1 = pickle.load(infile1)
-    # ref: data2 = [T1m,T2m,T3m,T4m,T5m,T6m]
-    with open('./tbnn_data/data_out/ml_data2_%s.pkl'%flist[ii], 'rb') as infile2:
-        result2 = pickle.load(infile2)
-    # ref: data2 = [x,y,z]
-    with open('./tbnn_data/data_out/ml_data3_%s.pkl'%flist[ii], 'rb') as infile3:
-        result3 = pickle.load(infile3)
+# for ref: data=[L,T,bD,Coord]
+with open('./datafile/to_ml/ml_Re3500_l1_r1.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+Ltmp.extend(result[0])
+Ttmp.extend(result[1])
+bDtmp.extend(result[2])
+xyz.extend(result[3])
     
-    bD.extend(result1[1])
-    bR.extend(result1[3])
-    L.extend(result1[2])
-    T1.extend(result2[0])
-    T2.extend(result2[1])
-    T3.extend(result2[2])
-    T4.extend(result2[3])
-    T5.extend(result2[4])
-    T6.extend(result2[5])
-    x.extend(result3[0])
-    y.extend(result3[1])
-    z.extend(result3[2])
-    
-bD=np.asarray(bD)
-bR=np.asarray(bR)
-L=np.asarray(L)
-x=np.asarray(x)
-y=np.asarray(y)
-z=np.asarray(z)
+bDtmp=np.asarray(bDtmp)
+Ltmp=np.asarray(Ltmp)
+Ttmp=np.asarray(Ttmp)
+xyz=np.asarray(xyz)
 
-T=[T1,T2,T3,T4,T5,T6]
-T=np.asarray(T)
+# reduce to 6 components
+l=len(Ltmp)
+
+L=Ltmp
+
+bD=np.zeros((l,6))
+bD[:,0]=bDtmp[:,0]
+bD[:,1]=bDtmp[:,1]
+bD[:,2]=bDtmp[:,2]
+bD[:,3]=bDtmp[:,4]
+bD[:,4]=bDtmp[:,5]
+bD[:,5]=bDtmp[:,8]
+
+T=np.zeros((l,10,6))
+T[:,:,0]=Ttmp[:,:,0]
+T[:,:,1]=Ttmp[:,:,1]
+T[:,:,2]=Ttmp[:,:,2]
+T[:,:,3]=Ttmp[:,:,4]
+T[:,:,4]=Ttmp[:,:,5]
+T[:,:,5]=Ttmp[:,:,8]
+
+
+#stdscaler
+#L  = L_ss.transform(L)
+
 
 #load model
 model_test = load_model('./model/final.hdf5') 
-#out=model_test.predict([L,T[0,:,:],T[1,:,:],T[2,:,:],T[3,:,:],T[4,:,:],T[5,:,:]])
-out=model_test.predict([L,T[0,:,:]])
+out=model_test.predict([L,T[:,:,0],T[:,:,1],T[:,:,2],T[:,:,3],T[:,:,4],T[:,:,5]])
+    
+#out=model_test.predict([L,T[:,:,5]])
 
 # no of dot layers
-l=1
+#l=1
 
 # inverse scaler & reshape
 out=np.asarray(out)
-#out=out.reshape(l,len(L))
-
+out=out[:,:,0].transpose()
 #plot
 def plot(x,y,z,nc,name):
     fig=plt.figure(figsize=(6, 5), dpi=100)
@@ -123,14 +115,26 @@ def plot(x,y,z,nc,name):
 nbD=['uu-bD','uv-bD','uw-bD','vv-bD','vw-bD','ww-bD']
 nbp=['uu-pred','uv-pred','uw-pred','vv-pred','vw-pred','ww-pred']
 nbR=['uu-bR','uv-bR','uw-bR','vv-bR','vw-bR','ww-bR']
+#nbD=['uu-bD','uv-bD','uw-bD','vu-bD','vv-bD','vw-bD','wu-bD','wv-bD','ww-bD']
 
-for i in range(0,1):
+#bD=bD_mm.inverse_transform(bD)
+#out=bD_mm.inverse_transform(out)
+
+#bD=bD_sscaler.inverse_transform(bD)
+#out=bD_sscaler.inverse_transform(out)
+
+import scipy
+out=scipy.ndimage.filters.gaussian_filter(out,0.1,mode='nearest')
+
+z=xyz[:,2]
+y=xyz[:,1]
+for i in range(0,6):
     plot(z,y,bD[:,i],20,'%s'%(nbD[i]))
     #plot(z,y,bR[:,i],20,'%s'%(nbR[i]))   
     plot(z,y,out[:,i],20,'%s'%(nbp[i]))   
    # plot(z,y,sum(T[i,:,:].transpose()),20,'%s'%(nbp[i])) 
-
-
+    #plot(z,y,bR[:,i],20,'%s'%(nbR[i]))   
+    #plot(z,y,bDs[:],20,'%s'%(nbp[i]))   
 
 
 

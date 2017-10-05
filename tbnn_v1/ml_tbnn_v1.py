@@ -46,19 +46,40 @@ for the_file in os.listdir(folder):
 Ltmp=[]
 Ttmp=[]
 bDtmp=[]
+
 # for ref: data=[L,T,bD,Coord]
-with open('./datafile/to_ml/ml_allDataQ_l1.pkl', 'rb') as infile:
+with open('./datafile/to_ml/ml_allData_r0_l1.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+Ltmp.extend(result[0])
+Ttmp.extend(result[1])
+bDtmp.extend(result[2])
+
+with open('./datafile/to_ml/ml_allData_r0_l1.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+Ltmp.extend(result[0])
+Ttmp.extend(result[1])
+bDtmp.extend(result[2])
+
+with open('./datafile/to_ml/ml_allData_r0_l3.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+Ltmp.extend(result[0])
+Ttmp.extend(result[1])
+bDtmp.extend(result[2])
+
+'''
+with open('./datafile/to_ml/ml_allData_r0_l4.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+Ltmp.extend(result[0])
+Ttmp.extend(result[1])
+bDtmp.extend(result[2])
+
+with open('./datafile/to_ml/ml_allData_r0_l5.pkl', 'rb') as infile:
     result = pickle.load(infile)
 Ltmp.extend(result[0])
 Ttmp.extend(result[1])
 bDtmp.extend(result[2])
 '''
-with open('./datafile/to_ml/ml_allDataQ_l2.pkl', 'rb') as infile:
-    result = pickle.load(infile)
-Ltmp.extend(result[0])
-Ttmp.extend(result[1])
-bDtmp.extend(result[2])
-'''
+
 bDtmp=np.asarray(bDtmp)
 Ltmp=np.asarray(Ltmp)
 Ttmp=np.asarray(Ttmp)
@@ -124,7 +145,7 @@ T6=T[:,:,5]
 N= len(L)
 I = np.arange(N)
 np.random.shuffle(I)
-n=10000
+n=20000
 
 ## Training sets
 xtr0 = L[I][:n]
@@ -204,7 +225,7 @@ model = Model(inputs=[aa,t1,t2,t3,t4,t5,t6], outputs=[y1,y2,y3,y4,y5,y6])
 
 #model = Model(inputs=[aa,t5], outputs=[y5])
 #callbacks
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1, mode='min',verbose=1 ,patience=25, min_lr=1.0e-8)
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1, mode='min',verbose=1 ,patience=50, min_lr=1.0e-8)
 
 e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-6, patience=100, verbose=1, mode='auto')
 
@@ -217,9 +238,9 @@ os.system("rm ./graph/* ")
 tb = TensorBoard(log_dir='./graph', histogram_freq=0, write_graph=True, write_images=True)
 
 # Compile model
-opt = Adam(lr=2.5e-4,decay=1.0e-9)
+opt = Adam(lr=2.5e-5,decay=1.0e-12)
 
-model.compile(loss= 'mean_squared_error',optimizer= opt)
+model.compile(loss= 'mean_squared_error',optimizer= opt,loss_weights=[1,1,1,1,1,1])
 
 
 hist = model.fit([xtr0,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6], [ttr1,ttr2,ttr3,ttr4,ttr5,ttr6], validation_split=0.2,\

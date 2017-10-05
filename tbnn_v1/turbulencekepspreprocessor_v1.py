@@ -169,7 +169,7 @@ class TurbulenceKEpsDataProcessor:
         for i in range(3):
             for j in range(3):
                 anisotropy_flat[:, 3*i+j] = anisotropy[:, i, j]
-        return anisotropy_flat
+        return (anisotropy_flat,tke)
 
     @staticmethod
     def calc_rans_anisotropy(grad_u, tke, eps):

@@ -46,9 +46,9 @@ bDtmp=[]
 xyz=[]
 k=[]
 ep=[]
-
+tkeD=[]
 # for ref: data=[L,T,bD,Coord]
-with open('../tbnn_v1/datafile/to_ml/ml_Re3500_l1_r1.pkl', 'rb') as infile:
+with open('../tbnn_v1/datafile/to_ml/ml_Re3500_r0_l4.pkl', 'rb') as infile:
     result = pickle.load(infile)
 Ltmp.extend(result[0])
 Ttmp.extend(result[1])
@@ -56,7 +56,8 @@ bDtmp.extend(result[2])
 xyz.extend(result[3])
 k.extend(result[4])
 ep.extend(result[5])
-
+bR=result[6]
+tkeD=result[7]
     
 bDtmp=np.asarray(bDtmp)
 Ltmp=np.asarray(Ltmp)
@@ -64,6 +65,7 @@ Ttmp=np.asarray(Ttmp)
 xyz=np.asarray(xyz)
 k=np.asarray(k)
 ep=np.asarray(ep)
+tkeD=np.asarray(tkeD)
 
 # reduce to 6 components
 l=len(Ltmp)
@@ -87,25 +89,17 @@ T[:,:,4]=Ttmp[:,:,5]
 T[:,:,5]=Ttmp[:,:,8]
 
 
-#stdscaler
-#L  = L_ss.transform(L)
-
 
 #load model
 model_test = load_model('../tbnn_v1/model/final.hdf5') 
 outtmp=model_test.predict([L,T[:,:,0],T[:,:,1],T[:,:,2],T[:,:,3],T[:,:,4],T[:,:,5]])
     
-#out=model_test.predict([L,T[:,:,5]])
 
-# no of dot layers
-#l=1
-
-# inverse scaler & reshape
+# reshape
 outtmp=np.asarray(outtmp)
 outtmp=outtmp[:,:,0].transpose()
 
 out=np.zeros((len(outtmp),9))
-
 out[:,0]=outtmp[:,0]
 out[:,1]=outtmp[:,1]
 out[:,2]=outtmp[:,2]
@@ -117,7 +111,6 @@ out[:,7]=outtmp[:,4]
 out[:,8]=outtmp[:,5]
 
 
-
 import sys
 sys.path.insert(0, '/home/vino/ml_test/ml_dns/tbnn_v1/')
 
@@ -126,7 +119,9 @@ tdp=TurbulenceKEpsDataProcessor()
 
 # Enforce realizability
 for i in range(5):
-    y = tdp.make_realizable(out)
+    out = tdp.make_realizable(out)
+
+k=tkeD
 
 a11=out[:,0]*2*k
 a12=out[:,1]*2*k
@@ -142,16 +137,21 @@ t22=a22+(2./3.)*k
 t23=a23
 t33=a33+(2./3.)*k
 
-
-
+import scipy
+t11=scipy.ndimage.filters.gaussian_filter(t11,0.1,mode='nearest')
+t12=scipy.ndimage.filters.gaussian_filter(t12,0.1,mode='nearest')
+t13=scipy.ndimage.filters.gaussian_filter(t13,0.1,mode='nearest')
+t22=scipy.ndimage.filters.gaussian_filter(t22,0.1,mode='nearest')
+t23=scipy.ndimage.filters.gaussian_filter(t23,0.1,mode='nearest')
+t33=scipy.ndimage.filters.gaussian_filter(t33,0.1,mode='nearest')
 
 
 from ml_Rey_write import write_R_ml
 write_R_ml(t11,t12,t13,t22,t23,t33)
+#write_R_ml(out[:,0],out[:,1],out[:,2],out[:,4],out[:,5],out[:,8])
 
-
-
-
+from ml_tke_write import write_tke_ml
+write_tke_ml(k)
 
 #plot
 def plot(x,y,z,nc,name):
@@ -185,7 +185,7 @@ plot(z,y,t22,20,'t22')
 plot(z,y,t23,20,'t23')
 plot(z,y,t33,20,'t33')
   
-
+plot(z,y,k,20,'k')
 
 
 

@@ -66,7 +66,7 @@ boundary not loaded: may be required?
 path='/home/vino/OpenFOAM/run/mycase/zpyPost_gen/rans_data/data_r0/'
 name='Re3500'
 
-def write_R_ml(t11,t12,t13,t22,t23,t33):
+def write_tke_ml(tke_slice):
         
     # line no starts with zero in python
     # for 200h duct
@@ -181,7 +181,7 @@ def write_R_ml(t11,t12,t13,t22,t23,t33):
     istR=np.zeros(len(bc))
     iendR=np.zeros(len(bc))
     
-    with open(path+'%s/turbulenceProperties:R'%name, 'r') as infile:
+    with open(path+'%s/k'%name, 'r') as infile:
         data0=infile.readlines()
         
         for i in range(len(bc)):
@@ -202,56 +202,32 @@ def write_R_ml(t11,t12,t13,t22,t23,t33):
                 line_no=line_no+1                 
             if (int(istR[i]) != int(iendR[i])):
                 for line in data0[int(istR[i]):int(iendR[i])]:
-                    line=line.replace("(","")
-                    line=line.replace(")","")        
-                    a, b, c,d,e,f = (item.strip() for item in line.split(' ', 6))
-                    mytmp.append(a)
+                    mytmp.append(float(line))
             else:
                 print ("%s - bc has no written value"%bc[i])
                 adj=nbc[i]
-        if(len(mytmp) != (sum(nbc)-adj)):
+        if(len(mytmp) != (sum(nbc)-2*adj)):
             print"Error- Length not equal"    
                         
-    rxx = np.zeros((len(z)))
-    rxy = np.zeros((len(z)))
-    rxz = np.zeros((len(z)))
-    ryy = np.zeros((len(z)))
-    ryz = np.zeros((len(z)))
-    rzz = np.zeros((len(z)))
+    tke= np.zeros((len(z)))
     
-    '''rxx[0:3481*599]=np.tile(t11,599)
-    rxy[0:3481*599]=np.tile(t12,599)
-    rxz[0:3481*599]=np.tile(t13,599)
-    ryy[0:3481*599]=np.tile(t22,599)
-    ryz[0:3481*599]=np.tile(t23,599)
-    rzz[0:3481*599]=np.tile(t33,599)'''  
-    
-  
-      
-    
-    
-    rxx[0:2401*199]=np.tile(t11,199)
-    rxy[0:2401*199]=np.tile(t12,199)
-    rxz[0:2401*199]=np.tile(t13,199)
-    ryy[0:2401*199]=np.tile(t22,199)
-    ryz[0:2401*199]=np.tile(t23,199)
-    rzz[0:2401*199]=np.tile(t33,199)  
+    tke[0:2401*199]=np.tile(tke_slice,199)
+    print l_bcR
+    print istR
+    print iendR
     
     print 'writing..'
-    fp= open("RANS_DNS_cr_100hk","w+")
+    fp= open("tke","w+")
     
     for i in range(int(istR[0])):
         fp.write("%s"%(data0[i]))
     for i in range(nbc[0]):
-        fp.write("(%.12f %.12f %.12f %.12f %.12f %.12f)\n" %(rxx[i],rxy[i],rxz[i],ryy[i],ryz[i],rzz[i]))
-    for i in range(int(iendR[0]),int(istR[1])):
-        fp.write("%s"%(data0[i]))    
-    for i in range(nbc[0],nbc[0]+nbc[1]):
-        fp.write("(%.12f %.12f %.12f %.12f %.12f %.12f)\n" %(rxx[i],rxy[i],rxz[i],ryy[i],ryz[i],rzz[i])) 
-    for i in range(int(iendR[1]),int(istR[2])):
+        fp.write("%.12f\n" %(tke[i]))
+    #inlet + wall    
+    for i in range(int(iendR[0]),int(istR[2])):
         fp.write("%s"%(data0[i])) 
     for i in range(nbc[0]+nbc[1],nbc[0]+nbc[1]+nbc[2]):
-        fp.write("(%.12f %.12f %.12f %.12f %.12f %.12f)\n" %(rxx[i],rxy[i],rxz[i],ryy[i],ryz[i],rzz[i]))     
+        fp.write("%.12f\n" %(tke[i]))
     
     #skip outlet bc[3]
     #no written value

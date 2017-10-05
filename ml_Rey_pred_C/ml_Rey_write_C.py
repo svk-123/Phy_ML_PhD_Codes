@@ -176,7 +176,14 @@ def write_R_ml(t11,t12,t13,t22,t23,t33):
     #load reynols stress
     print 'reading R data'
     mytmp=[]
-    
+
+    rxx=[]
+    rxy=[]
+    rxz=[]
+    ryy=[]
+    ryz=[]
+    rzz=[]
+
     l_bcR=np.zeros(len(bc))
     istR=np.zeros(len(bc))
     iendR=np.zeros(len(bc))
@@ -206,6 +213,7 @@ def write_R_ml(t11,t12,t13,t22,t23,t33):
                     line=line.replace(")","")        
                     a, b, c,d,e,f = (item.strip() for item in line.split(' ', 6))
                     mytmp.append(a)
+                    rxx.append(a), rxy.append(b), rxz.append(c),ryy.append(d), ryz.append(e), rzz.append(f)
             else:
                 print ("%s - bc has no written value"%bc[i])
                 adj=nbc[i]
@@ -219,23 +227,20 @@ def write_R_ml(t11,t12,t13,t22,t23,t33):
     ryz = np.zeros((len(z)))
     rzz = np.zeros((len(z)))
     
-    '''rxx[0:3481*599]=np.tile(t11,599)
-    rxy[0:3481*599]=np.tile(t12,599)
-    rxz[0:3481*599]=np.tile(t13,599)
-    ryy[0:3481*599]=np.tile(t22,599)
-    ryz[0:3481*599]=np.tile(t23,599)
-    rzz[0:3481*599]=np.tile(t33,599)'''  
-    
-  
-      
-    
-    
-    rxx[0:2401*199]=np.tile(t11,199)
+    '''rxx[0:2401*199]=np.tile(t11,199)
     rxy[0:2401*199]=np.tile(t12,199)
     rxz[0:2401*199]=np.tile(t13,199)
     ryy[0:2401*199]=np.tile(t22,199)
     ryz[0:2401*199]=np.tile(t23,199)
-    rzz[0:2401*199]=np.tile(t33,199)  
+    rzz[0:2401*199]=np.tile(t33,199)'''  
+    
+    rxx[0:2401*199]=0
+    rxy[0:2401*199]=0
+    rxz[0:2401*199]=0
+    ryy[0:2401*199]=0
+    ryz[0:2401*199]=np.tile(t23,199)
+    rzz[0:2401*199]=0
+    
     
     print 'writing..'
     fp= open("RANS_DNS_cr_100hk","w+")

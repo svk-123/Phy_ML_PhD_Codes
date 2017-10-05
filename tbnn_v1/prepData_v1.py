@@ -96,19 +96,19 @@ def get_dns(name,x,y,z):
     UUDi9=np.asarray(UUDi9)
     return (UUDi9.transpose())
 
-def get_rans(name,path):
+def get_rans(name,path,suff):
     
     # read RANS data
     # ref:[x,y,z,u,v,w,k,ep,nut]
-    with open(path+'duct_rans_data1_%s_r1.pkl'%name, 'rb') as infile1:
+    with open(path+'duct_rans_data1_%s_%s.pkl'%(name,suff), 'rb') as infile1:
         result1 = pickle.load(infile1)
         
     #ref:data2 = [ux,uy,uz,vx,vy,vz,wx,wy,wz]
-    with open(path+'duct_rans_data2_%s_r1.pkl'%name, 'rb') as infile2:
+    with open(path+'duct_rans_data2_%s_%s.pkl'%(name,suff), 'rb') as infile2:
         result2 = pickle.load(infile2)
     
     #ref:data3 = [rxx,rxy,rxz,ryy,ryz,rzz]
-    with open(path+'duct_rans_data3_%s_r1.pkl'%name, 'rb') as infile3:
+    with open(path+'duct_rans_data3_%s_%s.pkl'%(name,suff), 'rb') as infile3:
         result3 = pickle.load(infile3)
         
     x,y,z=result1[0],result1[1],result1[2]
@@ -126,7 +126,7 @@ def get_rans(name,path):
     grad_u=np.asarray(grad_u)
     return (x,y,z,k,ep,grad_u.transpose())
   
-def write_file(mylist,path,fname):
+def write_file(mylist,path,fname,suff,full=False):
     
 
     flist=mylist
@@ -142,20 +142,30 @@ def write_file(mylist,path,fname):
     
     
     for ii in range(len(flist)):
-        x,y,z,k,ep,grad_u=get_rans(flist[ii],path)
+        x,y,z,k,ep,grad_u=get_rans(flist[ii],path,suff)
         uu=get_dns(flist[ii],x,y,z)
         
         for j in range(len(z)):
-            if(z[j]<=0.15):
-             
+            if full:
                 xT.append(x[j])
                 yT.append(y[j])
                 zT.append(z[j])
                 kT.append(k[j])
                 epT.append(ep[j])
                 grad_uT.append(grad_u[j])
-                uuT.append(uu[j])    
-    
+                uuT.append(uu[j])
+            
+            else:    
+                if(z[j]<=0.15):
+             
+                    xT.append(x[j])
+                    yT.append(y[j])
+                    zT.append(z[j])
+                    kT.append(k[j])
+                    epT.append(ep[j])
+                    grad_uT.append(grad_u[j])
+                    uuT.append(uu[j])   
+                
     xT=np.asarray(xT)
     yT=np.asarray(yT)
     zT=np.asarray(zT)

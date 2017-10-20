@@ -56,8 +56,8 @@ bDtmp.extend(result[2])
 xyz.extend(result[3])
 k.extend(result[4])
 ep.extend(result[5])
-bR=result[6]
-tkeD=result[7]
+#bR=result[6]
+#tkeD=result[7]
     
 bDtmp=np.asarray(bDtmp)
 Ltmp=np.asarray(Ltmp)
@@ -65,7 +65,7 @@ Ttmp=np.asarray(Ttmp)
 xyz=np.asarray(xyz)
 k=np.asarray(k)
 ep=np.asarray(ep)
-tkeD=np.asarray(tkeD)
+#tkeD=np.asarray(tkeD)
 
 # reduce to 6 components
 l=len(Ltmp)
@@ -121,7 +121,7 @@ tdp=TurbulenceKEpsDataProcessor()
 for i in range(5):
     out = tdp.make_realizable(out)
 
-k=tkeD
+
 
 a11=out[:,0]*2*k
 a12=out[:,1]*2*k

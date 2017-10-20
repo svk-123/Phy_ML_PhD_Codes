@@ -42,19 +42,26 @@ Ltmp=[]
 Ttmp=[]
 bDtmp=[]
 xyz=[]
+bR=[]
 
-# for ref: data=[L,T,bD,Coord]
-with open('./datafile/to_ml/ml_Re3500_r0_l4.pkl', 'rb') as infile:
+# for ref: data=[L,T,bD,Coord,...]
+#     ref:[x,tb,y,coord,k,ep,rans_bij,tkedns]
+with open('./datafile/to_ml/ml_hill_Re10595_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
+    
+    
 Ltmp.extend(result[0])
 Ttmp.extend(result[1])
 bDtmp.extend(result[2])
 xyz.extend(result[3])
+bR.extend(result[6])
+
     
 bDtmp=np.asarray(bDtmp)
 Ltmp=np.asarray(Ltmp)
 Ttmp=np.asarray(Ttmp)
 xyz=np.asarray(xyz)
+bR=np.asarray(bR)
 
 # reduce to 6 components
 l=len(Ltmp)
@@ -113,15 +120,17 @@ nbp=['uu-pred','uv-pred','uw-pred','vv-pred','vw-pred','ww-pred']
 nbR=['uu-bR','uv-bR','uw-bR','vv-bR','vw-bR','ww-bR']
 #nbD=['uu-bD','uv-bD','uw-bD','vu-bD','vv-bD','vw-bD','wu-bD','wv-bD','ww-bD']
 
-import scipy
-out=scipy.ndimage.filters.gaussian_filter(out,0.1,mode='nearest')
+#import scipy
+#out=scipy.ndimage.filters.gaussian_filter(out,0.1,mode='nearest')
 
-z=xyz[:,2]
+x=xyz[:,0]
 y=xyz[:,1]
+cor=[0,0,0,1,1,3]
 for i in range(0,6):
-    plot(z,y,bD[:,i],20,'%s'%(nbD[i]))
-    #plot(z,y,bR[:,i],20,'%s'%(nbR[i]))   
-    plot(z,y,out[:,i],20,'%s'%(nbp[i]))   
+    plot(x,y,bD[:,i],20,'%s'%(nbD[i]))
+    k=i+cor[i]
+    #plot(x,y,bR[:,k],20,'%s'%(nbR[i]))   
+    plot(x,y,out[:,i],20,'%s'%(nbp[i]))   
    # plot(z,y,sum(T[i,:,:].transpose()),20,'%s'%(nbp[i])) 
     #plot(z,y,bR[:,i],20,'%s'%(nbR[i]))   
     #plot(z,y,bDs[:],20,'%s'%(nbp[i]))   

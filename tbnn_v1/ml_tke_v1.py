@@ -214,9 +214,9 @@ model = Model(inputs=[aa,t1,t2,t3,t4,t5,t6], outputs=[y1,y2,y3,y4,y5,y6])
 
 #model = Model(inputs=[aa,t5], outputs=[y5])
 #callbacks
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1, mode='min',verbose=1 ,patience=500, min_lr=1.0e-8)
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1, mode='min',verbose=1 ,patience=50, min_lr=1.0e-8)
 
-e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-6, patience=500, verbose=1, mode='auto')
+e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-6, patience=100, verbose=1, mode='auto')
 
 filepath="./model/model_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
 
@@ -233,7 +233,7 @@ model.compile(loss= 'mean_squared_error',optimizer= opt,loss_weights=[1,1,1,1,1,
 
 
 hist = model.fit([xtr0,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6], [ttr1,ttr2,ttr3,ttr4,ttr5,ttr6], validation_split=0.2,\
-                 epochs=2000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=False)
+                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=False)
 
 #hist = model.fit([xtr0,xtr5], [ttr5], validation_split=0.3,\
 #                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)

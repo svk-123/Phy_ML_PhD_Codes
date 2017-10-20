@@ -15,7 +15,7 @@ import pandas as pd
 from scipy import interpolate
 import cPickle as pickle
 
-def get_dns(name,x,y,z):
+def get_dns_duct(name,x,y,z):
         
     #read DNS data
     dataframe = pd.read_csv('../dns_data/duct/z_%s.txt'%name, sep=',', header=None, skiprows=0)
@@ -96,40 +96,34 @@ def get_dns(name,x,y,z):
     UUDi9=np.asarray(UUDi9)
     return (UUDi9.transpose())
 
-def get_rans(name,path,suff):
+def get_rans_duct(path_r):
     
-    # read RANS data
-    # ref:[x,y,z,u,v,w,k,ep,nut]
-    with open(path+'duct_rans_data1_%s_%s.pkl'%(name,suff), 'rb') as infile1:
-        result1 = pickle.load(infile1)
+    print 'run...get_rans_duct...'    
+    data = np.loadtxt(path_r, skiprows=1)
         
-    #ref:data2 = [ux,uy,uz,vx,vy,vz,wx,wy,wz]
-    with open(path+'duct_rans_data2_%s_%s.pkl'%(name,suff), 'rb') as infile2:
-        result2 = pickle.load(infile2)
+    x,y,z=data[:,0],data[:,1],data[:,2]
+    u,v,w=data[:,3],data[:,4],data[:,5]
+    k,ep,nut,p=data[:,6],data[:,7],data[:,8],data[:,9]
     
-    #ref:data3 = [rxx,rxy,rxz,ryy,ryz,rzz]
-    with open(path+'duct_rans_data3_%s_%s.pkl'%(name,suff), 'rb') as infile3:
-        result3 = pickle.load(infile3)
+    ux,uy,uz=data[:,10],data[:,11],data[:,12]
+    vx,vy,vz=data[:,13],data[:,14],data[:,15]
+    wx,wy,wz=data[:,16],data[:,17],data[:,18]
+    
+    #load when required
+    #rxx,rxy,rxz=data[19],data[20],data[21]
+    #ryx,ryy,ryz=data[22],data[23],data[24]
+    #rzx,rzy,rzz=data[25],data[26],data[27]
         
-    x,y,z=result1[0],result1[1],result1[2]
-    u,v,w=result1[3],result1[4],result1[5]
-    k,ep,mut=result1[6],result1[7],result1[8]
-    
-    ux,uy,uz=result2[0],result2[1],result2[2]
-    vx,vy,vz=result2[3],result2[4],result2[5]
-    wx,wy,wz=result2[6],result2[7],result2[8]
-    
-    rxx,rxy,rxz=result3[0],result3[1],result3[2]
-    ryy,ryz,rzz=result3[3],result3[4],result3[5]
-    
     grad_u=[ux,uy,uz,vx,vy,vz,wx,wy,wz]
     grad_u=np.asarray(grad_u)
+    
+    print 'done...get_rans_duct...'      
     return (x,y,z,k,ep,grad_u.transpose())
   
-def write_file(mylist,path,fname,suff,full=False):
+def write_file_duct(Re,path_r,fname,full=True):
     
 
-    flist=mylist
+    flist=Re
     
     #variavles
     xT=[]
@@ -141,30 +135,30 @@ def write_file(mylist,path,fname,suff,full=False):
     uuT=[]
     
     
-    for ii in range(len(flist)):
-        x,y,z,k,ep,grad_u=get_rans(flist[ii],path,suff)
-        uu=get_dns(flist[ii],x,y,z)
+
+    x,y,z,k,ep,grad_u=get_rans_duct(path_r)
+    uu=get_dns_duct(Re,x,y,z)
         
-        for j in range(len(z)):
-            if full:
+    for j in range(len(z)):
+        if full:
+            xT.append(x[j])
+            yT.append(y[j])
+            zT.append(z[j])
+            kT.append(k[j])
+            epT.append(ep[j])
+            grad_uT.append(grad_u[j])
+            uuT.append(uu[j])
+            
+        else:    
+            if(z[j]<=0.15):
+         
                 xT.append(x[j])
                 yT.append(y[j])
                 zT.append(z[j])
                 kT.append(k[j])
                 epT.append(ep[j])
                 grad_uT.append(grad_u[j])
-                uuT.append(uu[j])
-            
-            else:    
-                if(z[j]<=0.15):
-             
-                    xT.append(x[j])
-                    yT.append(y[j])
-                    zT.append(z[j])
-                    kT.append(k[j])
-                    epT.append(ep[j])
-                    grad_uT.append(grad_u[j])
-                    uuT.append(uu[j])   
+                uuT.append(uu[j])   
                 
     xT=np.asarray(xT)
     yT=np.asarray(yT)
@@ -192,6 +186,207 @@ def write_file(mylist,path,fname,suff,full=False):
     
 
 
+
+def get_dns_cbfs(path_d,x,y,z,case):
+    
+    print 'run...get_dns_cbfs...' 
+     
+    if (case=='hill'):
+        dataframe = pd.read_csv(path_d,sep='\s+',header=None, skiprows=20)
+        dataset = dataframe.values
+        data=np.asarray(dataset)
+        
+        """VARIABLES = 0-x,1-y,2-p,3-u/Ub,4-v/Ub,5-w/Ub,6-nu_t/nu,7-uu/Ub^2,8-vv/Ub^2,9-ww/Ub^2,10-uv/Ub^2.
+                       11-uw/Ub^2,12-vw/Ub^2,13-k/Ub^2"""
+                      
+        xD,yD,p,u,v,w,nu,uu,vv,ww,uv,uw,vw,k = data[:,0],data[:,1],data[:,2],data[:,3],data[:,4],data[:,5],\
+                                             data[:,6],data[:,7],data[:,8],data[:,9],data[:,10],data[:,11],data[:,12],data[:,13]
+                                             
+    if (case=='cbfs'):
+        dataframe = pd.read_csv(path_d,sep='\s+',header=None, skiprows=19)
+        dataset = dataframe.values
+        data=np.asarray(dataset)
+        
+        """VARIABLES = 0-x,1-y,2-p,3-u/Ub,4-v/Ub,5-w/Ub,6-uu/Ub^2,7-vv/Ub^2,8-ww/Ub^2,9-uv/Ub^2.
+                       10-uw/Ub^2,11-vw/Ub^2,12-k/Ub^2"""
+                      
+        xD,yD,p,u,v,w,uu,vv,ww,uv,uw,vw,k = data[:,0],data[:,1],data[:,2],data[:,3],data[:,4],data[:,5],\
+                                             data[:,6],data[:,7],data[:,8],data[:,9],data[:,10],data[:,11],data[:,12]                                        
+    if (case=='wavywall'):
+        dataframe = pd.read_csv(path_d,sep='\s+',header=None, skiprows=1)
+        dataset = dataframe.values
+        data=np.asarray(dataset)
+        
+        """1-x/H  2-z/H  3-u  4-v  5-w  6-p  7-uu  8-vv  9-ww 10-'-uw' 11-pp"""
+        #here zD taken ad yD              
+        xD,yD,u,v,w,p,uu,vv,ww,uw,pp = data[:,0],data[:,1],data[:,2],data[:,3],data[:,4],data[:,5],\
+                                             data[:,6],data[:,7],data[:,8],data[:,9],data[:,10]  
+        uw=-uw
+        y=z
+                             
+    #interpolate DNS to rans co-ordinates
+    
+    UUDi=np.zeros((len(x),9))
+    
+    #LinearNDinterpolator
+    pD=np.asarray([xD,yD]).transpose()
+    
+    print 'interpolation-1...'      
+    fuuD=interpolate.LinearNDInterpolator(pD, uu)
+    for i in range(len(x)):
+        UUDi[i,0]=fuuD(x[i],y[i])
+    del fuuD
+
+    
+    '''print 'interpolation-2...'    
+    fuvD=interpolate.LinearNDInterpolator(pD, uv)
+    for i in range(len(x)):
+        UUDi[i,1]=fuvD(x[i],y[i])
+    del fuvD'''
+
+    
+    print 'interpolation-3...'
+    fuwD=interpolate.LinearNDInterpolator(pD, uw)
+    for i in range(len(x)):    
+        UUDi[i,2]=fuwD(x[i],y[i])
+    del fuwD    
+
+        
+    print 'interpolation-4...'
+    fvvD=interpolate.LinearNDInterpolator(pD, vv)
+    for i in range(len(x)):
+        UUDi[i,4]=fvvD(x[i],y[i])
+    del fvvD    
+
+        
+    '''print 'interpolation-5...'
+    fvwD=interpolate.LinearNDInterpolator(pD, vw)
+    for i in range(len(x)):
+        UUDi[i,5]=fvwD(x[i],y[i])
+    del fvwD'''
+
+        
+    print 'interpolation-6...'      
+    fwwD=interpolate.LinearNDInterpolator(pD, ww)
+    for i in range(len(x)):
+        UUDi[i,8]=fwwD(x[i],y[i])
+    del fwwD
+
+    print 'interpolation-done...' 
+    #--------comment END---------------#
+    
+    print 'done...get_dns_cbfs...' 
+    UUDi[:,3]=UUDi[:,1]
+    UUDi[:,6]=UUDi[:,2]
+    UUDi[:,7]=UUDi[:,5]
+    
+    if (np.isnan(UUDi).any()==True):
+        inan=[]
+        for j in range(len(UUDi[:,0])):
+            if (np.isnan(UUDi[j,0])==True):
+                inan.append(j)
+        
+        print 'writing..'
+        fp= open("wavywall_inan.txt","w+")
+      
+        for k in range(len(inan)):
+            fp.write("%i\n"%inan[k])
+            
+        fp.close()
+    
+    print ('NaN---%s'%np.isnan(UUDi).any())
+    return UUDi
+ 
+    
+def get_rans_cbfs(path_r):
+    
+    print 'run...get_rans_cbfs...'    
+    data = np.loadtxt(path_r, skiprows=1)
+        
+    x,y,z=data[:,0],data[:,1],data[:,2]
+    u,v,w=data[:,3],data[:,4],data[:,5]
+    k,ep,nut,p=data[:,6],data[:,7],data[:,8],data[:,9]
+    
+    ux,uy,uz=data[:,10],data[:,11],data[:,12]
+    vx,vy,vz=data[:,13],data[:,14],data[:,15]
+    wx,wy,wz=data[:,16],data[:,17],data[:,18]
+    
+    #load when required
+    #rxx,rxy,rxz=data[19],data[20],data[21]
+    #ryx,ryy,ryz=data[22],data[23],data[24]
+    #rzx,rzy,rzz=data[25],data[26],data[27]
+        
+    grad_u=[ux,uy,uz,vx,vy,vz,wx,wy,wz]
+    grad_u=np.asarray(grad_u)
+    
+    print 'done...get_rans_cbfs...'      
+    return (x,y,z,k,ep,grad_u.transpose())
+
+    
+def write_file_cbfs(path_r,path_d,fname,case,full=True):
+    print 'run...write_file_cbfs...'      
+
+
+    #variavles
+    xT=[]
+    yT=[]
+    zT=[]
+    kT=[]
+    epT=[]
+    grad_uT=[]
+    uuT=[]
+    
+    
+    x,y,z,k,ep,grad_u=get_rans_cbfs(path_r)
+    uu=get_dns_cbfs(path_d,x,y,z,case)
+        
+    for j in range(len(x)):
+        if full:
+            xT.append(x[j])
+            yT.append(y[j])
+            zT.append(z[j])
+            kT.append(k[j])
+            epT.append(ep[j])
+            grad_uT.append(grad_u[j])
+            uuT.append(uu[j])
+            
+        else:    
+            if(z[j]<=0.15):
+             
+                xT.append(x[j])
+                yT.append(y[j])
+                zT.append(z[j])
+                kT.append(k[j])
+                epT.append(ep[j])
+                grad_uT.append(grad_u[j])
+                uuT.append(uu[j])   
+                
+    xT=np.asarray(xT)
+    yT=np.asarray(yT)
+    zT=np.asarray(zT)
+    kT=np.asarray(kT)
+    epT=np.asarray(epT)
+    grad_uT=np.asarray(grad_uT)
+    uuT=np.asarray(uuT)
+    
+
+  
+    l=len(xT)     
+    
+    print 'writing..'
+    fp= open("./datafile/%s.txt"%fname,"w+")
+    
+    fp.write('k, ep, ux, uy, uz, vx, vy, vz, wx, wy, wz, uu, uv, uw, vu, vv,vw,wu, wv, ww, x, y, z\n')
+    
+    for i in range(l):
+        fp.write("%.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f\n"\
+                 %(kT[i],epT[i],grad_uT[i,0],grad_uT[i,1],grad_uT[i,2],grad_uT[i,3],grad_uT[i,4],grad_uT[i,5],grad_uT[i,6],grad_uT[i,7],grad_uT[i,8],\
+                   uuT[i,0],uuT[i,1],uuT[i,2],uuT[i,3],uuT[i,4],uuT[i,5],uuT[i,6],uuT[i,7],uuT[i,8],xT[i],yT[i],zT[i]))        
+     
+    fp.close() 
+
+
+
 def load_data(fname):
     """
     Loads in channel flow data
@@ -216,7 +411,7 @@ def load_data(fname):
     return k, eps, grad_u, stresses,coord    
 
 #plot
-def plot(x,y,z,nc,name):
+def plotust(x,y,z,nc,name):
     pyplot.figure(figsize=(6, 5), dpi=100)
     #cp = pyplot.tricontour(ys, zs, pp,nc)
     cp = pyplot.tricontourf(x, y, z,nc,cmap=cm.jet)
@@ -231,7 +426,7 @@ def plot(x,y,z,nc,name):
     pyplot.show()
 
 
-def plotD(x,y,z,nc,name):
+def plotst(x,y,z,nc,name):
     pyplot.figure(figsize=(6, 5), dpi=100)
     #cp = pyplot.tricontour(ys, zs, pp,nc)
     cp = pyplot.contourf(x, y, z,nc,cmap=cm.jet)

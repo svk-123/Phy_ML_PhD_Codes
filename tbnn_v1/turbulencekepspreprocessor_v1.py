@@ -1,5 +1,5 @@
 import numpy as np
-
+from numpy import linalg as la
 """
 Copyright 2017 Sandia Corporation. Under the terms of Contract DE-AC04-94AL85000,
 there is a non-exclusive license for use of this work by or on behalf of the U.S. Government.
@@ -258,3 +258,158 @@ class TurbulenceKEpsDataProcessor:
                 labels[i, 6] = A[0, 2]
 
         return labels
+    
+    def calc_tke_input(self, Sij, Rij):
+        "tke prediction input preparations"
+        
+        num_points = Sij.shape[0]
+        num_tensor_basis = 6
+        
+        I = np.zeros((num_points, num_tensor_basis))
+        
+        for i in range(num_points):
+            sij = Sij[i, :, :]
+            rij = Rij[i, :, :]
+            #I[i, 0] = np.trace(sij)
+            I[i, 0] = np.trace(np.dot(sij, sij))
+            I[i, 1] = np.trace(np.dot(sij, np.dot(sij, sij)))
+            I[i, 2] = np.trace(np.dot(rij, rij))
+            I[i, 3] = np.trace(np.dot(np.dot(rij, rij), sij))
+            I[i, 4] = np.trace(np.dot(np.dot(rij, rij), np.dot(sij,sij)))
+            tmp1    = np.dot(rij, rij)
+            tmp2    = np.dot(tmp1,sij)
+            tmp3    = np.dot(tmp2,rij)
+            tmp4    = np.dot(tmp3,np.dot(sij,sij)) 
+            I[i, 5] = np.trace(tmp4)
+            
+            
+        # Enforce zero trace for anisotropy if required
+
+        return I
+    
+
+    def calc_piml_basis(self, k, ep, grad_u, grad_p, grad_k, vel, cap=7.):
+        
+        "calc piml basis invariant (47 nos)"
+
+        num_points = grad_u.shape[0]
+        
+        Sij = np.zeros((num_points, 3, 3))
+        Rij = np.zeros((num_points, 3, 3))
+        
+        for i in xrange(num_points):
+            Sij[i, :, :] = 0.5 * (grad_u[i, :, :] + np.transpose(grad_u[i, :, :]))
+            Rij[i, :, :] = 0.5 * (grad_u[i, :, :] - np.transpose(grad_u[i, :, :]))
+
+        Sij[Sij > cap] = cap
+        Sij[Sij < -cap] = -cap
+        Rij[Rij > cap] = cap
+        Rij[Rij < -cap] = -cap
+       
+        Ap = np.zeros((num_points, 3, 3))
+        Ak = np.zeros((num_points, 3, 3))        
+
+        for i in xrange(num_points):
+            Ap[i, :, :] = np.cross(-np.eye(3),grad_p[i, :])
+            Ak[i, :, :] = np.cross(-np.eye(3),grad_k[i, :])
+
+        k = np.maximum(k, 1e-8)
+        ep_k = ep / k 
+        sqk  = np.sqrt(k)
+        ep_sqk= ep / sqk
+        
+        udu  = np.zeros((num_points))
+        tmp = np.zeros((3, 3))
+        for i in xrange(num_points):        
+            tmp[:,0]=grad_u[i,:,0]*vel[i,0]
+            tmp[:,1]=grad_u[i,:,1]*vel[i,1]
+            tmp[:,2]=grad_u[i,:,2]*vel[i,2]
+            udu[i]  = la.norm(tmp)
+
+        #normalize
+        for i in xrange(num_points):
+            Sij[i, :, :]=Sij[i,:,:]/(la.norm(Sij[i,:,:]) + ep_k[i])
+            Rij[i, :, :]=Rij[i,:,:]/(la.norm(Rij[i,:,:]) + 1.0e-8)
+            Ap[i, :, :] = Ap[i, :, :] /(la.norm(Ap[i, :, :]) + udu[i])
+            Ak[i, :, :] = Ak[i, :, :] /(la.norm(Ak[i, :, :]) + ep_sqk[i])
+            
+        #prep invariants
+        B=np.zeros((num_points, 47))
+        
+        for i in xrange(num_points):
+            s   = Sij[i, :, :]
+            r   = Rij[i, :, :]
+            ap  = Ap[i, :, :] 
+            ak  = Ak[i, :, :]
+            
+            s2  = np.dot(s,s)
+            r2  = np.dot(r,r)
+            ap2 = np.dot(ap,ap)
+            ak2 = np.dot(ak,ak)
+            
+            B[i,0] = np.trace(s2)
+            B[i,1] = np.trace(np.dot(s2,s))    
+            B[i,2] = np.trace(r2)
+            B[i,3] = np.trace(ap2)
+            B[i,4] = np.trace(ak2)
+            B[i,5] = np.trace(np.dot(r2,s))
+            B[i,6] = np.trace(np.dot(r2,s2))    
+            r2s    = np.dot(r2,s)
+            r2sr   = np.dot(r2s,r)
+            B[i,7] = np.trace(np.dot(r2sr,s2))
+            B[i,8] = np.trace(np.dot(ap2,s))
+            B[i,9] = np.trace(np.dot(ap2,s2))            
+            ap2s   = np.dot(ap2,s)
+            ap2sap = np.dot(ap2s,ap)
+            B[i,10] = np.trace(np.dot(ap2sap,s2))             
+            B[i,11] = np.trace(np.dot(ak2,s))
+            B[i,12] = np.trace(np.dot(ak2,s2))             
+            ak2s   = np.dot(ak2,s)
+            ak2sak = np.dot(ak2s,ak)
+            B[i,13] = np.trace(np.dot(ak2sak,s2))             
+            B[i,14] = np.trace(np.dot(r,ap))             
+            B[i,15] = np.trace(np.dot(ap,ak))              
+            B[i,16] = np.trace(np.dot(r,ak)) 
+             
+            B[i,17] = np.trace(np.dot(np.dot(r,ap),s))               
+            B[i,18] = np.trace(np.dot(np.dot(r,ap),s2))
+            B[i,19] = np.trace(np.dot(np.dot(r2,ap),s))              
+            B[i,20] = np.trace(np.dot(np.dot(ap2,r),s)) 
+            B[i,21] = np.trace(np.dot(np.dot(r2,ap),s2))              
+            B[i,22] = np.trace(np.dot(np.dot(ap2,r),s2))             
+            B[i,23] = np.trace(np.dot(np.dot(np.dot(r2,s),ap),s2))  
+            B[i,24] = np.trace(np.dot(np.dot(np.dot(ap2,s),r),s2)) 
+            
+            B[i,25] = np.trace(np.dot(np.dot(r,ak),s))               
+            B[i,26] = np.trace(np.dot(np.dot(r,ak),s2))
+            B[i,27] = np.trace(np.dot(np.dot(r2,ak),s))              
+            B[i,28] = np.trace(np.dot(np.dot(ak2,r),s)) 
+            B[i,29] = np.trace(np.dot(np.dot(r2,ak),s2))              
+            B[i,30] = np.trace(np.dot(np.dot(ak2,r),s2))             
+            B[i,31] = np.trace(np.dot(np.dot(np.dot(r2,s),ak),s2))  
+            B[i,32] = np.trace(np.dot(np.dot(np.dot(ak2,s),r),s2))             
+
+            B[i,33] = np.trace(np.dot(np.dot(ap,ak),s))               
+            B[i,34] = np.trace(np.dot(np.dot(ap,ak),s2))
+            B[i,35] = np.trace(np.dot(np.dot(ap2,ak),s))              
+            B[i,36] = np.trace(np.dot(np.dot(ak2,ap),s)) 
+            B[i,37] = np.trace(np.dot(np.dot(ap2,ak),s2))              
+            B[i,38] = np.trace(np.dot(np.dot(ak2,ap),s2))             
+            B[i,39] = np.trace(np.dot(np.dot(np.dot(ap2,s),ak),s2))  
+            B[i,40] = np.trace(np.dot(np.dot(np.dot(ak2,s),ap),s2)) 
+
+            B[i,41] = np.trace(np.dot(np.dot(r,ap),ak))               
+            B[i,42] = np.trace(np.dot(np.dot(np.dot(r,ap),ak),s))              
+            B[i,43] = np.trace(np.dot(np.dot(np.dot(r,ak),ap),s))              
+            B[i,44] = np.trace(np.dot(np.dot(np.dot(r,ap),ak),s2))              
+            B[i,45] = np.trace(np.dot(np.dot(np.dot(r,ak),ap),s2))              
+            B[i,46] = np.trace(np.dot(np.dot(np.dot(np.dot(r,ap),s),ak),s2))              
+  
+    
+        return B    
+            
+            
+                    
+            
+            
+            

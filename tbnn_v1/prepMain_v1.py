@@ -30,7 +30,7 @@ start_time = time.time()
                                  
 from turbulencekepspreprocessor_v1 import TurbulenceKEpsDataProcessor
 tdp=TurbulenceKEpsDataProcessor()
-from prepData_v1 import get_rans_cbfs,get_dns_cbfs,plotust,write_file_cbfs,load_data
+from prepData_v1 import get_rans_cbfs,get_dns_cbfs,plotust,write_file_cbfs,load_data,load_data_piml
 
 enforce_realizability = True
 num_realizability_its = 5
@@ -39,7 +39,7 @@ num_realizability_its = 5
 case='duct'
 
 
-#set path\
+#set path
 if(case=='wavywall'):
     path_r='../rans_data/wavywall/wavywall_Re6760_train.txt'
     path_d='../dns_data/wavywall/Re6760/wavywall_train.txt'
@@ -53,11 +53,11 @@ if(case=='cbfs'):
     path_d='../dns_data/cbfs/Re13700/cbfs_train.dat'    
     
 if(case=='duct'):
-    path_r='../rans_data/duct/duct_Re3500_full.txt'
-    Re='Re3500'       # only Re 
+    path_r='../rans_data/duct/duct_Re2200_full.txt'
+    Re='Re2200'       # only Re 
    
 # call write file.txt
-fname='duct_Re3500_full'    
+fname='duct_Re2200_full'    
 
 
 
@@ -65,12 +65,12 @@ fname='duct_Re3500_full'
 if (case=='duct'):
     from prepData_v1 import get_rans_duct,get_dns_duct,write_file_duct
 
-
 #cbfs-for_all_other_than_duct
 if (case!='duct'): 
     write_file_cbfs(path_r,path_d,fname,case,True)  
 if (case=='duct'):      
     write_file_duct(Re,path_r,fname,True)  
+
 
 def prep_input():
         
@@ -89,15 +89,36 @@ def prep_input():
         for i in range(num_realizability_its):
             y = tdp.make_realizable(y)
     
-    return(x,tb,y,coord,k,ep,tkedns,rans_bij)
+    #tke input
+    I = tdp.calc_tke_input(Sij, Rij)
+    
+    return(x,tb,y,coord,k,ep,tkedns,rans_bij,I)
 
-x,tb,y,coord,k,ep,tkedns,rans_bij=prep_input()
+x,tb,y,coord,k,ep,tkedns,rans_bij,I=prep_input()
+
+
+def prep_piml_input():
+       
+    #piml
+    k,ep,grad_u,grad_p,grad_k,vel,coord=load_data_piml(fname)
+    B=tdp.calc_piml_basis(k,ep,grad_u,grad_p,grad_k,vel)
+
+    return B
+
+B = prep_piml_input()
+    
+    
+
+# dump data
+data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I]
+with open('./datafile/to_ml/ml_%s.pkl'%fname, 'wb') as outfile:
+    pickle.dump(data, outfile, pickle.HIGHEST_PROTOCOL)
 
 
 # dump data
-data=[x,tb,y,coord,k,ep,rans_bij,tkedns]
-with open('./datafile/to_ml/ml_%s.pkl'%fname, 'wb') as outfile:
-    pickle.dump(data, outfile, pickle.HIGHEST_PROTOCOL)
+data1=[B]
+with open('./datafile/to_ml/ml_piml_%s.pkl'%fname, 'wb') as outfile:
+    pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
 
 #plot

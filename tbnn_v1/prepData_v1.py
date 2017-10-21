@@ -114,17 +114,27 @@ def get_rans_duct(path_r):
     #ryx,ryy,ryz=data[22],data[23],data[24]
     #rzx,rzy,rzz=data[25],data[26],data[27]
         
+    px,py,pz=data[:,28],data[:,29],data[:,30]
+    kx,ky,kz=data[:,31],data[:,32],data[:,33]
+    
     grad_u=[ux,uy,uz,vx,vy,vz,wx,wy,wz]
     grad_u=np.asarray(grad_u)
     
+    grad_p=[px,py,pz]
+    grad_p=np.asarray(grad_p)
+    
+    grad_k=[kx,ky,kz]
+    grad_k=np.asarray(grad_k)
+    
+    vel=[u,v,w]
+    vel=np.asarray(vel)    
+
     print 'done...get_rans_duct...'      
-    return (x,y,z,k,ep,grad_u.transpose())
+    return (x,y,z,k,ep,grad_u.transpose(),grad_p.transpose(),grad_k.transpose(),vel.transpose())
   
 def write_file_duct(Re,path_r,fname,full=True):
     
 
-    flist=Re
-    
     #variavles
     xT=[]
     yT=[]
@@ -133,12 +143,14 @@ def write_file_duct(Re,path_r,fname,full=True):
     epT=[]
     grad_uT=[]
     uuT=[]
-    
+    grad_pT=[]
+    grad_kT=[]
+    velT=[]  
     
 
-    x,y,z,k,ep,grad_u=get_rans_duct(path_r)
-    uu=get_dns_duct(Re,x,y,z)
-        
+    x,y,z,k,ep,grad_u,grad_p,grad_k,vel = get_rans_duct(path_r)
+    uu = get_dns_duct(Re,x,y,z)
+   
     for j in range(len(z)):
         if full:
             xT.append(x[j])
@@ -148,6 +160,9 @@ def write_file_duct(Re,path_r,fname,full=True):
             epT.append(ep[j])
             grad_uT.append(grad_u[j])
             uuT.append(uu[j])
+            grad_pT.append(grad_p[j])
+            grad_kT.append(grad_k[j])
+            velT.append(vel[j]) 
             
         else:    
             if(z[j]<=0.15):
@@ -159,6 +174,9 @@ def write_file_duct(Re,path_r,fname,full=True):
                 epT.append(ep[j])
                 grad_uT.append(grad_u[j])
                 uuT.append(uu[j])   
+                grad_pT.append(grad_p[j])
+                grad_kT.append(grad_k[j])
+                velT.append(vel[j]) 
                 
     xT=np.asarray(xT)
     yT=np.asarray(yT)
@@ -167,7 +185,9 @@ def write_file_duct(Re,path_r,fname,full=True):
     epT=np.asarray(epT)
     grad_uT=np.asarray(grad_uT)
     uuT=np.asarray(uuT)
-    
+    grad_pT=np.asarray(grad_pT)    
+    grad_kT=np.asarray(grad_kT)
+    velT=np.asarray(velT) 
 
   
     l=len(xT)     
@@ -178,9 +198,10 @@ def write_file_duct(Re,path_r,fname,full=True):
     fp.write('k, ep, ux, uy, uz, vx, vy, vz, wx, wy, wz, uu, uv, uw, vu, vv,vw,wu, wv, ww, x, y, z\n')
     
     for i in range(l):
-        fp.write("%.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f\n"\
+        fp.write("%.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f\n"\
                  %(kT[i],epT[i],grad_uT[i,0],grad_uT[i,1],grad_uT[i,2],grad_uT[i,3],grad_uT[i,4],grad_uT[i,5],grad_uT[i,6],grad_uT[i,7],grad_uT[i,8],\
-                   uuT[i,0],uuT[i,1],uuT[i,2],uuT[i,3],uuT[i,4],uuT[i,5],uuT[i,6],uuT[i,7],uuT[i,8],xT[i],yT[i],zT[i]))        
+                   uuT[i,0],uuT[i,1],uuT[i,2],uuT[i,3],uuT[i,4],uuT[i,5],uuT[i,6],uuT[i,7],uuT[i,8],xT[i],yT[i],zT[i],\
+                   grad_pT[i,0],grad_pT[i,1],grad_pT[i,2],grad_kT[i,0],grad_kT[i,1],grad_kT[i,2],velT[i,0],velT[i,1],velT[i,2]))        
      
     fp.close() 
     
@@ -315,12 +336,24 @@ def get_rans_cbfs(path_r):
     #rxx,rxy,rxz=data[19],data[20],data[21]
     #ryx,ryy,ryz=data[22],data[23],data[24]
     #rzx,rzy,rzz=data[25],data[26],data[27]
-        
+    
+    px,py,pz=data[28],data[29],data[30]
+    kx,ky,kz=data[31],data[32],data[33]
+    
     grad_u=[ux,uy,uz,vx,vy,vz,wx,wy,wz]
     grad_u=np.asarray(grad_u)
     
+    grad_p=[px,py,pz]
+    grad_p=np.asarray(grad_p)
+    
+    grad_k=[kx,ky,kz]
+    grad_k=np.asarray(grad_k)
+    
+    vel=[u,v,w]
+    vel=np.asarray(vel)    
+    
     print 'done...get_rans_cbfs...'      
-    return (x,y,z,k,ep,grad_u.transpose())
+    return (x,y,z,k,ep,grad_u.transpose(),grad_p.transpose(),grad_k.transpose(),vel.transpose())
 
     
 def write_file_cbfs(path_r,path_d,fname,case,full=True):
@@ -335,9 +368,11 @@ def write_file_cbfs(path_r,path_d,fname,case,full=True):
     epT=[]
     grad_uT=[]
     uuT=[]
+    grad_pT=[]
+    grad_kT=[]
+    velT=[]    
     
-    
-    x,y,z,k,ep,grad_u=get_rans_cbfs(path_r)
+    x,y,z,k,ep,grad_u,grad_p,grad_k,vel = get_rans_cbfs(path_r)
     uu=get_dns_cbfs(path_d,x,y,z,case)
         
     for j in range(len(x)):
@@ -349,6 +384,9 @@ def write_file_cbfs(path_r,path_d,fname,case,full=True):
             epT.append(ep[j])
             grad_uT.append(grad_u[j])
             uuT.append(uu[j])
+            grad_pT.append(grad_p[j])
+            grad_kT.append(grad_k[j])
+            velT.append(vel[j])       
             
         else:    
             if(z[j]<=0.15):
@@ -360,6 +398,9 @@ def write_file_cbfs(path_r,path_d,fname,case,full=True):
                 epT.append(ep[j])
                 grad_uT.append(grad_u[j])
                 uuT.append(uu[j])   
+                grad_pT.append(grad_p[j])
+                grad_kT.append(grad_k[j])
+                velT.append(vel[j])  
                 
     xT=np.asarray(xT)
     yT=np.asarray(yT)
@@ -368,20 +409,22 @@ def write_file_cbfs(path_r,path_d,fname,case,full=True):
     epT=np.asarray(epT)
     grad_uT=np.asarray(grad_uT)
     uuT=np.asarray(uuT)
-    
+    grad_pT=np.asarray(grad_pT)    
+    grad_kT=np.asarray(grad_kT)
+    velT=np.asarray(velT) 
 
-  
     l=len(xT)     
     
     print 'writing..'
     fp= open("./datafile/%s.txt"%fname,"w+")
     
-    fp.write('k, ep, ux, uy, uz, vx, vy, vz, wx, wy, wz, uu, uv, uw, vu, vv,vw,wu, wv, ww, x, y, z\n')
+    fp.write('k, ep, ux, uy, uz, vx, vy, vz, wx, wy, wz, uu, uv, uw, vu, vv,vw,wu, wv, ww, x, y, z, px, py, pz, kx, ky, kz\n')
     
     for i in range(l):
-        fp.write("%.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f\n"\
+        fp.write("%.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f %.12f\n"\
                  %(kT[i],epT[i],grad_uT[i,0],grad_uT[i,1],grad_uT[i,2],grad_uT[i,3],grad_uT[i,4],grad_uT[i,5],grad_uT[i,6],grad_uT[i,7],grad_uT[i,8],\
-                   uuT[i,0],uuT[i,1],uuT[i,2],uuT[i,3],uuT[i,4],uuT[i,5],uuT[i,6],uuT[i,7],uuT[i,8],xT[i],yT[i],zT[i]))        
+                   uuT[i,0],uuT[i,1],uuT[i,2],uuT[i,3],uuT[i,4],uuT[i,5],uuT[i,6],uuT[i,7],uuT[i,8],xT[i],yT[i],zT[i],\
+                   grad_pT[i,0],grad_pT[i,1],grad_pT[i,2],grad_kT[i,0],grad_kT[i,1],grad_kT[i,2],velT[:,0],velT[:,1],velT[:,2]))        
      
     fp.close() 
 
@@ -409,6 +452,35 @@ def load_data(fname):
             grad_u[:, i, j] = grad_u_flat[:, i*3+j]
             stresses[:, i, j] = stresses_flat[:, i*3+j]
     return k, eps, grad_u, stresses,coord    
+
+
+
+def load_data_piml(fname):
+    """
+    Loads in channel flow data
+    :return:
+    """
+    # Load in data from channel.txt
+    data = np.loadtxt('./datafile/%s.txt'%fname, skiprows=1)
+    k = data[:, 0]
+    eps = data[:, 1]
+    grad_u_flat = data[:, 2:11]
+    stresses_flat = data[:, 11:20]
+    coord=data[:,20:23]
+    grad_p=data[:,23:26]
+    grad_k=data[:,26:29]
+    vel=data[:,29:32]
+    
+    # Reshape grad_u and stresses to num_points X 3 X 3 arrays
+    num_points = data.shape[0]
+    grad_u = np.zeros((num_points, 3, 3))
+    stresses = np.zeros((num_points, 3, 3))
+    for i in xrange(3):
+        for j in xrange(3):
+            grad_u[:, i, j] = grad_u_flat[:, i*3+j]
+            stresses[:, i, j] = stresses_flat[:, i*3+j]
+    return k, eps, grad_u, grad_p, grad_k, vel, coord  
+
 
 #plot
 def plotust(x,y,z,nc,name):

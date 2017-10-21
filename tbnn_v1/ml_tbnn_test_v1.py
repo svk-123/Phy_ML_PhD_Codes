@@ -44,8 +44,8 @@ bDtmp=[]
 xyz=[]
 bR=[]
 
-# for ref: data=[L,T,bD,Coord,...]
-#     ref:[x,tb,y,coord,k,ep,rans_bij,tkedns]
+
+# ref:[x,tb,y,coord,k,ep,rans_bij,tkedns,I]
 with open('./datafile/to_ml/ml_hill_Re10595_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
     

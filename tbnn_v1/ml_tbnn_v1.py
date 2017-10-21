@@ -48,14 +48,15 @@ for the_file in os.listdir(folder):
     >>>    result = pickle.load(infile)
     >>>Ltmp.extend(result[0])
     >>>Ttmp.extend(result[1])
-    >>>bDtmp.extend(result[2])"""
+    >>>bDtmp.extend(result[2])
+    >>>data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I]"""
 """------------------------------------"""
 
 Ltmp=[]
 Ttmp=[]
 bDtmp=[]
 
-# for ref: data=[L,T,bD,Coord]
+
 with open('./datafile/to_ml/ml_cbfs_Re13700.pkl', 'rb') as infile:
     result = pickle.load(infile)
 Ltmp.extend(result[0])

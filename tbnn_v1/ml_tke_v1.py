@@ -33,7 +33,7 @@ import cPickle as pickle
 
 
 import os, shutil
-folder = './model/'
+folder = './model_tke/'
 for the_file in os.listdir(folder):
     file_path = os.path.join(folder, the_file)
     try:
@@ -51,194 +51,101 @@ for the_file in os.listdir(folder):
     >>>bDtmp.extend(result[2])"""
 """------------------------------------"""
 
-Ltmp=[]
-Ttmp=[]
-bDtmp=[]
 
-# for ref: data=[L,T,bD,Coord]
-with open('./datafile/to_ml/ml_cbfs_Re13700.pkl', 'rb') as infile:
+ktmp=[]
+tkedtmp=[]
+Itmp=[]
+
+
+# [x,tb,y,coord,k,ep,rans_bij,tkedns,I]
+with open('./datafile/to_ml/ml_duct_Re2200_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
-Ltmp.extend(result[0])
-Ttmp.extend(result[1])
-bDtmp.extend(result[2])
+ktmp.extend(result[4])
+tkedtmp.extend(result[7])
+Itmp.extend(result[8])
 
-with open('./datafile/to_ml/ml_hill_Re10595.pkl', 'rb') as infile:
+with open('./datafile/to_ml/ml_duct_Re2600_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
-Ltmp.extend(result[0])
-Ttmp.extend(result[1])
-bDtmp.extend(result[2])
+ktmp.extend(result[4])
+tkedtmp.extend(result[7])
+Itmp.extend(result[8])
+
+with open('./datafile/to_ml/ml_duct_Re2900_full.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+ktmp.extend(result[4])
+tkedtmp.extend(result[7])
+Itmp.extend(result[8])
+
+with open('./datafile/to_ml/ml_duct_Re3500_full.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+ktmp.extend(result[4])
+tkedtmp.extend(result[7])
+Itmp.extend(result[8])
 
 
-bDtmp=np.asarray(bDtmp)
-Ltmp=np.asarray(Ltmp)
-Ttmp=np.asarray(Ttmp)
+ktmp=np.asarray(ktmp)
+tkedtmp=np.asarray(tkedtmp)
+Itmp=np.asarray(Itmp)
+
+#Itmp=np.abs(Itmp)
+
+'''
+scale=[1,10000,1,10000,0.1,1]
+for i in range(6):
+    Itmp[:,i]=Itmp[:,i]*scale[i]
+'''
 
 
-# reduce to 6 components
-l=len(Ltmp)
-
-L=Ltmp
-
-bD=np.zeros((l,6))
-bD[:,0]=bDtmp[:,0]
-bD[:,1]=bDtmp[:,1]
-bD[:,2]=bDtmp[:,2]
-bD[:,3]=bDtmp[:,4]
-bD[:,4]=bDtmp[:,5]
-bD[:,5]=bDtmp[:,8]
-
-T=np.zeros((l,10,6))
-T[:,:,0]=Ttmp[:,:,0]
-T[:,:,1]=Ttmp[:,:,1]
-T[:,:,2]=Ttmp[:,:,2]
-T[:,:,3]=Ttmp[:,:,4]
-T[:,:,4]=Ttmp[:,:,5]
-T[:,:,5]=Ttmp[:,:,8]
-
-
-# std scaler
-#L_ss = preprocessing.StandardScaler() 
-#L_ss.fit(L)
-#L  = L_ss.transform(L)
-
-#bD_sscaler = preprocessing.StandardScaler() 
-#bD_sscaler.fit(bD)
-#bD = bD_sscaler.transform(bD)
-
-#minMax scaler
-#L_mm = preprocessing.MinMaxScaler(feature_range=(-1, 1))
-#bD_mm = preprocessing.MinMaxScaler(feature_range=(-1, 1))
-#L_mm.fit(L)
-#bD_mm.fit(bD)
-#L  = L_mm.transform(L)
-#bD = bD_mm.transform(bD)
-
-bD1=bD[:,0]
-bD2=bD[:,1]
-bD3=bD[:,2]
-bD4=bD[:,3]
-bD5=bD[:,4]
-bD6=bD[:,5]
-
-
-T1=T[:,:,0]
-T2=T[:,:,1]
-T3=T[:,:,2]
-T4=T[:,:,3]
-T5=T[:,:,4]
-T6=T[:,:,5]
+# length
+l=len(ktmp)
 
 
 # ---------ML PART:-----------#
 #shuffle data
-N= len(L)
+N= len(ktmp)
 I = np.arange(N)
 np.random.shuffle(I)
-n=15000
+n=9000
 
 ## Training sets
-xtr0 = L[I][:n]
-xtr1 = T1[I][:n]
-xtr2 = T2[I][:n]
-xtr3 = T3[I][:n]
-xtr4 = T4[I][:n]
-xtr5 = T5[I][:n]
-xtr6 = T6[I][:n]
+xtr1 = Itmp[I][:n]
+ttr1 = tkedtmp[I][:n]
 
 
-
-ttr1 = bD1[I][:n]
-ttr2 = bD2[I][:n]
-ttr3 = bD3[I][:n]
-ttr4 = bD4[I][:n]
-ttr5 = bD5[I][:n]
-ttr6 = bD6[I][:n]
-
-
-# Multilayer Perceptron
-# create model
-'''
-aa=Input(shape=(5,))
-xx =Dense(30,  kernel_initializer='random_normal', activation='relu')(aa)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-g =Dense(10, activation='linear')(xx)
-'''
-
-aa=Input(shape=(5,))
-xx =Dense(30, kernel_initializer='random_normal')(aa)
+aa=Input(shape=(6,))
+xx =Dense(10, kernel_initializer='random_normal')(aa)
 xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(30)(xx)
+xx =Dense(10)(xx)
 xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(30)(xx)
+xx =Dense(10)(xx)
 xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(30)(xx)
-xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(30)(xx)
-xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(30)(xx)
-xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(30)(xx)
-xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(30)(xx)
-g =Dense(10, activation='linear')(xx)
-
-t1=Input(shape=(10,))
-y1= dot([g,t1], 1)
-
-t2=Input(shape=(10,))
-y2= dot([g, t2], 1)
-
-t3=Input(shape=(10,))
-y3= dot([g, t3], 1)
-
-t4=Input(shape=(10,))
-y4= dot([g, t4], 1)
-
-t5=Input(shape=(10,))
-y5= dot([g, t5], 1)
-
-t6=Input(shape=(10,))
-y6= dot([g, t6], 1)
-
-
-
+g =Dense(1, activation='linear')(xx)
 
 #model = Model(inputs=a, outputs=g)
-model = Model(inputs=[aa,t1,t2,t3,t4,t5,t6], outputs=[y1,y2,y3,y4,y5,y6])
+model = Model(inputs=[aa], outputs=[g])
 
 #model = Model(inputs=[aa,t5], outputs=[y5])
 #callbacks
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1, mode='min',verbose=1 ,patience=50, min_lr=1.0e-8)
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1, mode='min',verbose=1 ,patience=200, min_lr=1.0e-8)
 
-e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-6, patience=100, verbose=1, mode='auto')
+e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-8, patience=200, verbose=1, mode='auto')
 
-filepath="./model/model_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
+filepath="./model_tke/model_tke_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
 
 chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
-                                save_best_only=False, save_weights_only=False, mode='auto', period=1000)
-
-os.system("rm ./graph/* ")
-tb = TensorBoard(log_dir='./graph', histogram_freq=0, write_graph=True, write_images=True)
+                                save_best_only=False, save_weights_only=False, mode='auto', period=200)
 
 # Compile model
-opt = Adam(lr=2.5e-5,decay=1.0e-12)
+opt = Adam(lr=2.5e-6,decay=1.0e-12)
 
-model.compile(loss= 'mean_squared_error',optimizer= opt,loss_weights=[1,1,1,1,1,1])
+model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 
-hist = model.fit([xtr0,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6], [ttr1,ttr2,ttr3,ttr4,ttr5,ttr6], validation_split=0.2,\
-                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=False)
+hist = model.fit(xtr1,ttr1, validation_split=0.2,epochs=3000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt],\
+                 verbose=1,shuffle=False)
 
-#hist = model.fit([xtr0,xtr5], [ttr5], validation_split=0.3,\
-#                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)
 #save model
-model.save('./model/final.hdf5') 
+model.save('./model_tke/final_tke.hdf5') 
 
 
 print"\n"
@@ -249,22 +156,66 @@ print"\n"
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
+#plot
+def plot(x,y,z,nc,name):
+    fig=plt.figure(figsize=(6, 5), dpi=100)
+    ax=fig.add_subplot(111)
+    #cp = ax.tricontourf(x, y, z,np.linspace(-0.3,0.3,30),extend='both')
+    cp = ax.tricontourf(x, y, z,30,extend='both')
+    #cp.set_clim(-0.2,0.2)
+    #plt.xlim([-1, 0])
+    #plt.ylim([-1, 0])
+     
+    cbar=plt.colorbar(cp)
+    plt.title(name)
+    plt.xlabel('Z ')
+    plt.ylabel('Y ')
+    #plt.savefig(name +'.png', format='png', dpi=100)
+    plt.show()
+
+
+def pred():
+    
+    kp=[]
+    tkedp=[]
+    Ip=[]
+    xyz=[]
+    
+    # [x,tb,y,coord,k,ep,rans_bij,tkedns,I]
+    with open('./datafile/to_ml/ml_duct_Re2900_full.pkl', 'rb') as infile:
+        result = pickle.load(infile)
+    kp.extend(result[4])
+    tkedp.extend(result[7])
+    Ip.extend(result[8])
+    xyz.extend(result[3])
+    
+    kp=np.asarray(kp)
+    tkedp=np.asarray(tkedp)
+    Ip=np.asarray(Ip)
+    xyz=np.asarray(xyz)
+    
+    '''
+    scale=[1,10000,1,10000,0.1,1]
+    for i in range(6):
+        Itmp[:,i]=Itmp[:,i]*scale[i]
+    '''
+    
+    model_test = load_model('./model_tke/final_tke.hdf5') 
+    out=model_test.predict(Ip)
+
+    out=np.asarray(out)
+
+    plot(xyz[:,2],xyz[:,1],out[:,0],20,'pred')
+    plot(xyz[:,2],xyz[:,1],tkedp,20,'dns')
+    plot(xyz[:,2],xyz[:,1],kp,20,'rans')
+    
+    return (xyz,out)
+xyz,out=pred()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+for i in range(6):
+    print i,Itmp[:,i].min(),Itmp[:,i].max()
 
 
 

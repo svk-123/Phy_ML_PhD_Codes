@@ -63,8 +63,8 @@ boundary not loaded: may be required?
 '''
 
 # path of Rey file to read
-path='/home/vino/OpenFOAM/run/mycase/zpyPost_gen/rans_data/hill/'
-name='Re10595'
+path='/home/vino/OpenFOAM/run/mycase/zpyPost_gen/rans_data/cbfs/'
+name='Re13700'
 
 def write_R_ml(t11,t12,t13,t22,t23,t33,xR,yR,zR):
         
@@ -73,9 +73,9 @@ def write_R_ml(t11,t12,t13,t22,t23,t33,xR,yR,zR):
     #bc=['internalField','inlet','mywall','outlet']
     #nbc=[2085119,3481,141364,3481]
     
-    # for 100h duct
+    # for cbfs
     bc=['internalField','inlet','mywall','outlet','side']
-    nbc=[3920499,19701,79202,19701,0]
+    nbc=[292842,2871,5916,2871,0]
     
     l_bc=np.zeros(len(bc))
     ist=np.zeros(len(bc))
@@ -297,6 +297,7 @@ def write_R_ml(t11,t12,t13,t22,t23,t33,xR,yR,zR):
     inan=[]
     for i in range(len(rxx)):
         if (np.isnan(rxx[i])==True):
+            print 'Nan True'
             inan.append(i)
             rxx[i]=0
         if (np.isnan(rxy[i])==True):
@@ -336,7 +337,7 @@ def write_R_ml(t11,t12,t13,t22,t23,t33,xR,yR,zR):
            
 
     print 'writing..'
-    fp= open("RANS_ml_hill","w+")
+    fp= open("RANS_dns_inp_cbfs","w+")
     
     for i in range(int(istR[0])):
         fp.write("%s"%(data0[i]))

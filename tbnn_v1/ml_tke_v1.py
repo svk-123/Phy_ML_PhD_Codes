@@ -55,7 +55,7 @@ for the_file in os.listdir(folder):
 ktmp=[]
 tkedtmp=[]
 Itmp=[]
-
+Btmp=[]
 
 # [x,tb,y,coord,k,ep,rans_bij,tkedns,I]
 with open('./datafile/to_ml/ml_duct_Re2200_full.pkl', 'rb') as infile:
@@ -76,16 +76,30 @@ ktmp.extend(result[4])
 tkedtmp.extend(result[7])
 Itmp.extend(result[8])
 
-with open('./datafile/to_ml/ml_duct_Re3500_full.pkl', 'rb') as infile:
+'''with open('./datafile/to_ml/ml_duct_Re3500_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
 ktmp.extend(result[4])
 tkedtmp.extend(result[7])
-Itmp.extend(result[8])
+Itmp.extend(result[8])'''
 
+# [B]
+with open('./datafile/to_ml/ml_piml_duct_Re2200_full.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+Btmp.extend(result[0])
+with open('./datafile/to_ml/ml_piml_duct_Re2600_full.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+Btmp.extend(result[0])
+with open('./datafile/to_ml/ml_piml_duct_Re2900_full.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+Btmp.extend(result[0])
+#with open('./datafile/to_ml/ml_piml_duct_Re3500_full.pkl', 'rb') as infile:
+#    result = pickle.load(infile)
+#Btmp.extend(result[0])
 
 ktmp=np.asarray(ktmp)
 tkedtmp=np.asarray(tkedtmp)
 Itmp=np.asarray(Itmp)
+Btmp=np.asarray(Btmp)
 
 #Itmp=np.abs(Itmp)
 
@@ -108,16 +122,18 @@ np.random.shuffle(I)
 n=9000
 
 ## Training sets
-xtr1 = Itmp[I][:n]
+xtr1 = Btmp[I][:n]
 ttr1 = tkedtmp[I][:n]
 
 
-aa=Input(shape=(6,))
-xx =Dense(10, kernel_initializer='random_normal')(aa)
+aa=Input(shape=(47,))
+xx =Dense(30, kernel_initializer='random_normal')(aa)
 xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(10)(xx)
+xx =Dense(30)(xx)
 xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(10)(xx)
+xx =Dense(30)(xx)
+xx=LeakyReLU(alpha=.1)(xx)
+xx =Dense(30)(xx)
 xx=LeakyReLU(alpha=.1)(xx)
 g =Dense(1, activation='linear')(xx)
 
@@ -180,9 +196,9 @@ def pred():
     tkedp=[]
     Ip=[]
     xyz=[]
-    
+    Bp=[]
     # [x,tb,y,coord,k,ep,rans_bij,tkedns,I]
-    with open('./datafile/to_ml/ml_duct_Re2900_full.pkl', 'rb') as infile:
+    with open('./datafile/to_ml/ml_duct_Re3500_full.pkl', 'rb') as infile:
         result = pickle.load(infile)
     kp.extend(result[4])
     tkedp.extend(result[7])
@@ -194,6 +210,11 @@ def pred():
     Ip=np.asarray(Ip)
     xyz=np.asarray(xyz)
     
+    with open('./datafile/to_ml/ml_piml_duct_Re3500_full.pkl', 'rb') as infile:
+        result = pickle.load(infile)   
+    Bp.extend(result[0])
+    Bp=np.asarray(Bp)
+    
     '''
     scale=[1,10000,1,10000,0.1,1]
     for i in range(6):
@@ -201,7 +222,7 @@ def pred():
     '''
     
     model_test = load_model('./model_tke/final_tke.hdf5') 
-    out=model_test.predict(Ip)
+    out=model_test.predict(Bp)
 
     out=np.asarray(out)
 
@@ -213,9 +234,6 @@ def pred():
 xyz,out=pred()
 
 
-
-for i in range(6):
-    print i,Itmp[:,i].min(),Itmp[:,i].max()
 
 
 

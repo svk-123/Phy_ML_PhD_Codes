@@ -29,9 +29,7 @@ from keras.layers.advanced_activations import LeakyReLU, PReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 import cPickle as pickle
 import seaborn as sns
-
-from scipy import interpolate
-
+#
 import os,sys
 scriptpath = "/home/vino/miniconda2/mypy"
 sys.path.append(os.path.abspath(scriptpath))
@@ -44,37 +42,41 @@ Ltmp=[]
 Ttmp=[]
 bDtmp=[]
 xyz=[]
-k=[]
-ep=[]
-tkeD=[]
+bR=[]
 Btmp=[]
-# for ref: data=[L,T,bD,Coord]
-with open('../../tbnn_v1/datafile/to_ml/ml_duct_Re3500_full.pkl', 'rb') as infile:
+bRtmp=[]
+wdtmp=[]
+
+# ref:[x,tb,y,coord,k,ep,rans_bij,tkedns,I,B,wd]
+with open('./datafile/to_ml/ml_duct_Re3500_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
+
 Ltmp.extend(result[0])
 Ttmp.extend(result[1])
 bDtmp.extend(result[2])
 xyz.extend(result[3])
-k.extend(result[4])
-ep.extend(result[5])
-tkeD.extend(result[7])
+bR.extend(result[6])
 Btmp.extend(result[9])
+bRtmp.extend(result[6])
+wdtmp.extend(result[10])
     
 bDtmp=np.asarray(bDtmp)
 Ltmp=np.asarray(Ltmp)
 Ttmp=np.asarray(Ttmp)
 xyz=np.asarray(xyz)
-k=np.asarray(k)
-ep=np.asarray(ep)
-tkeD=np.asarray(tkeD)
+bR=np.asarray(bR)
 Btmp=np.asarray(Btmp)
+bRtmp=np.asarray(bRtmp)
+wdtmp=np.asarray(wdtmp)
 
-
+# reduce to 6 components
 # reduce to 6 components
 l=len(Ltmp)
 
 L=Ltmp
 B=Btmp
+
+B  = B_mm.transform(B)
 
 bD=np.zeros((l,6))
 bD[:,0]=bDtmp[:,0]
@@ -84,6 +86,14 @@ bD[:,3]=bDtmp[:,4]
 bD[:,4]=bDtmp[:,5]
 bD[:,5]=bDtmp[:,8]
 
+dbD=np.zeros((l,6))
+dbD[:,0]=bDtmp[:,0]-bRtmp[:,0]
+dbD[:,1]=bDtmp[:,1]-bRtmp[:,1]
+dbD[:,2]=bDtmp[:,2]-bRtmp[:,2]
+dbD[:,3]=bDtmp[:,4]-bRtmp[:,4]
+dbD[:,4]=bDtmp[:,5]-bRtmp[:,5]
+dbD[:,5]=bDtmp[:,8]-bRtmp[:,8]
+
 T=np.zeros((l,10,6))
 T[:,:,0]=Ttmp[:,:,0]
 T[:,:,1]=Ttmp[:,:,1]
@@ -92,75 +102,13 @@ T[:,:,3]=Ttmp[:,:,4]
 T[:,:,4]=Ttmp[:,:,5]
 T[:,:,5]=Ttmp[:,:,8]
 
-
 #load model
-model_test = load_model('../../tbnn_v1/selected_model/model_duct_B_3999_0.005_0.004.hdf5') 
-outtmp=model_test.predict([B,T[:,:,0],T[:,:,1],T[:,:,2],T[:,:,3],T[:,:,4],T[:,:,5]])
-    
+model_test = load_model('./selected_model/model_duct_B_9999_0.006_0.006.hdf5') 
+out=model_test.predict([B,T[:,:,0],T[:,:,1],T[:,:,2],T[:,:,3],T[:,:,4],T[:,:,5]])
 
 # reshape
-outtmp=np.asarray(outtmp)
-outtmp=outtmp[:,:,0].transpose()
-
-out=np.zeros((len(outtmp),9))
-out[:,0]=outtmp[:,0]
-out[:,1]=outtmp[:,1]
-out[:,2]=outtmp[:,2]
-out[:,3]=outtmp[:,1]
-out[:,4]=outtmp[:,3]
-out[:,5]=outtmp[:,4]
-out[:,6]=outtmp[:,2]
-out[:,7]=outtmp[:,4]
-out[:,8]=outtmp[:,5]
-
-
-import sys
-sys.path.insert(0, '/home/vino/ml_test/ml_dns/tbnn_v1/')
-
-from turbulencekepspreprocessor_v1 import TurbulenceKEpsDataProcessor
-tdp=TurbulenceKEpsDataProcessor()
-
-# Enforce realizability
-for i in range(5):
-    out = tdp.make_realizable(out)
-
-#load model
-#model_test_tke = load_model('../../tbnn_v1/model_tke/final_tke.hdf5') 
-#tketmp=model_test_tke.predict(Btmp)
-#tketmp=np.asarray(tketmp)
-#k=tketmp[:,0]
-k=tkeD
-
-a11=out[:,0]*2*k
-a12=out[:,1]*2*k
-a13=out[:,2]*2*k
-a22=out[:,4]*2*k
-a23=out[:,5]*2*k
-a33=out[:,8]*2*k
-
-t11=a11+(2./3.)*k
-t12=a12
-t13=a13
-t22=a22+(2./3.)*k
-t23=a23
-t33=a33+(2./3.)*k
-
-import scipy
-t11=scipy.ndimage.filters.gaussian_filter(t11,0.1,mode='nearest')
-t12=scipy.ndimage.filters.gaussian_filter(t12,0.1,mode='nearest')
-t13=scipy.ndimage.filters.gaussian_filter(t13,0.1,mode='nearest')
-t22=scipy.ndimage.filters.gaussian_filter(t22,0.1,mode='nearest')
-t23=scipy.ndimage.filters.gaussian_filter(t23,0.1,mode='nearest')
-t33=scipy.ndimage.filters.gaussian_filter(t33,0.1,mode='nearest')
-
-
-from ml_Rey_write import write_R_ml_cyclic
-write_R_ml_cyclic(t11,t12,t13,t22,t23,t33)
-#write_R_ml(out[:,0],out[:,1],out[:,2],out[:,4],out[:,5],out[:,8])
-
-from ml_tke_write import write_tke_ml
-#write_tke_ml(k)
-
+out=np.asarray(out)
+out=out[:,:,0].transpose()
 #plot
 def plot(x,y,z,nc,name):
     fig=plt.figure(figsize=(6, 5), dpi=100)
@@ -179,24 +127,25 @@ def plot(x,y,z,nc,name):
     plt.show()
 
 
+nbD=['uu-bD','uv-bD','uw-bD','vv-bD','vw-bD','ww-bD']
+nbp=['uu-pred','uv-pred','uw-pred','vv-pred','vw-pred','ww-pred']
+nbR=['uu-bR','uv-bR','uw-bR','vv-bR','vw-bR','ww-bR']
+#nbD=['uu-bD','uv-bD','uw-bD','vu-bD','vv-bD','vw-bD','wu-bD','wv-bD','ww-bD']
 
 #import scipy
 #out=scipy.ndimage.filters.gaussian_filter(out,0.1,mode='nearest')
 
-z=xyz[:,2]
+x=xyz[:,2]
 y=xyz[:,1]
-
-plot(z,y,t11,20,'t11')
-plot(z,y,t12,20,'t12')
-plot(z,y,t13,20,'t13')
-plot(z,y,t22,20,'t22')
-plot(z,y,t23,20,'t23')
-plot(z,y,t33,20,'t33')
-  
-plot(z,y,k,20,'k')
-
-
-
+cor=[0,0,0,1,1,3]
+for i in range(0,6):
+    #plot(x,y,dbD[:,i],20,'%s'%(nbD[i]))
+    k=i+cor[i]
+    plot(x,y,bD[:,i],20,'%s'%(nbR[i]))   
+    plot(x,y,out[:,i],20,'%s'%(nbp[i]))   
+   # plot(z,y,sum(T[i,:,:].transpose()),20,'%s'%(nbp[i])) 
+    #plot(x,y,bR[:,k],20,'%s'%(nbR[i]))   
+    #plot(z,y,bDs[:],20,'%s'%(nbp[i]))   
 
 
 

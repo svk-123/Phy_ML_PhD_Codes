@@ -39,7 +39,7 @@ import colormaps as cmaps
 plt.register_cmap(name='viridis', cmap=cmaps.viridis)
 plt.set_cmap(cmaps.viridis)
 
-'''
+
 Ltmp=[]
 Ttmp=[]
 bDtmp=[]
@@ -47,19 +47,18 @@ xyz=[]
 k=[]
 ep=[]
 tkeD=[]
+Btmp=[]
 # for ref: data=[L,T,bD,Coord]
 with open('../../tbnn_v1/datafile/to_ml/ml_hill_Re10595_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
-
 Ltmp.extend(result[0])
 Ttmp.extend(result[1])
 bDtmp.extend(result[2])
 xyz.extend(result[3])
 k.extend(result[4])
 ep.extend(result[5])
-
-#bR=result[6]
-#tkeD=result[7]
+tkeD.extend(result[7])
+Btmp.extend(result[9])
     
 bDtmp=np.asarray(bDtmp)
 Ltmp=np.asarray(Ltmp)
@@ -67,12 +66,14 @@ Ttmp=np.asarray(Ttmp)
 xyz=np.asarray(xyz)
 k=np.asarray(k)
 ep=np.asarray(ep)
-#tkeD=np.asarray(tkeD)
+tkeD=np.asarray(tkeD)
+Btmp=np.asarray(Btmp)
 
 # reduce to 6 components
 l=len(Ltmp)
 
 L=Ltmp
+B=Btmp
 
 bD=np.zeros((l,6))
 bD[:,0]=bDtmp[:,0]
@@ -93,12 +94,9 @@ T[:,:,5]=Ttmp[:,:,8]
 
 
 #load model
-model_test = load_model('../../tbnn_v1/model/final.hdf5') 
-outtmp=model_test.predict([L,T[:,:,0],T[:,:,1],T[:,:,2],T[:,:,3],T[:,:,4],T[:,:,5]])
-'''
-
-
-'''    
+model_test = load_model('../../tbnn_v1/model/final_cbfs_B.hdf5') 
+outtmp=model_test.predict([B,T[:,:,0],T[:,:,1],T[:,:,2],T[:,:,3],T[:,:,4],T[:,:,5]])
+   
 # reshape
 outtmp=np.asarray(outtmp)
 outtmp=outtmp[:,:,0].transpose()
@@ -113,9 +111,9 @@ out[:,5]=outtmp[:,4]
 out[:,6]=outtmp[:,2]
 out[:,7]=outtmp[:,4]
 out[:,8]=outtmp[:,5]
-'''
 
-'''
+
+
 import sys
 sys.path.insert(0, '/home/vino/ml_test/ml_dns/tbnn_v1/')
 
@@ -149,11 +147,11 @@ t13=scipy.ndimage.filters.gaussian_filter(t13,0.1,mode='nearest')
 t22=scipy.ndimage.filters.gaussian_filter(t22,0.1,mode='nearest')
 t23=scipy.ndimage.filters.gaussian_filter(t23,0.1,mode='nearest')
 t33=scipy.ndimage.filters.gaussian_filter(t33,0.1,mode='nearest')
-'''
+
 
 
 from ml_Rey_write_hill import write_R_ml
-#write_R_ml(t11,t12,t13,t22,t23,t33)
+write_R_ml(t11,t12,t13,t22,t23,t33,xyz[:,0],xyz[:,1],xyz[:,2])
 
 
 def rr_inp():
@@ -165,8 +163,6 @@ def rr_inp():
     ryx,ryy,ryz=data[:,22],data[:,23],data[:,24]
     rzx,rzy,rzz=data[:,25],data[:,26],data[:,27]    
     write_R_ml(rxx,rxy,rxz,ryy,ryz,rzz,x,y,z)
-
-
 
 def dr_inp():
     "dns data to rans data Rey interpolation (from slice to wholedata)"
@@ -210,12 +206,10 @@ def plot(x,y,z,nc,name):
 #import scipy
 #out=scipy.ndimage.filters.gaussian_filter(out,0.1,mode='nearest')
 
-#z=xyz[:,0]
-#y=xyz[:,1]
-
-
+x=xyz[:,0]
+y=xyz[:,1]
   
-#plot(x,y,rxx,20,'k')
+plot(x,y,t11,20,'k')
 
 
 
@@ -223,20 +217,6 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 
 
-'''
-zsort=np.zeros((100,2))
-for j in range(100):
-    zsort[j,0]=j
-    zsort[j,1]=j       
-np.random.seed(123)    
-np.random.shuffle(zsort[:,0])
-tmp1=zsort[:,0]       
-zsort=zsort[np.argsort(zsort[:, 0])]
-tmp2=zsort[:,0]
-
-I=map(np.int,zsort[:,1])
-tmp3=tmp1[I][:]
-'''
 
 
 

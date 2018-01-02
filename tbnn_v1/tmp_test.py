@@ -11,11 +11,13 @@ import cPickle as pickle
 print 'run...get_dns_cbfs...'  
 
 
+path_r='../rans_data/hill/hill_Re10595_train_wnan.txt'
+path_d='../dns_data/hill/Re10595/hill_train.dat'
 
-path_r='../rans_data/cbfs/cbfs_Re13700_train.txt'
-path_d='../dns_data/cbfs/Re13700/cbfs_train.dat'   
+case='hill'
 
-case='cbfs'
+
+
 
 
 if (case=='hill'):

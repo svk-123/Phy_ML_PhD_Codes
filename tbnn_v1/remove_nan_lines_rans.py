@@ -7,7 +7,7 @@ import pandas as pd
 from scipy import interpolate
 
 
-path_r='../rans_data/wavywall/wavywall_Re6760_train.txt'
+path_r='../rans_data/wavywall/wavywall_Re6760_train_wnan.txt'
 
 inan = np.loadtxt('wavywall_inan.txt', skiprows=0)
 inan=inan+1
@@ -22,7 +22,7 @@ for i in range(len(data0)):
         
         
 
-path_rn='../rans_data/wavywall/wavywall_Re6760_train_nn.txt'
+path_rn='../rans_data/wavywall/wavywall_Re6760_train.txt'
 fp= open(path_rn,"w+")
 
 for k in range(len(datan)):

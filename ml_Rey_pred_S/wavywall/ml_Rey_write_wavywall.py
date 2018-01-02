@@ -63,8 +63,8 @@ boundary not loaded: may be required?
 '''
 
 # path of Rey file to read
-path='/home/vino/OpenFOAM/run/mycase/zpyPost_gen/rans_data/hill/'
-name='Re10595'
+path='/home/vino/OpenFOAM/run/mycase/zpyPost_gen/rans_data/wavywall/'
+name='Re6760'
 
 def write_R_ml(t11,t12,t13,t22,t23,t33,xR,yR,zR):
         
@@ -73,9 +73,9 @@ def write_R_ml(t11,t12,t13,t22,t23,t33,xR,yR,zR):
     #bc=['internalField','inlet','mywall','outlet']
     #nbc=[2085119,3481,141364,3481]
     
-    # for 100h duct
+    # for cbfs
     bc=['internalField','inlet','mywall','outlet','side']
-    nbc=[3920499,19701,79202,19701,0]
+    nbc=[1950399,0,39402,0,0]
     
     l_bc=np.zeros(len(bc))
     ist=np.zeros(len(bc))
@@ -261,17 +261,16 @@ def write_R_ml(t11,t12,t13,t22,t23,t33,xR,yR,zR):
     
 
     #LinearNDinterpolator
-    pD=np.asarray([xR,yR]).transpose()
+    pD=np.asarray([xR,zR]).transpose()
     
     print 'interpolation-1...'      
     frxx=interpolate.LinearNDInterpolator(pD,t11)
     for i in range(nbc[0]):
         rxx[i]=frxx(x[i],y[i])
    
-    print 'interpolation-1...'      
-    frxy=interpolate.LinearNDInterpolator(pD,t12)
+
     for i in range(nbc[0]):
-        rxy[i]=frxy(x[i],y[i])
+        rxy[i]=0
         
         
     print 'interpolation-1...'      
@@ -283,11 +282,10 @@ def write_R_ml(t11,t12,t13,t22,t23,t33,xR,yR,zR):
     fryy=interpolate.LinearNDInterpolator(pD,t22)
     for i in range(nbc[0]):
         ryy[i]=fryy(x[i],y[i])
-        
-    print 'interpolation-1...'      
-    fryz=interpolate.LinearNDInterpolator(pD,t23)
+       
+
     for i in range(nbc[0]):
-        ryz[i]=fryz(x[i],y[i])
+        ryz[i]=0
         
     print 'interpolation-1...'      
     frzz=interpolate.LinearNDInterpolator(pD,t33)
@@ -336,7 +334,7 @@ def write_R_ml(t11,t12,t13,t22,t23,t33,xR,yR,zR):
            
 
     print 'writing..'
-    fp= open("RANS_ml_hill","w+")
+    fp= open("RANS_ml_wavywall","w+")
     
     for i in range(int(istR[0])):
         fp.write("%s"%(data0[i]))
@@ -384,7 +382,7 @@ def write_R_ml(t11,t12,t13,t22,t23,t33,xR,yR,zR):
         a=0+k*l
         b=l+k*l
 
-        plot(da[a:b,0],da[a:b,1],da[a:b,3],20,'name')  
+        plot(da[a:b,0],da[a:b,2],da[a:b,3],20,'name')  
     
     #plot(da[0:19701,0],da[0:19701,1],da[0+100*19701:19701+100*19701,3],20,'rxx') 
     #plt.scatter(da[0:19701,0],da[0:19701,1])

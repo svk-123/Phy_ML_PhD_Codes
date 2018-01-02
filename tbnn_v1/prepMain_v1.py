@@ -41,11 +41,11 @@ case='duct'
 
 #set path
 if(case=='wavywall'):
-    path_r='../rans_data/wavywall/wavywall_Re6760_train.txt'
+    path_r='../rans_data/wavywall/wavywall_Re6760_full.txt'
     path_d='../dns_data/wavywall/Re6760/wavywall_train.txt'
 
 if(case=='hill'):
-    path_r='../rans_data/hill/hill_Re10595_train_nn.txt'
+    path_r='../rans_data/hill/hill_Re10595_full.txt'
     path_d='../dns_data/hill/Re10595/hill_train.dat'
     
 if(case=='cbfs'):
@@ -53,13 +53,13 @@ if(case=='cbfs'):
     path_d='../dns_data/cbfs/Re13700/cbfs_train.dat'    
     
 if(case=='duct'):
-    path_r='../rans_data/duct/duct_Re2200_full.txt'
-    Re='Re2200'       # only Re 
+    Re='Re3500'       # only Re 
+    path_r='../rans_LRR_data/duct_200h/duct_%s_full.txt'%Re
+
    
 # call write file.txt
-fname='duct_Re2200_full'    
-
-
+#fname='wavywall_Re6760_train'    
+fname='duct_%s_full'%Re # do not include.txt
 
 
 if (case=='duct'):
@@ -75,7 +75,7 @@ if (case=='duct'):
 def prep_input():
         
     #load written data
-    k,ep,grad_u,stresses,coord=load_data(fname)
+    k,ep,grad_u,stresses,coord,wd=load_data(fname)
     
     # Calculate inputs and outputs
     Sij, Rij = tdp.calc_Sij_Rij(grad_u, k, ep)
@@ -92,9 +92,9 @@ def prep_input():
     #tke input
     I = tdp.calc_tke_input(Sij, Rij)
     
-    return(x,tb,y,coord,k,ep,tkedns,rans_bij,I)
+    return(x,tb,y,coord,k,ep,tkedns,rans_bij,I,grad_u,wd)
 
-x,tb,y,coord,k,ep,tkedns,rans_bij,I=prep_input()
+x,tb,y,coord,k,ep,tkedns,rans_bij,I,grad_u,wd=prep_input()
 
 
 def prep_piml_input():
@@ -108,23 +108,26 @@ def prep_piml_input():
 B = prep_piml_input()
     
     
-
 # dump data
-data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I]
+data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I,B,wd]
 with open('./datafile/to_ml/ml_%s.pkl'%fname, 'wb') as outfile:
     pickle.dump(data, outfile, pickle.HIGHEST_PROTOCOL)
 
 
-# dump data
-data1=[B]
-with open('./datafile/to_ml/ml_piml_%s.pkl'%fname, 'wb') as outfile:
-    pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
-
-
 #plot
-plotust(coord[:,2],coord[:,1],k,20,'tkedns')    
-       
-
+for j in range(6):
+    plotust(coord[:,2],coord[:,1],y[:,j],20,'dns')    
+    plotust(coord[:,2],coord[:,1],rans_bij[:,j],20,'rans')          
+plotust(coord[:,2],coord[:,1],wd,20,'rans')  
+'''
+for i in range(3):
+    for j in range(3):    
+        plotust(coord[:,2],coord[:,1],grad_u[:,i,j],20,'dns')    
+'''
+ 
+    
+    
+    
 # print time  
 print("--- %s seconds ---" % (time.time() - start_time))
      

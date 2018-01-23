@@ -90,7 +90,7 @@ model.compile(loss=keras.losses.mean_squared_error,
 # train model
 model.fit(train_geometries, train_drag_vectors,
           batch_size=batch_size,
-          epochs=epochs,
+          epochs=epochs, 
           verbose=1,
           validation_data=(test_geometries, test_drag_vectors))
 

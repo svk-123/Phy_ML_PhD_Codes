@@ -102,9 +102,8 @@ T[:,:,4]=Ttmp[:,:,5]
 T[:,:,5]=Ttmp[:,:,8]
 
 #load model
-model_test = load_model('./selected_model/4b/final_duct_L.hdf5') 
-#out=model_test.predict([B,T[:,:,0],T[:,:,1],T[:,:,2],T[:,:,3],T[:,:,4],T[:,:,5]])
-out=model_test.predict([B,T[:,0:4,0],T[:,0:4,1],T[:,0:4,2],T[:,0:4,3],T[:,0:4,4],T[:,0:4,5]])
+model_test = load_model('./selected_model/final_duct_L.hdf5') 
+out=model_test.predict([L,T[:,:,0],T[:,:,1],T[:,:,2],T[:,:,3],T[:,:,4],T[:,:,5]])
 
 # reshape
 out=np.asarray(out)

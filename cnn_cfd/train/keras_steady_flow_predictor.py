@@ -16,10 +16,10 @@ from numpy.linalg import inv
 # numpy and matplot lib
 import numpy as np
 import matplotlib.pyplot as plt
-
+import cPickle as pickle
 # training params
 batch_size = 32
-epochs = 100 # number of times through training set
+epochs = 1 # number of times through training set
 
 # load dataset
 with open('mycnndata.pickle', 'rb') as handle:

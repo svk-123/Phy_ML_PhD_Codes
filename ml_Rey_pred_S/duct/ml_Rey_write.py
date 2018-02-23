@@ -240,7 +240,7 @@ def write_R_ml(t11,t12,t13,t22,t23,t33):
     rzz[0:3481*199]=np.tile(t33,199)'''  
     
     print 'writing..'
-    fp= open("RANS_nonduct_B_k","w+")
+    fp= open("RANS_200h_bDNS","w+")
     
     for i in range(int(istR[0])):
         fp.write("%s"%(data0[i]))

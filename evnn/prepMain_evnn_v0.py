@@ -53,7 +53,7 @@ if(case=='cbfs'):
     path_d='../dns_data/cbfs/Re13700/cbfs_train.dat'    
     
 if(case=='duct'):
-    Re='Re3500'       # only Re 
+    Re='Re2200'       # only Re 
     path_r='../rans_data/duct/duct_%s_full.txt'%Re
 
    
@@ -107,51 +107,13 @@ def prep_piml_input():
 
 B = prep_piml_input()
     
+    
 # dump data
-wd=abs(wd)
 data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I,B,wd]
-
-l1=[]
-l2=[]
-for i in range(len(wd)):
-    if (wd[i]<=0.1):
-        l1.append(i)
-    else:
-        l2.append(i)
-
-x1          = x[l1][:]
-tb1         = tb[l1][:]
-y1          = y[l1][:]
-c1          = coord[l1][:]
-k1          = k[l1][:]
-ep1         = ep[l1][:]
-rans_bij1   = rans_bij[l1][:]
-tkedns1     = tkedns[l1][:]
-I1          = I[l1][:]
-B1          = B[l1][:]
-wd1         = wd[l1][:]
-
-x2          = x[l2][:]
-tb2         = tb[l2][:]
-y2          = y[l2][:]
-c2          = coord[l2][:]
-k2          = k[l2][:]
-ep2         = ep[l2][:]
-rans_bij2   = rans_bij[l2][:]
-tkedns2     = tkedns[l2][:]
-I2          = I[l2][:]
-B2          = B[l2][:]
-wd2         = wd[l2][:]
+with open('./datafile/to_ml/ml_%s.pkl'%fname, 'wb') as outfile:
+    pickle.dump(data, outfile, pickle.HIGHEST_PROTOCOL)
 
 
-data1=[x1,tb1,y1,c1,k1,ep1,rans_bij1,tkedns1,I1,B1,wd1]
-with open('./datafile/to_ml/1_ml_%s.pkl'%fname, 'wb') as outfile:
-    pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
-    
-data2=[x2,tb2,y2,c2,k2,ep2,rans_bij2,tkedns2,I2,B2,wd2]
-with open('./datafile/to_ml/2_ml_%s.pkl'%fname, 'wb') as outfile:
-    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)  
-    
 #plot
 for j in range(6):
     plotust(coord[:,2],coord[:,1],y[:,j],20,'dns')    

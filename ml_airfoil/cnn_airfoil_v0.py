@@ -3,7 +3,11 @@
 """
 Created on Mon May  1 08:09:04 2017
 
+<<<<<<< HEAD
 @author: vinoth 
+=======
+@author: vinoth
+>>>>>>> d71191ea21ec8fb7205ba8a507d0a283384e48f2
 """
 
 import time

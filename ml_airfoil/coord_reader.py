@@ -12,11 +12,35 @@ start_time = time.time()
 # Python 3.5
 import numpy as np
 import matplotlib.pyplot as plt
+<<<<<<< HEAD
 from os import listdir
 from os.path import isfile, join
 import cPickle as pickle
 from skimage import io, viewer,util 
 
+=======
+import pandas
+from os import listdir
+from os.path import isfile, join
+
+import keras
+from keras.models import Sequential, Model
+from keras.layers.core import Dense, Activation
+from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
+from keras.layers import merge, Input, dot
+from sklearn.metrics import mean_squared_error
+import random
+
+from keras.models import model_from_json
+from keras.models import load_model
+from sklearn import preprocessing
+from keras.layers.advanced_activations import LeakyReLU, PReLU
+from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
+from keras.callbacks import TensorBoard
+import cPickle as pickle
+import pandas
+from skimage import io, viewer,util 
+>>>>>>> d71191ea21ec8fb7205ba8a507d0a283384e48f2
 np.set_printoptions(threshold=np.inf)
 
 indir="./naca4digit/coord"
@@ -29,7 +53,11 @@ for i in range(len(fname)):
     tmp_co=np.loadtxt(indir+'/%s'%fname[i],skiprows=1)
     
     #plot
+<<<<<<< HEAD
     figure=plt.figure(figsize=(3,3))
+=======
+    figure=plt.figure(figsize=(5,5))
+>>>>>>> d71191ea21ec8fb7205ba8a507d0a283384e48f2
     plt0, =plt.plot(tmp_co[:,0],tmp_co[:,1],'k',linewidth=1,label='true')
     #plt1, =plt.plot(val_inp[:,4],out,'-or',linewidth=2,label='nn')  
     #plt.legend(fontsize=16)
@@ -83,4 +111,8 @@ with open('data_airfoil.pkl', 'wb') as outfile:
     
     
     
+<<<<<<< HEAD
     
+=======
+    
+>>>>>>> d71191ea21ec8fb7205ba8a507d0a283384e48f2

@@ -157,7 +157,11 @@ val_out=data2[:,5]
 
 my_error=[]    
 #load_model
+<<<<<<< HEAD
 model_test=load_model('./model_cnn/final_cnn.hdf5') 
+=======
+model_test=load_model('./model_cnn/final_tbnn_cnn.hdf5') 
+>>>>>>> d71191ea21ec8fb7205ba8a507d0a283384e48f2
   
 for i in range(21):
     
@@ -172,7 +176,11 @@ for i in range(21):
     val_out=data2[:,5]
     val_inp1=np.asarray(val_inp1)
     val_inp2=np.asarray(val_inp2)
+<<<<<<< HEAD
     val_inp1=np.reshape(val_inp1,(len(val_inp1),216,216,1))    
+=======
+    val_inp1=np.reshape(val_inp1,(len(val_inp1),360,360,1))    
+>>>>>>> d71191ea21ec8fb7205ba8a507d0a283384e48f2
     #test-val
     out=model_test.predict([val_inp1,val_inp2])
     

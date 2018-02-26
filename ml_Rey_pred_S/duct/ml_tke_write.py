@@ -63,19 +63,19 @@ boundary not loaded: may be required?
 '''
 
 # path of Rey file to read
-path='/home/vino/OpenFOAM/run/mycase/zpyPost_gen/rans_data/data_r0/'
+path='/home/vino/OpenFOAM/run/mycase/zpyPost_gen/rans_data/duct/'
 name='Re3500'
 
 def write_tke_ml(tke_slice):
         
     # line no starts with zero in python
     # for 200h duct
-    #bc=['internalField','inlet','mywall','outlet']
-    #nbc=[2085119,3481,141364,3481]
+    bc=['internalField','inlet','mywall','outlet']
+    nbc=[2085119,3481,141364,3481]
     
     # for 100h duct
-    bc=['internalField','inlet','wall','outlet']
-    nbc=[477799,2401,39004,2401]
+    #bc=['internalField','inlet','wall','outlet']
+    #nbc=[477799,2401,39004,2401]
     
     l_bc=np.zeros(len(bc))
     ist=np.zeros(len(bc))
@@ -211,7 +211,7 @@ def write_tke_ml(tke_slice):
                         
     tke= np.zeros((len(z)))
     
-    tke[0:2401*199]=np.tile(tke_slice,199)
+    tke[0:3481*599]=np.tile(tke_slice,599)
     print l_bcR
     print istR
     print iendR

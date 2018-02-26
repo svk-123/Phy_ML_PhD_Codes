@@ -92,10 +92,10 @@ T[:,:,3]=Ttmp[:,:,4]
 T[:,:,4]=Ttmp[:,:,5]
 T[:,:,5]=Ttmp[:,:,8]
 
-
+'''
 #load model
-model_test = load_model('../../tbnn_v1/selected_model/model_duct_B_3999_0.005_0.004.hdf5') 
-outtmp=model_test.predict([B,T[:,:,0],T[:,:,1],T[:,:,2],T[:,:,3],T[:,:,4],T[:,:,5]])
+model_test = load_model('../../tbnn_v1/selected_model/4b/final_duct_B.hdf5') 
+outtmp=model_test.predict([B,T[:,0:4,0],T[:,0:4,1],T[:,0:4,2],T[:,0:4,3],T[:,0:4,4],T[:,0:4,5]])
     
 
 # reshape
@@ -112,8 +112,8 @@ out[:,5]=outtmp[:,4]
 out[:,6]=outtmp[:,2]
 out[:,7]=outtmp[:,4]
 out[:,8]=outtmp[:,5]
-
-
+'''
+'''
 import sys
 sys.path.insert(0, '/home/vino/ml_test/ml_dns/tbnn_v1/')
 
@@ -129,7 +129,7 @@ for i in range(5):
 #tketmp=model_test_tke.predict(Btmp)
 #tketmp=np.asarray(tketmp)
 #k=tketmp[:,0]
-k=tkeD
+#k=tkeD
 
 a11=out[:,0]*2*k
 a12=out[:,1]*2*k
@@ -152,14 +152,14 @@ t13=scipy.ndimage.filters.gaussian_filter(t13,0.1,mode='nearest')
 t22=scipy.ndimage.filters.gaussian_filter(t22,0.1,mode='nearest')
 t23=scipy.ndimage.filters.gaussian_filter(t23,0.1,mode='nearest')
 t33=scipy.ndimage.filters.gaussian_filter(t33,0.1,mode='nearest')
-
-
-from ml_Rey_write import write_R_ml_cyclic
-write_R_ml_cyclic(t11,t12,t13,t22,t23,t33)
+'''
+from ml_Rey_write import write_R_ml_cyclic, write_R_ml
+#write_R_ml_cyclic(t11,t12,t13,t22,t23,t33)
 #write_R_ml(out[:,0],out[:,1],out[:,2],out[:,4],out[:,5],out[:,8])
+write_R_ml(bDtmp[:,0],bDtmp[:,1],bDtmp[:,2],bDtmp[:,4],bDtmp[:,5],bDtmp[:,8])
 
 from ml_tke_write import write_tke_ml
-#write_tke_ml(k)
+write_tke_ml(k)
 
 #plot
 def plot(x,y,z,nc,name):
@@ -183,6 +183,7 @@ def plot(x,y,z,nc,name):
 #import scipy
 #out=scipy.ndimage.filters.gaussian_filter(out,0.1,mode='nearest')
 
+'''
 z=xyz[:,2]
 y=xyz[:,1]
 
@@ -194,7 +195,7 @@ plot(z,y,t23,20,'t23')
 plot(z,y,t33,20,'t33')
   
 plot(z,y,k,20,'k')
-
+'''
 
 
 

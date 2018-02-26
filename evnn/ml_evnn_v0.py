@@ -9,6 +9,7 @@ Created on Mon May  1 08:09:04 2017
 import time
 start_time = time.time()
 
+
 # Python 3.5
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,6 +29,8 @@ from keras.layers.advanced_activations import LeakyReLU, PReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 from keras.callbacks import TensorBoard
 import cPickle as pickle
+#
+
 
 import os, shutil
 folder = './model/'
@@ -57,7 +60,7 @@ bRtmp=[]
 wdtmp=[]
 
 # ref:[x,tb,y,coord,k,ep,rans_bij,tkedns,I,B,wd]
-with open('./datafile/to_ml/ml_duct_Re2200_full.pkl', 'rb') as infile:
+with open('../tbnn_v1/datafile/to_ml/ml_duct_Re2200_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
 Ltmp.extend(result[0])
 Ttmp.extend(result[1])
@@ -66,7 +69,7 @@ Btmp.extend(result[9])
 bRtmp.extend(result[6])
 wdtmp.extend(result[10])
 
-with open('./datafile/to_ml/ml_duct_Re2600_full.pkl', 'rb') as infile:
+with open('../tbnn_v1/datafile/to_ml/ml_duct_Re2600_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
 Ltmp.extend(result[0])
 Ttmp.extend(result[1])
@@ -75,7 +78,7 @@ Btmp.extend(result[9])
 bRtmp.extend(result[6])
 wdtmp.extend(result[10])
 
-with open('./datafile/to_ml/ml_duct_Re2900_full.pkl', 'rb') as infile:
+with open('../tbnn_v1/datafile/to_ml/ml_duct_Re2900_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
 Ltmp.extend(result[0])
 Ttmp.extend(result[1])
@@ -84,7 +87,7 @@ Btmp.extend(result[9])
 bRtmp.extend(result[6])
 wdtmp.extend(result[10])
 
-with open('./datafile/to_ml/ml_duct_Re3500_full.pkl', 'rb') as infile:
+with open('../tbnn_v1/datafile/to_ml/ml_duct_Re3500_full.pkl', 'rb') as infile:
     result = pickle.load(infile)
 Ltmp.extend(result[0])
 Ttmp.extend(result[1])
@@ -155,13 +158,28 @@ bD5=bD[:,4]
 bD6=bD[:,5]
 
 
-T1=T[:,:,0]
+#10 basis
+'''T1=T[:,:,0]
 T2=T[:,:,1]
 T3=T[:,:,2]
 T4=T[:,:,3]
 T5=T[:,:,4]
-T6=T[:,:,5]
+T6=T[:,:,5]'''
 
+#4 basis
+T1=T[:,0:4,0]
+T2=T[:,0:4,1]
+T3=T[:,0:4,2]
+T4=T[:,0:4,3]
+T5=T[:,0:4,4]
+T6=T[:,0:4,5]
+
+S1=T[:,0,0]
+S2=T[:,0,1]
+S3=T[:,0,2]
+S4=T[:,0,3]
+S5=T[:,0,4]
+S6=T[:,0,5]
 
 # ---------ML PART:-----------#
 #shuffle data
@@ -172,13 +190,25 @@ n=10000
 
 ## Training sets
 #xtr0 = L[I][:n]
-xtr0 = L[I][:n]
+xtr0 = B[I][:n]
+
+
 xtr1 = T1[I][:n]
 xtr2 = T2[I][:n]
 xtr3 = T3[I][:n]
 xtr4 = T4[I][:n]
 xtr5 = T5[I][:n]
 xtr6 = T6[I][:n]
+
+
+'''
+xtr1 = S1[I][:n]
+xtr2 = S2[I][:n]
+xtr3 = S3[I][:n]
+xtr4 = S4[I][:n]
+xtr5 = S5[I][:n]
+xtr6 = S6[I][:n]
+'''
 
 ttr1 = bD1[I][:n]
 ttr2 = bD2[I][:n]
@@ -187,9 +217,10 @@ ttr4 = bD4[I][:n]
 ttr5 = bD5[I][:n]
 ttr6 = bD6[I][:n]
 
+
 # Multilayer Perceptron
 # create model
-aa=Input(shape=(5,))
+aa=Input(shape=(47,))
 xx =Dense(30, kernel_initializer='random_normal')(aa)
 xx=LeakyReLU(alpha=.1)(xx)
 xx =Dense(30)(xx)
@@ -206,32 +237,28 @@ xx =Dense(30)(xx)
 xx=LeakyReLU(alpha=.1)(xx)
 xx =Dense(30)(xx)
 xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(30)(xx)
-xx=LeakyReLU(alpha=.1)(xx)
-xx =Dense(30)(xx)
-xx=LeakyReLU(alpha=.1)(xx)
-g =Dense(10, activation='linear')(xx)
+g =Dense(4, activation='linear')(xx)
 
-t1=Input(shape=(10,))
+t1=Input(shape=(4,))
 y1= dot([g,t1], 1)
 
-t2=Input(shape=(10,))
+t2=Input(shape=(4,))
 y2= dot([g, t2], 1)
 
-t3=Input(shape=(10,))
+t3=Input(shape=(4,))
 y3= dot([g, t3], 1)
 
-t4=Input(shape=(10,))
+t4=Input(shape=(4,))
 y4= dot([g, t4], 1)
 
-t5=Input(shape=(10,))
+t5=Input(shape=(4,))
 y5= dot([g, t5], 1)
   
-t6=Input(shape=(10,))
+t6=Input(shape=(4,))
 y6= dot([g, t6], 1)
 
 #model = Model(inputs=a, outputs=g)
-model = Model(inputs=[aa,t2,t3,t4,t5,t6], outputs=[y2,y3,y4,y5,y6])
+model = Model(inputs=[aa,t1,t2,t3,t4,t5,t6], outputs=[y1,y2,y3,y4,y5,y6])
 
 #model = Model(inputs=[aa,t5], outputs=[y5])
 #callbacks
@@ -248,13 +275,13 @@ chkpt_weight= ModelCheckpoint(filepath_weight, monitor='val_loss', verbose=0,\
                                 save_best_only=False, save_weights_only=True, mode='auto', period=200)
 
 # Compile model
-opt = Adam(lr=2.5e-6)
+opt = Adam(lr=2.0e-6)
 
-#model.load_weights("./selected_model/model_weight_duct_L_9999_0.072_0.068.hdf5")
-model.compile(loss= 'mean_squared_error',optimizer= opt,loss_weights=[1,1,1,1,1])
+model.load_weights("./selected_model/model_weight_duct_L_9199_0.055_0.061.hdf5")
+model.compile(loss= 'mean_squared_error',optimizer= opt,loss_weights=[1,1,1,1,1,1])
 
-hist = model.fit([xtr0,xtr2,xtr3,xtr4,xtr5,xtr6], [ttr2,ttr3,ttr4,ttr5,ttr6], validation_split=0.2,\
-                 epochs=50000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=False)
+hist = model.fit([xtr0,xtr1,xtr2,xtr3,xtr4,xtr5,xtr6], [ttr1,ttr2,ttr3,ttr4,ttr5,ttr6], validation_split=0.2,\
+                 epochs=25000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=False)
 
 #hist = model.fit([xtr0,xtr5], [ttr5], validation_split=0.3,\
 #                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)

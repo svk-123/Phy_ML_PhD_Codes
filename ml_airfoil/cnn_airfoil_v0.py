@@ -3,11 +3,6 @@
 """
 Created on Mon May  1 08:09:04 2017
 
-<<<<<<< HEAD
-@author: vinoth 
-=======
-@author: vinoth
->>>>>>> d71191ea21ec8fb7205ba8a507d0a283384e48f2
 """
 
 import time
@@ -19,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from os import listdir
 from os.path import isfile, join
+import sys
 
 import keras
 from keras.models import Sequential, Model
@@ -61,11 +57,12 @@ for the_file in os.listdir(folder):
 """------------------------------------"""
 
 # ref:[data,name]
-with open('data_airfoil.pkl', 'rb') as infile:
+path='./naca4'
+with open(path+'/data_airfoil.pkl', 'rb') as infile:
     result = pickle.load(infile)
 coord=result
 
-indir="./naca4digit/polar_train"
+indir=path+"/polar_train"
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
 name=[]   
@@ -86,37 +83,60 @@ for i in range(len(fname)):
     tmp_data=np.loadtxt(indir+'/%s'%fname[i],skiprows=11)
     data1.append(tmp_data[:,0:3])
 
-d1=[]
-d2=[]
-d3=[]
 
 #split space from name
-for i in range(len(name)):
-    tmp0=name[i].split()
-    tmp1=list(tmp0[0])
-    d1.append(float(tmp1[0]))
-    d2.append(float(tmp1[1]))
-    d3.append(float(tmp1[2]+tmp1[3]))
+geo_digit=False    
+if(geo_digit):
 
-d1=np.asarray(d1)
-d2=np.asarray(d2)
-d3=np.asarray(d3)
+    #need to modify some data[i] if using this
+    d1=[]
+    d2=[]
+    d3=[]
 
-
+    for i in range(len(name)):
+        tmp0=name[i].split()
+        tmp1=list(tmp0[0])
+        d1.append(float(tmp1[0]))
+        d2.append(float(tmp1[1]))
+        d3.append(float(tmp1[2]+tmp1[3]))
     
-#rey_no
-for i in range(len(rey_no)):
-    tmp0=rey_no[i].split()
-    rey_no[i]=float(tmp0[0])
-tmp_name=[]
-for i in range(len(name)):
-    tmp0=np.full(len(data1[i]),rey_no[i])
-    tmp1=np.full(len(data1[i]),d1[i])
-    tmp2=np.full(len(data1[i]),d2[i])
-    tmp3=np.full(len(data1[i]),d3[i])
-    tmp4=np.full(len(data1[i]),name[i])
-    tmp_name.extend(tmp4)
-    data1[i]=np.concatenate((tmp0[:,None],tmp1[:,None],tmp2[:,None],tmp3[:,None],data1[i]),axis=1)
+    d1=np.asarray(d1)
+    d2=np.asarray(d2)
+    d3=np.asarray(d3)
+    
+    
+        
+    #rey_no
+    for i in range(len(rey_no)):
+        tmp0=rey_no[i].split()
+        rey_no[i]=float(tmp0[0])
+    tmp_name=[]
+    for i in range(len(name)):
+        tmp0=np.full(len(data1[i]),rey_no[i])
+        tmp1=np.full(len(data1[i]),d1[i])
+        tmp2=np.full(len(data1[i]),d2[i])
+        tmp3=np.full(len(data1[i]),d3[i])
+        tmp4=np.full(len(data1[i]),name[i])
+        tmp_name.extend(tmp4)
+        data1[i]=np.concatenate((tmp0[:,None],tmp1[:,None],tmp2[:,None],tmp3[:,None],data1[i]),axis=1)
+        #Re, d1, d2, d3 alp, cl, cd
+        
+geo_mat=True
+if(geo_mat):
+    for i in range(len(name)):
+        tmp0=name[i].split()
+        tmp1=list(tmp0[0])
+               
+    #rey_no
+    for i in range(len(rey_no)):
+        tmp0=rey_no[i].split()
+        rey_no[i]=float(tmp0[0])
+    tmp_name=[]
+    for i in range(len(name)):
+        tmp0=np.full(len(data1[i]),rey_no[i])
+        tmp1=np.full(len(data1[i]),name[i])
+        tmp_name.extend(tmp1)
+        data1[i]=np.concatenate((tmp0[:,None],data1[i]),axis=1)
 
 #name for matching with coord
 new_name=[]
@@ -126,13 +146,17 @@ for i in range(len(tmp_name)):
 for i in range(len(new_name)):
     new_name[i]='n'+'%s'%new_name[i][0] 
     
-#Re, d1, d2, d3, alp, cl, cd
+#Re, alp, cl, cd
 data2=[]
 for i in range(len(name)):
     data2.extend(data1[i])
 data2=np.asarray(data2)    
 
 #get coord to each Re, Aoa
+#strip .dat from coord
+for i in range(len(coord[1])):
+    coord[1][i]=coord[1][i].split('.dat',1)[0]
+    
 co_inp=[]
 veri=[]
 for i in range(len(new_name)):
@@ -142,23 +166,34 @@ for i in range(len(new_name)):
             veri.append(coord[1][j])
 co_inp=np.asarray(co_inp)
 
+if (len(new_name)==len(veri)):
+    print 'co append len OK'
+else:
+    print 'co append len NOT OK'
+    for i in range(len(veri)):
+        if(new_name[i] != veri[i]):
+            print 'not equal starts %d'%i
+            sys.exit()
 #input-output
 my_inp1=co_inp
 #Re,AoA
 my_inp2=data2[:,0]
-my_inp2=np.concatenate((my_inp2[:,None],data2[:,4,None]),axis=1)
+my_inp2=np.concatenate((my_inp2[:,None],data2[:,1,None]),axis=1)
 my_inp2[:,0]=my_inp2[:,0]*4
 my_inp2[:,1]=my_inp2[:,1]/10.
-my_out=data2[:,5]
+my_out=data2[:,3]
 
+# print dataset values
+print('my_inp1 shape:', my_inp1.shape)
+print('my_inp2 shape:', my_inp2.shape)
+print('my_out shape:', my_out.shape)
 #CNN-ML
-
 # ---------ML PART:-----------#
 #shuffle data
 N= len(my_inp1)
 I = np.arange(N)
 np.random.shuffle(I)
-n=2000
+n=400
 
 ## Training sets
 #xtr0 = L[I][:n]
@@ -166,13 +201,14 @@ xtr1 = my_inp1[I][:n]
 xtr2 = my_inp2[I][:n]
 ttr1 = my_out[I][:n]
 
-xtr1=np.reshape(xtr1,(len(xtr1),360,360,1))         
+xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))         
 
 # Multilayer Perceptron
 # create model
 # construct model
 
-aa = Input([360,360,1])
+
+aa = Input([216,216,1])
 
 # 2 3x3 convolutions followed by a max pool
 conv1 = Conv2D(8, (4, 4), activation='relu', padding='same')(aa)
@@ -214,18 +250,18 @@ model = Model(inputs=[aa,bb], outputs=[g])
 
 #model = Model(inputs=[aa,t5], outputs=[y5])
 #callbacks
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,patience=10, min_lr=1.0e-8)
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,patience=20, min_lr=1.0e-8)
 
-e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-6, patience=20, verbose=1, mode='auto')
+e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-6, patience=30, verbose=1, mode='auto')
 
-filepath="./model_cnn/model_piml_cnn_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
-filepath_weight="./model_cnn/weight_model_piml_cnn_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
+filepath="./model_cnn/model_af_cnn_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
+filepath_weight="./model_cnn/weight_model_af_cnn_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
 
 chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
-                                save_best_only=False, save_weights_only=False, mode='auto', period=10)
+                                save_best_only=False, save_weights_only=False, mode='auto', period=25)
 
 chkpt_weight= ModelCheckpoint(filepath_weight, monitor='val_loss', verbose=0,\
-                                save_best_only=False, save_weights_only=True, mode='auto', period=10)
+                                save_best_only=False, save_weights_only=True, mode='auto', period=25)
 # Compile model
 opt = Adam(lr=2.5e-4,decay=1e-10)
 
@@ -235,13 +271,13 @@ opt = Adam(lr=2.5e-4,decay=1e-10)
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 hist = model.fit([xtr1,xtr2], [ttr1], validation_split=0.2,\
-                 epochs=1000, batch_size=32,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=False)
+                 epochs=300, batch_size=32,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=False)
 
 #hist = model.fit([xtr0,xtr5], [ttr5], validation_split=0.3,\
 #                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)
 
 #save model
-model.save('./model_cnn/final_tbnn_cnn.hdf5') 
+model.save('./model_cnn/final_af_cnn.hdf5') 
 
 print"\n"
 print("loss = %f to %f"%(np.asarray(hist.history["loss"][:1]),np.asarray(hist.history["loss"][-1:])))

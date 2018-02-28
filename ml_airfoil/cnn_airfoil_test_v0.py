@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from os import listdir
 from os.path import isfile, join
+import sys
 
 import keras
 from keras.models import Sequential, Model
@@ -49,11 +50,11 @@ import os, shutil
 """------------------------------------"""
 
 # ref:[data,name]
-with open('data_airfoil.pkl', 'rb') as infile:
+with open('./naca456/data_airfoil.pkl', 'rb') as infile:
     result = pickle.load(infile)
 coord=result
 
-indir="./naca4digit/polar_val"
+indir="./naca456/polar_val"
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
 name=[]   
@@ -74,40 +75,22 @@ for i in range(len(fname)):
     tmp_data=np.loadtxt(indir+'/%s'%fname[i],skiprows=11)
     data1.append(tmp_data[:,0:3])
 
-d1=[]
-d2=[]
-d3=[]
-
-#split space from name
-for i in range(len(name)):
-    tmp0=name[i].split()
-    tmp1=list(tmp0[0])
-    d1.append(float(tmp1[0]))
-    d2.append(float(tmp1[1]))
-    d3.append(float(tmp1[2]+tmp1[3]))
-
-d1=np.asarray(d1)
-d2=np.asarray(d2)
-d3=np.asarray(d3)
-
-
-    
-#rey_no
-for i in range(len(rey_no)):
-    tmp0=rey_no[i].split()
-    rey_no[i]=float(tmp0[0])
-
-tmp_name=[]
-for i in range(len(name)):
-    tmp0=np.full(len(data1[i]),rey_no[i])
-    tmp1=np.full(len(data1[i]),d1[i])
-    tmp2=np.full(len(data1[i]),d2[i])
-    tmp3=np.full(len(data1[i]),d3[i])
-    tmp4=np.full(len(data1[i]),name[i])
-    tmp_name.append(tmp4) # some mod done here than train
-    data1[i]=np.concatenate((tmp0[:,None],tmp1[:,None],tmp2[:,None],tmp3[:,None],data1[i]),axis=1)
-
-
+geo_mat=True
+if(geo_mat):
+    for i in range(len(name)):
+        tmp0=name[i].split()
+        tmp1=list(tmp0[0])
+               
+    #rey_no
+    for i in range(len(rey_no)):
+        tmp0=rey_no[i].split()
+        rey_no[i]=float(tmp0[0])
+    tmp_name=[]
+    for i in range(len(name)):
+        tmp0=np.full(len(data1[i]),rey_no[i])
+        tmp1=np.full(len(data1[i]),name[i])
+        tmp_name.append(tmp1) # modified for prediction
+        data1[i]=np.concatenate((tmp0[:,None],data1[i]),axis=1)
 
 #name for matching with coord
 # some modi done for val than trainig
@@ -122,6 +105,11 @@ for i in range(len(new_name)):
     for j in range(len(new_name[i])):
         new_name[i][j]='n'+'%s'%new_name[i][j][0] 
 
+#get coord to each Re, Aoa
+#strip .dat from coord
+for i in range(len(coord[1])):
+    coord[1][i]=coord[1][i].split('.dat',1)[0]
+    
 '''  
 #Re, d1, d2, d3, alp, cl, cd
 data2=[]
@@ -135,13 +123,25 @@ co_inp=[]
 veri=[]
 for i in range(len(new_name)):
     tmp_co_inp=[]
+    tmp_veri=[]
     for j in range(len(new_name[i])):
         for k in range(len(coord[1])):
             if (new_name[i][j]==coord[1][k]):
                 tmp_co_inp.append(coord[0][k])
-                veri.append(coord[1][k])
-    co_inp.append(tmp_co_inp)              
+                tmp_veri.append(coord[1][k])
+    co_inp.append(tmp_co_inp)
+    veri.append(tmp_veri)              
 co_inp=np.asarray(co_inp)
+
+for i in range(len(new_name)):
+    if(len(new_name[i])==len(veri[i])):
+            print 'co append len OK'
+    else:
+        print 'co append len NOT OK'
+        for j in range(len(veri[i])):
+            if(new_name[i][j] != veri[i][j]):
+                print 'not equal starts %d-%d'%(i,j)
+                sys.exit()
 
 '''
 #input-output
@@ -157,11 +157,7 @@ val_out=data2[:,5]
 
 my_error=[]    
 #load_model
-<<<<<<< HEAD
-model_test=load_model('./model_cnn/final_cnn.hdf5') 
-=======
-model_test=load_model('./model_cnn/final_tbnn_cnn.hdf5') 
->>>>>>> d71191ea21ec8fb7205ba8a507d0a283384e48f2
+model_test=load_model('./selected_model/naca456_ws/final_af_cnn.hdf5') 
   
 for i in range(21):
     
@@ -170,17 +166,13 @@ for i in range(21):
     
     val_inp1=co_inp[i]
     val_inp2=data2[:,0]
-    val_inp2=np.concatenate((val_inp2[:,None],data2[:,4,None]),axis=1)
+    val_inp2=np.concatenate((val_inp2[:,None],data2[:,1,None]),axis=1)
     val_inp2[:,0]=val_inp2[:,0]*4.0
     val_inp2[:,1]=val_inp2[:,1]/10.0
-    val_out=data2[:,5]
+    val_out=data2[:,2]
     val_inp1=np.asarray(val_inp1)
     val_inp2=np.asarray(val_inp2)
-<<<<<<< HEAD
     val_inp1=np.reshape(val_inp1,(len(val_inp1),216,216,1))    
-=======
-    val_inp1=np.reshape(val_inp1,(len(val_inp1),360,360,1))    
->>>>>>> d71191ea21ec8fb7205ba8a507d0a283384e48f2
     #test-val
     out=model_test.predict([val_inp1,val_inp2])
     
@@ -197,7 +189,7 @@ for i in range(21):
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.01,1.4)    
-    plt.savefig('NACA%sRe=%se6'%(name[i],rey_no[i]), format='png', dpi=100)
+    plt.savefig('./plot_out/NACA%sRe=%se6'%(name[i],rey_no[i]), format='png', dpi=100)
     plt.show() 
     
 

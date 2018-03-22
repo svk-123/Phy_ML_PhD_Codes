@@ -36,7 +36,7 @@ import pandas
 
 from numpy import linalg as LA
        
-indir="./naca4digit/polar_val"
+indir="./naca4/polar_val"
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
 #read polar

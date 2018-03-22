@@ -11,6 +11,8 @@ start_time = time.time()
 
 # Python 3.5
 import numpy as np
+#import matplotlib
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from os import listdir
 from os.path import isfile, join
@@ -41,7 +43,8 @@ from skimage import io, viewer,util
 np.set_printoptions(threshold=np.inf)
 
 
-path='./naca4'
+path='./naca456'
+
 indir=path+"/coord"
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
@@ -53,7 +56,7 @@ for i in range(len(fname)):
     
     #plot
     figure=plt.figure(figsize=(3,3))
-    plt0, =plt.plot(tmp_co[:,0],tmp_co[:,1],'k',linewidth=1,label='true')
+    plt0, =plt.plot(tmp_co[:,0],tmp_co[:,1],'k',linewidth=0.1,label='true')
     #plt1, =plt.plot(val_inp[:,4],out,'-or',linewidth=2,label='nn')  
     #plt.legend(fontsize=16)
     #plt.xlabel('alpha',fontsize=16)
@@ -76,10 +79,12 @@ for i in range(len(fname)):
     #viewer.ImageViewer(img).show()  
     #img=img-1
     #img=abs(img)
-    #viewer.ImageViewer(img).show()    
+    #viewer.ImageViewer(img).show()
+
+
 
 data1=[img_mat,fname]
-with open(path+'/data_airfoil.pkl', 'wb') as outfile:
+with open(path+'/data_airfoil_inverse.pkl', 'wb') as outfile:
     pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
     

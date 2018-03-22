@@ -32,7 +32,7 @@ from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 from keras.callbacks import TensorBoard
 import cPickle as pickle
 
-from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, Dense, Dropout, Flatten
+from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, Dense, Dropout, Flatten,UpSampling2D
 from keras.layers.convolutional import ZeroPadding2D
 from keras import backend as K
 
@@ -57,13 +57,14 @@ for the_file in os.listdir(folder):
 """------------------------------------"""
 
 # ref:[data,name]
-path='./naca4'
+path='./naca456'
 data_file='/data_airfoil_inverse.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
 coord=result
 
+'''
 indir=path+"/polar_train"
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
@@ -185,66 +186,88 @@ my_out=data2[:,2]
 print('my_inp1 shape:', my_inp1.shape)
 print('my_inp2 shape:', my_inp2.shape)
 print('my_out shape:', my_out.shape)
+
 #CNN-ML
 # ---------ML PART:-----------#
 #shuffle data
 N= len(my_inp1)
 I = np.arange(N)
 np.random.shuffle(I)
-n=2000
+n=20
+'''
 
 ## Training sets
-#xtr0 = L[I][:n]
-xtr1 = my_inp1[I][:n]
-xtr2 = my_inp2[I][:n]
-ttr1 = my_out[I][:n]
-
+xtr1 = coord[0]
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))         
+ttr1=xtr1
+# print dataset values
+print('xtr shape:', xtr1.shape)
+print('ttr shape:', ttr1.shape)
 
 # Multilayer Perceptron
 # create model
 # construct model
-
-
 aa = Input([216,216,1])
 
 # 2 3x3 convolutions followed by a max pool
-conv1 = Conv2D(8, (4, 4), activation='relu', padding='same')(aa)
-conv1 = Conv2D(8, (4, 4), activation='relu', padding='same')(conv1)
+conv1 = Conv2D(32, (4, 4), activation='relu', padding='same')(aa)
 pool1 = MaxPooling2D(pool_size=(4, 4))(conv1)
 
-# 2 3x3 convolutions followed by a max pool
-conv2 = Conv2D(16, (3, 3), activation='relu', padding='same')(pool1)
-conv2 = Conv2D(16, (3, 3), activation='relu', padding='same')(conv2)
-pool2 = MaxPooling2D(pool_size=(4, 4))(conv2)
+conv2 = Conv2D(32, (3, 3), activation='relu', padding='same')(pool1)
+pool2 = MaxPooling2D(pool_size=(3, 3))(conv2)
 
 conv3 = Conv2D(16, (3, 3), activation='relu', padding='same')(pool2)
-conv3 = Conv2D(16, (3, 3), activation='relu', padding='same')(conv3)
-pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
+pool3 = MaxPooling2D(pool_size=(3, 3))(conv3)
 
-# flatten the 4D array (batch, height, width, depth) into 
-# a 2D array (batch, n). Perform a fully connected layer
-flat4 = Flatten()(pool3)
+conv4 = Conv2D(16, (3, 3), activation='relu', padding='same')(pool3)
+pool4 = MaxPooling2D(pool_size=(3, 3))(conv4)
 
-#flat5 = Dense(515, activation='relu')(flat4)
-flat5 = Dense(32, activation='relu')(flat4)
-flat5 = Dense(32, activation='relu')(flat5)
-flat5 = Dense(8, activation='relu')(flat5)
+conv5 = Conv2D(16, (2, 2), activation='relu', padding='same')(pool4)
 
-bb=Input(shape=(2,))
-merged = concatenate([flat5,bb]) 
+#De-conv upsampling
+#dpool5 = UpSampling2D((3,3))(conv5)
 
-flat6 = Dense(32, activation='relu')(merged)
-flat6 = Dense(32, activation='relu')(flat6)
-flat6 = Dense(32, activation='relu')(flat6)
-# Dropout at 50% on this layer
-#flat5_dropout = Dropout(0.1)(flat5)
+dconv4 = Conv2D(16, (3, 3), activation='relu', padding='same')(conv5)
+dpool4 = UpSampling2D((3, 3))(dconv4)
 
-# One more layer to a single value (this will be the predicted drag)
-g = Dense(1, activation='linear')(flat6)
+dconv3 = Conv2D(16, (3, 3), activation='relu', padding='same')(dpool4)
+dpool3 = UpSampling2D((3, 3))(dconv3)
+
+dconv2 = Conv2D(32, (3, 3), activation='relu', padding='same')(dpool3)
+dpool2 = UpSampling2D((3, 3))(dconv2)
+
+dconv1 = Conv2D(32, (4, 4), activation='relu', padding='same')(dpool2)
+dpool1 = UpSampling2D((4, 4))(dconv1)
+
+dconv0 = Conv2D(1,(4,4), activation='linear', padding='same')(dpool1)
+
+#print
+print ('aa',K.int_shape(aa))
+print ('conv1',K.int_shape(conv1))
+print ('pool1',K.int_shape(pool1))
+print ('conv2',K.int_shape(conv2))
+print ('pool2',K.int_shape(pool2))
+print ('conv3',K.int_shape(conv3))
+print ('pool3',K.int_shape(pool3))
+print ('conv4',K.int_shape(conv4))
+print ('pool4',K.int_shape(pool4))
+print ('conv5',K.int_shape(conv5))
+#print ('pool5',K.int_shape(pool5))
+
+#print ('dconv5',K.int_shape(dconv5))
+#print ('dpool5',K.int_shape(dpool5))
+print ('dconv4',K.int_shape(dconv4))
+print ('dpool4',K.int_shape(dpool4))
+print ('dconv3',K.int_shape(dconv3))
+print ('dpool3',K.int_shape(dpool3))
+print ('dconv2',K.int_shape(dconv2))
+print ('dpool2',K.int_shape(dpool2))
+print ('dconv1',K.int_shape(dconv1))
+print ('dpool1',K.int_shape(dpool1))
+print ('dconv0',K.int_shape(dconv0))
 
 #model = Model(inputs=a, outputs=g)
-model = Model(inputs=[aa,bb], outputs=[g])
+model = Model(inputs=[aa],outputs=[dconv0])
 
 #model = Model(inputs=[aa,t5], outputs=[y5])
 #callbacks
@@ -252,8 +275,8 @@ reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,
 
 e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-6, patience=30, verbose=1, mode='auto')
 
-filepath="./model_cnn/model_af_cnn_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
-filepath_weight="./model_cnn/weight_model_af_cnn_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
+filepath="./model_cnn/model_enc_cnn_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
+filepath_weight="./model_cnn/weight_model_enc_cnn_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
 
 chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
                                 save_best_only=False, save_weights_only=False, mode='auto', period=25)
@@ -261,21 +284,23 @@ chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
 chkpt_weight= ModelCheckpoint(filepath_weight, monitor='val_loss', verbose=0,\
                                 save_best_only=False, save_weights_only=True, mode='auto', period=25)
 # Compile model
-opt = Adam(lr=2.5e-4,decay=1e-10)
+opt = Adam(lr=2.5e-5,decay=1e-10)
 
 #scaler
-model.load_weights('./selected_model/naca4_cnn_ws/weight_model_af_cnn_100_0.003_0.004.hdf5')
+#model.load_weights('./selected_model/naca4_cnn_ws/weight_model_af_cnn_100_0.003_0.004.hdf5')
 
-model.compile(loss= 'mean_squared_error',optimizer= opt)
+#model.compile(loss= 'mean_squared_error',optimizer= opt)
+model.compile(loss= 'binary_crossentropy',optimizer= opt)
 
-hist = model.fit([xtr1,xtr2], [ttr1], validation_split=0.2,\
-                 epochs=100, batch_size=32,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=False)
+
+hist = model.fit([xtr1], [ttr1], validation_split=0.2,\
+                 epochs=1000, batch_size=32,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=False)
 
 #hist = model.fit([xtr0,xtr5], [ttr5], validation_split=0.3,\
 #                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)
 
 #save model
-model.save('./model_cnn/final_af_cnn.hdf5') 
+model.save('./model_cnn/final_enc_cnn.hdf5') 
 
 print"\n"
 print("loss = %f to %f"%(np.asarray(hist.history["loss"][:1]),np.asarray(hist.history["loss"][-1:])))

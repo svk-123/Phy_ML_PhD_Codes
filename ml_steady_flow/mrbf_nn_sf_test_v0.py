@@ -3,8 +3,6 @@
 """
 Created on Mon May  1 08:09:04 2017
 
-this is test for one layer RBF and NN together.
-
 @author: vinoth
 """
 
@@ -47,7 +45,7 @@ reytmp=[]
 utmp=[]
 vtmp=[]
 
-flist=['Re1000']
+flist=['Re100']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -74,76 +72,47 @@ val_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)
 model_test=load_model('./selected_model/uv_both/final_sf.hdf5') 
 out=model_test.predict([val_inp])    
 
-
-#load rbf centre,weight
-rbf_cw_u='./rbfout/data_cavity_cw200_Re1000_u.pkl'
-rbf_cw_v='./rbfout/data_cavity_cw200_Re1000_v.pkl'
-
-with open(rbf_cw_u,'rb') as infile:
+with open('./rbfcom/centers_1.pkl', 'rb') as infile:
     result1 = pickle.load(infile)
-c1=result1[0]
-w1=result1[1]
-sp=result1[2]
+print('loaded centers')
+c=result1[0]
+
+with open('./rbfout_2/cavity_weight2_pd_w1_200_%s.pkl'%flist[0], 'rb') as infile:
+    result2 = pickle.load(infile)
+print('loaded weight')
+wu=result2[0]
+wv=result2[1]
 
 #prediction
 L=len(val_inp)
-k=len(c1)
+k=len(c)
 d=2
-
+sp=0.2
     
 predu=np.zeros((L))
-def predu_dist():
-    for i in range(L):
-        tmp1=0
-        for j in range(k):
-            tmp2=0
-            for l in range(d):
-                tmp2+=(val_inp[i,l]-c1[j,l])**2
-            tmp2=np.sqrt(tmp2)
-            tmp1+=w1[j]*tmp2
-        predu[i]=tmp1
-
 def predu_mq_c():
     for i in range(L):
         tmp1=0
         for j in range(k):
             tmp2=0
             for l in range(d):
-                tmp2+=(val_inp[i,l]-c1[j,l])**2
+                tmp2+=(val_inp[i,l]-c[j,l])**2
             tmp2=np.sqrt(tmp2+(sp**2))
-            tmp1+=w1[j]*tmp2
+            tmp1+=wu[0,j]*tmp2
         predu[i]=tmp1
 predu_mq_c()
 
-#load rbf centre,weight
-with open(rbf_cw_v,'rb') as infile:
-    result2 = pickle.load(infile)
-c2=result2[0]
-w2=result2[1]
-sp=result2[2]
-
 #prediction
 predv=np.zeros((L))
-def predv_dist():
-    for i in range(L):
-        tmp1=0
-        for j in range(k):
-            tmp2=0
-            for l in range(d):
-                tmp2+=(val_inp[i,l]-c2[j,l])**2
-            tmp2=np.sqrt(tmp2)
-            tmp1+=w2[j]*tmp2
-        predv[i]=tmp1
-        
 def predv_mq_c():
     for i in range(L):
         tmp1=0
         for j in range(k):
             tmp2=0
             for l in range(d):
-                tmp2+=(val_inp[i,l]-c2[j,l])**2
+                tmp2+=(val_inp[i,l]-c[j,l])**2
             tmp2=np.sqrt(tmp2+(sp**2))
-            tmp1+=w2[j]*tmp2
+            tmp1+=wv[0,j]*tmp2
         predv[i]=tmp1  
 predv_mq_c()        
         

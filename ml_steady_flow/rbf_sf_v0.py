@@ -43,7 +43,7 @@ reytmp=[]
 utmp=[]
 vtmp=[]
 #flist=['Re100','Re200','Re300','Re500','Re1000']
-flist=['Re1000']
+flist=['Re500']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -60,13 +60,12 @@ reytmp=np.asarray(reytmp)
 utmp=np.asarray(utmp)
 vtmp=np.asarray(vtmp)
 
-
 # ---------ML PART:-----------#
 #shuffle data
 N= len(utmp)
 I = np.arange(N)
 np.random.shuffle(I)
-n=10000
+n=N
 
 #normalize
 reytmp=reytmp/1000.
@@ -82,18 +81,65 @@ x=xtr0[:,0:2]
 y=ttr1[:,0]
 
 #kmeans
-k=200
+k=500
 L=len(x)
 d=2
 sp=0.2
 
-#kmeans = KMeans(n_clusters=k, random_state=0).fit(x[:,0:2])
-#c=kmeans.cluster_centers_
-with open('./rbfout/centers.pkl', 'rb') as infile:
+def ClusterIndicesNumpy(clustNum, labels_array): #numpy 
+    return np.where(labels_array == clustNum)[0]
+
+def ClusterIndicesComp(clustNum, labels_array): #list comprehension
+    return np.array([i for i, x in enumerate(labels_array) if x == clustNum])
+
+kmeans = KMeans(n_clusters=k, random_state=0).fit(x)
+c=kmeans.cluster_centers_
+
+sd=[]
+for i in range(k):
+    xtmp=x[ClusterIndicesNumpy(i,kmeans.labels_)]
+    sd.append(np.std(xtmp,axis=0))
+sd=np.asarray(sd)
+
+data_rbf=[c,sd]
+with open('./rbfcom/data_cavity_c%s_l1.pkl'%(k), 'wb') as outfile:
+    pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''with open('./rbfout/centers.pkl', 'rb') as infile:
     result = pickle.load(infile)
 print('found centers')
-c=result[0]
-
+c=result[0]'''
+'''
 #rbf fucntion
 P=np.zeros((L,k))
 
@@ -149,8 +195,6 @@ def predu_mq_c():
         
 predu_mq_c()
 
-
-
 plt.plot(y, predu, 'o', label='rbf, c=%s'%k)
 plt.plot([-0.65,1.6],[-0.65,1.6] ,'r')
 plt.xlabel('true',fontsize=16)
@@ -161,7 +205,7 @@ plt.show()
 
 #Re, d1, d2, d3, alp, cl, cd
 data_rbf=[c,w,sp]
-with open('./rbfout/data_cavity_cw%s_%s_u.pkl'%(k,flist[0]), 'wb') as outfile:
+with open('./rbfout_1/data_cavity_cw%s_%s_u.pkl'%(k,flist[0]), 'wb') as outfile:
     pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
 
 
@@ -209,13 +253,13 @@ plt.show()
 
 #Re, d1, d2, d3, alp, cl, cd
 data_rbf=[c,w,sp]
-with open('./rbfout/data_cavity_cw%s_%s_v.pkl'%(k,flist[0]), 'wb') as outfile:
+with open('./rbfout_1/data_cavity_cw%s_%s_v.pkl'%(k,flist[0]), 'wb') as outfile:
     pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
     
     
 print('Prank',Prank)    
 print("--- %s seconds ---" % (time.time() - start_time))
-
+'''
 
 
 

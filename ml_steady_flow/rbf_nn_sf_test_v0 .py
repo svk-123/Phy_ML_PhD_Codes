@@ -38,7 +38,6 @@ import pandas
 
 from scipy import interpolate
 from numpy import linalg as LA
-       
 
 #load data
 xtmp=[]
@@ -47,7 +46,7 @@ reytmp=[]
 utmp=[]
 vtmp=[]
 
-flist=['Re1000']
+flist=['Re1200']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -74,10 +73,9 @@ val_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)
 model_test=load_model('./selected_model/uv_both/final_sf.hdf5') 
 out=model_test.predict([val_inp])    
 
-
 #load rbf centre,weight
-rbf_cw_u='./rbfout/data_cavity_cw200_Re1000_u.pkl'
-rbf_cw_v='./rbfout/data_cavity_cw200_Re1000_v.pkl'
+rbf_cw_u='./rbfout_1/data_cavity_cw500_Re100_u.pkl'
+rbf_cw_v='./rbfout_1/data_cavity_cw500_Re100_v.pkl'
 
 with open(rbf_cw_u,'rb') as infile:
     result1 = pickle.load(infile)
@@ -88,8 +86,7 @@ sp=result1[2]
 #prediction
 L=len(val_inp)
 k=len(c1)
-d=2
-
+d=3
     
 predu=np.zeros((L))
 def predu_dist():

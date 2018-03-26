@@ -36,7 +36,7 @@ import pandas
 
 from scipy import interpolate
 from numpy import linalg as LA
-       
+import math       
 
 #load data
 xtmp=[]
@@ -45,7 +45,7 @@ reytmp=[]
 utmp=[]
 vtmp=[]
 
-flist=['Re100']
+flist=['Re1200']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -77,7 +77,7 @@ with open('./rbfcom/centers_1.pkl', 'rb') as infile:
 print('loaded centers')
 c=result1[0]
 
-with open('./rbfout_2/cavity_weight2_pd_w1_200_%s.pkl'%flist[0], 'rb') as infile:
+with open('./rbfout_2/cavity_w2_pd_ga_w1_200_%s.pkl'%flist[0], 'rb') as infile:
     result2 = pickle.load(infile)
 print('loaded weight')
 wu=result2[0]
@@ -87,7 +87,8 @@ wv=result2[1]
 L=len(val_inp)
 k=len(c)
 d=2
-sp=0.2
+sp=0.
+sig=1.0
     
 predu=np.zeros((L))
 def predu_mq_c():
@@ -100,7 +101,21 @@ def predu_mq_c():
             tmp2=np.sqrt(tmp2+(sp**2))
             tmp1+=wu[0,j]*tmp2
         predu[i]=tmp1
-predu_mq_c()
+        
+def predu_ga():
+    for i in range(L):
+        tmp1=0
+        for j in range(k):
+            tmp2=0
+            for l in range(d):
+                tmp2+=(val_inp[i,l]-c[j,l])**2
+            tmp2=math.exp(-np.sqrt(tmp2+(sp**2))/(2.0*sig))
+            tmp1+=wu[0,j]*tmp2
+        predu[i]=tmp1
+        
+           
+        
+predu_ga()
 
 #prediction
 predv=np.zeros((L))
@@ -114,7 +129,20 @@ def predv_mq_c():
             tmp2=np.sqrt(tmp2+(sp**2))
             tmp1+=wv[0,j]*tmp2
         predv[i]=tmp1  
-predv_mq_c()        
+        
+def predv_ga():
+    for i in range(L):
+        tmp1=0
+        for j in range(k):
+            tmp2=0
+            for l in range(d):
+                tmp2+=(val_inp[i,l]-c[j,l])**2
+            tmp2=math.exp(-np.sqrt(tmp2+(sp**2))/(2.0*sig))
+            tmp1+=wv[0,j]*tmp2
+        predv[i]=tmp1  
+                
+        
+predv_ga()        
         
 #plot
 def line_plot1():

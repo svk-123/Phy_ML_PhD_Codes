@@ -80,18 +80,18 @@ def fit_layer1(mylist):
         
         from mrbf_layers import layer_1
         l1u=layer_1(x,y,c,x.shape[0],c.shape[0],2,sp1)
-        l1u.f_mq()
+        l1u.f_ga()
         l1u.ls_solve()
-        l1u.pred_f_mq()
+        l1u.pred_f_ga()
         predu=l1u.pred
     
         x=my_inp[:,0:2]
         y=my_out[:,1]
     
         l1v=layer_1(x,y,c,x.shape[0],c.shape[0],2,sp1)
-        l1v.f_mq()
+        l1v.f_ga()
         l1v.ls_solve()
-        l1v.pred_f_mq()
+        l1v.pred_f_ga()
         predv=l1v.pred
     
         def plot1(x,y,name):
@@ -109,11 +109,11 @@ def fit_layer1(mylist):
         #pickle 
         data_rbf=[l1u.w,l1v.w]
         #weights for each Re- cavity
-        with open('./rbfout_1/cavity_weight1_w%s_%s.pkl'%(c.shape[0],flist[ii]), 'wb') as outfile:
+        with open('./rbfout_1/cavity_w1_ga_w%s_%s.pkl'%(c.shape[0],flist[ii]), 'wb') as outfile:
             pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
 
 
-#flist=['Re100','Re200','Re300','Re500','Re1000']
+flist=['Re100','Re200','Re300','Re500','Re1000']
 #fit_layer1(flist)
 
  
@@ -129,7 +129,7 @@ def fit_layer2(mylist,myreno):
     for ii in range(len(flist)):
         #wu,wv
         #load data
-        with open('./rbfout_1/cavity_weight1_w200_%s.pkl'%flist[ii], 'rb') as infile:
+        with open('./rbfout_1/cavity_w1_ga_w200_%s.pkl'%flist[ii], 'rb') as infile:
             result = pickle.load(infile)
         wtmp_u.append(result[0])
         wtmp_v.append(result[1])
@@ -140,7 +140,8 @@ def fit_layer2(mylist,myreno):
     reytmp=np.asarray(reytmp)
     
     #normalize
-    wtmp=wtmp_u/10000.
+    nor_par=20.
+    wtmp=wtmp_u/nor_par
     reytmp=reytmp/1000.
     
     my_inp=reytmp
@@ -152,13 +153,13 @@ def fit_layer2(mylist,myreno):
   
     from mrbf_layers import layer_2
     l2u=layer_2(x,y,c,x.shape[0],c.shape[0],1,sp2)
-    l2u.f_mq()
+    l2u.f_ga()
     l2u.ls_solve()
-    l2u.pred_f_mq()
+    l2u.pred_f_ga()
     predu=l2u.pred
     
     #normalize
-    wtmp=wtmp_v/10000.
+    wtmp=wtmp_v/nor_par
     
     my_inp=reytmp
     my_out=wtmp
@@ -167,9 +168,9 @@ def fit_layer2(mylist,myreno):
     y=my_out.copy()
     
     l2v=layer_2(x,y,c,x.shape[0],c.shape[0],1,sp2)
-    l2v.f_mq()
+    l2v.f_ga()
     l2v.ls_solve()
-    l2v.pred_f_mq()
+    l2v.pred_f_ga()
     predv=l2v.pred
     
     def plot2(x,y,name):
@@ -181,17 +182,19 @@ def fit_layer2(mylist,myreno):
         plt.savefig('rbf_u',format='png', dpi=100)
         plt.show()
     
-    plot2(wtmp_u/10000,predu,'rbf-u-%s'%flist[ii])
+    plot2(wtmp_u/nor_par,predu,'rbf-u-%s'%flist[ii])
     plot2(my_out,predv,'rbf-v-%s'%flist[ii])
 
-    data_rbf=[l2u.w*10000,l2v.w*10000]
+    data_rbf=[l2u.w*nor_par,l2v.w*nor_par]
     #weights-2 for apprx. weights-1 as func. of Re.
-    with open('./rbfout_2/cavity_weight2_w%s_%s.pkl'%(predu.shape[0],predu.shape[1]), 'wb') as outfile:
+    with open('./rbfout_2/cavity_w2_ga_w%s_%s.pkl'%(predu.shape[0],predu.shape[1]), 'wb') as outfile:
         pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
-        
-#flist=['Re100','Re200','Re300','Re500','Re1000']
-#reno=[100,200,300,500,1000]
-#fit_layer2(flist,reno)
+    
+    return (wtmp_u,wtmp_v)    
+    
+flist=['Re100','Re200','Re300','Re500','Re1000']
+reno=[100,200,300,500,1000]
+#wtmp_u,wtmp_v=fit_layer2(flist,reno)
 
 
 def pred_layer2(myreno):
@@ -209,18 +212,18 @@ def pred_layer2(myreno):
     from mrbf_layers import layer_2
     l3u=layer_2(x,y,c,1,c.shape[0],1,sp2)
     l3u.load_weight2(0)
-    l3u.pred_f_mq()
+    l3u.pred_f_ga()
     predu=l3u.pred
     
     from mrbf_layers import layer_2
     l3v=layer_2(x,y,c,1,c.shape[0],1,sp2)
     l3v.load_weight2(1)
-    l3v.pred_f_mq()
+    l3v.pred_f_ga()
     predv=l3v.pred
 
     data_rbf=[predu,predv]
     #weights-2 for apprx. weights-1 as func. of Re. - predicted
-    with open('./rbfout_2/cavity_weight2_pd_w%s_%s_Re%s.pkl'%(predu.shape[0],predu.shape[1],myreno), 'wb') as outfile:
+    with open('./rbfout_2/cavity_w2_pd_ga_w%s_%s_Re%s.pkl'%(predu.shape[0],predu.shape[1],myreno), 'wb') as outfile:
         pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
 
     return predu

@@ -42,8 +42,8 @@ ytmp=[]
 reytmp=[]
 utmp=[]
 vtmp=[]
-#flist=['Re100','Re200','Re300','Re500','Re1000']
-flist=['Re500']
+flist=['Re100','Re200','Re300','Re500','Re1000']
+#flist=['Re500']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -81,7 +81,7 @@ x=xtr0[:,0:2]
 y=ttr1[:,0]
 
 #kmeans
-k=500
+k=1000
 L=len(x)
 d=2
 sp=0.2
@@ -95,51 +95,26 @@ def ClusterIndicesComp(clustNum, labels_array): #list comprehension
 kmeans = KMeans(n_clusters=k, random_state=0).fit(x)
 c=kmeans.cluster_centers_
 
-sd=[]
+'''
+sd1=[]
+sdn=[]
 for i in range(k):
     xtmp=x[ClusterIndicesNumpy(i,kmeans.labels_)]
-    sd.append(np.std(xtmp,axis=0))
-sd=np.asarray(sd)
+    sd1.append(np.std(xtmp))
+    sdn.append(np.std(xtmp,axis=0))
+sd1=np.asarray(sd1)
+sdn=np.asarray(sdn)
 
-data_rbf=[c,sd]
+data_rbf=[c,sd1,sdn]
 with open('./rbfcom/data_cavity_c%s_l1.pkl'%(k), 'wb') as outfile:
     pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
+'''
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''with open('./rbfout/centers.pkl', 'rb') as infile:
+with open('./rbfout/centers.pkl', 'rb') as infile:
     result = pickle.load(infile)
 print('found centers')
-c=result[0]'''
-'''
+c=result[0]
+
 #rbf fucntion
 P=np.zeros((L,k))
 
@@ -259,7 +234,7 @@ with open('./rbfout_1/data_cavity_cw%s_%s_v.pkl'%(k,flist[0]), 'wb') as outfile:
     
 print('Prank',Prank)    
 print("--- %s seconds ---" % (time.time() - start_time))
-'''
+
 
 
 

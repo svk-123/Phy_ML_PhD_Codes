@@ -38,6 +38,7 @@ import pandas
 
 from scipy import interpolate
 from numpy import linalg as LA
+import math
 
 #load data
 xtmp=[]
@@ -46,7 +47,7 @@ reytmp=[]
 utmp=[]
 vtmp=[]
 
-flist=['Re1200']
+flist=['Re100']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -73,76 +74,34 @@ val_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)
 model_test=load_model('./selected_model/uv_both/final_sf.hdf5') 
 out=model_test.predict([val_inp])    
 
-#load rbf centre,weight
-rbf_cw_u='./rbfout_1/data_cavity_cw500_Re100_u.pkl'
-rbf_cw_v='./rbfout_1/data_cavity_cw500_Re100_v.pkl'
+#layer-1 centres
+with open('./rbfcom/data_cavity_c200_l1.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+print('found centers')
+c=result[0]
 
-with open(rbf_cw_u,'rb') as infile:
-    result1 = pickle.load(infile)
-c1=result1[0]
-w1=result1[1]
-sp=result1[2]
+d=2
+sp1=0.0
 
-#prediction
-L=len(val_inp)
-k=len(c1)
-d=3
-    
-predu=np.zeros((L))
-def predu_dist():
-    for i in range(L):
-        tmp1=0
-        for j in range(k):
-            tmp2=0
-            for l in range(d):
-                tmp2+=(val_inp[i,l]-c1[j,l])**2
-            tmp2=np.sqrt(tmp2)
-            tmp1+=w1[j]*tmp2
-        predu[i]=tmp1
+#prediction-x
+x=val_inp[:,0:2]
+y=val_out[:,0]
 
-def predu_mq_c():
-    for i in range(L):
-        tmp1=0
-        for j in range(k):
-            tmp2=0
-            for l in range(d):
-                tmp2+=(val_inp[i,l]-c1[j,l])**2
-            tmp2=np.sqrt(tmp2+(sp**2))
-            tmp1+=w1[j]*tmp2
-        predu[i]=tmp1
-predu_mq_c()
+from mrbf_layers import layer_1
+l1u=layer_1(x,y,c,x.shape[0],c.shape[0],2,sp1)
+l1u.load_weight1(0)
+l1u.pred_f_ga()
+predu=l1u.pred
 
-#load rbf centre,weight
-with open(rbf_cw_v,'rb') as infile:
-    result2 = pickle.load(infile)
-c2=result2[0]
-w2=result2[1]
-sp=result2[2]
+#prediction-y
+x=val_inp[:,0:2]
+y=val_out[:,1]
 
-#prediction
-predv=np.zeros((L))
-def predv_dist():
-    for i in range(L):
-        tmp1=0
-        for j in range(k):
-            tmp2=0
-            for l in range(d):
-                tmp2+=(val_inp[i,l]-c2[j,l])**2
-            tmp2=np.sqrt(tmp2)
-            tmp1+=w2[j]*tmp2
-        predv[i]=tmp1
-        
-def predv_mq_c():
-    for i in range(L):
-        tmp1=0
-        for j in range(k):
-            tmp2=0
-            for l in range(d):
-                tmp2+=(val_inp[i,l]-c2[j,l])**2
-            tmp2=np.sqrt(tmp2+(sp**2))
-            tmp1+=w2[j]*tmp2
-        predv[i]=tmp1  
-predv_mq_c()        
+l1v=layer_1(x,y,c,x.shape[0],c.shape[0],2,sp1)
+l1v.load_weight1(1)
+l1v.pred_f_ga()
+predv=l1v.pred
+
         
 #plot
 def line_plot1():

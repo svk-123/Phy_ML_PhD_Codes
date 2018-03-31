@@ -21,15 +21,19 @@ import os, shutil
 
 #rbf commons
 #layer-1 centres
-with open('./rbfcom/centers_1.pkl', 'rb') as infile:
+with open('./rbfcom/data_cavity_c200_l1.pkl', 'rb') as infile:
     result = pickle.load(infile)
 print('found centers')
 c1=result[0]
+sig1=result[1]
+sig1=1.0
 
 #layer-2 centers
 c2=np.asarray([0.1,0.2,0.3,0.5,1.0])
 c2=np.reshape(c2,(5,1))
+sig2=1.0
 
+#for mq-sp1-0.2,sp2-0.4
 sp1=0.2
 sp2=0.4
 
@@ -100,7 +104,7 @@ def fit_layer1(mylist):
             plt.xlabel('true',fontsize=16)
             plt.ylabel('pred',fontsize=16)
             plt.legend(fontsize=16)
-            plt.savefig('%s'%name,format='png', dpi=100)
+            plt.savefig('./plot/%s'%name,format='png', dpi=100)
             plt.show()
     
         plot1(my_out[:,0],predu,'rbf-u-%s'%flist[ii])
@@ -112,12 +116,15 @@ def fit_layer1(mylist):
         with open('./rbfout_1/cavity_w1_ga_w%s_%s.pkl'%(c.shape[0],flist[ii]), 'wb') as outfile:
             pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
 
+        print('l1-res-u',l1u.res)
+        print('l1-res-v',l1v.res)
 
 flist=['Re100','Re200','Re300','Re500','Re1000']
+#flist=['Re100']      
 #fit_layer1(flist)
 
  
-def fit_layer2(mylist,myreno):
+def fit_layer2(mylist,myreno,Lc):
 
     flist=mylist
     reno=myreno
@@ -129,18 +136,18 @@ def fit_layer2(mylist,myreno):
     for ii in range(len(flist)):
         #wu,wv
         #load data
-        with open('./rbfout_1/cavity_w1_ga_w200_%s.pkl'%flist[ii], 'rb') as infile:
+        with open('./rbfout_1/cavity_w1_ga_w%s_%s.pkl'%(Lc,flist[ii]), 'rb') as infile:
             result = pickle.load(infile)
         wtmp_u.append(result[0])
         wtmp_v.append(result[1])
-        reytmp.append(np.full(200,reno[ii]))
+        reytmp.append(np.full(Lc,reno[ii]))
     
     wtmp_u=np.asarray(wtmp_u)
     wtmp_v=np.asarray(wtmp_v)
     reytmp=np.asarray(reytmp)
     
     #normalize
-    nor_par=20.
+    nor_par=max(abs(wtmp_u.max()),abs(wtmp_u.min()),abs(wtmp_v.max()),abs(wtmp_v.min()))
     wtmp=wtmp_u/nor_par
     reytmp=reytmp/1000.
     
@@ -185,23 +192,30 @@ def fit_layer2(mylist,myreno):
     plot2(wtmp_u/nor_par,predu,'rbf-u-%s'%flist[ii])
     plot2(my_out,predv,'rbf-v-%s'%flist[ii])
 
-    data_rbf=[l2u.w*nor_par,l2v.w*nor_par]
+    data_rbf=[l2u.w*nor_par,l2v.w*nor_par,nor_par]
     #weights-2 for apprx. weights-1 as func. of Re.
-    with open('./rbfout_2/cavity_w2_ga_w%s_%s.pkl'%(predu.shape[0],predu.shape[1]), 'wb') as outfile:
+    with open('./rbfout_2/cavity_w2_ga_r%sc%s.pkl'%(predu.shape[0],predu.shape[1]), 'wb') as outfile:
         pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
-    
+        
+    print('l2-res-u',l2u.res)
+    print('l2-res-v',l2v.res)
+        
     return (wtmp_u,wtmp_v)    
     
 flist=['Re100','Re200','Re300','Re500','Re1000']
 reno=[100,200,300,500,1000]
-#wtmp_u,wtmp_v=fit_layer2(flist,reno)
+
+#flist=['Re100']
+#reno=[100]
+
+#wtmp_u,wtmp_v=fit_layer2(flist,reno,200)
 
 
-def pred_layer2(myreno):
+def pred_layer2(myreno,Lc):
   
-    my_out=np.zeros((1,200)) #dummy out for shape initialization
+    my_out=np.zeros((1,Lc)) #dummy out for shape initialization
     
-    my_inp=np.full(200,myreno)
+    my_inp=np.full(Lc,myreno)
     my_inp=np.reshape(my_inp,(1,len(my_inp)))
     my_inp=my_inp/1000.
     
@@ -211,21 +225,21 @@ def pred_layer2(myreno):
   
     from mrbf_layers import layer_2
     l3u=layer_2(x,y,c,1,c.shape[0],1,sp2)
-    l3u.load_weight2(0)
+    l3u.load_weight2('ga',0)
     l3u.pred_f_ga()
     predu=l3u.pred
     
     from mrbf_layers import layer_2
     l3v=layer_2(x,y,c,1,c.shape[0],1,sp2)
-    l3v.load_weight2(1)
+    l3v.load_weight2('ga',1)
     l3v.pred_f_ga()
     predv=l3v.pred
 
     data_rbf=[predu,predv]
     #weights-2 for apprx. weights-1 as func. of Re. - predicted
-    with open('./rbfout_2/cavity_w2_pd_ga_w%s_%s_Re%s.pkl'%(predu.shape[0],predu.shape[1],myreno), 'wb') as outfile:
+    with open('./rbfout_2/cavity_w2_pd_ga_r%sc%s_Re%s.pkl'%(predu.shape[0],predu.shape[1],myreno), 'wb') as outfile:
         pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
 
     return predu
 
-predu=pred_layer2(1200)
+predu=pred_layer2(600,200)

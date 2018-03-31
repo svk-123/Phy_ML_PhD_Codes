@@ -38,7 +38,7 @@ class layer_1(object):
         self.c = c
         self.P = np.zeros((self.Lx,self.Lc))
         self.pred = np.zeros((self.y.shape))
-        self.sig = 1.0
+        self.sig=1.0
         
     def f_mq(self):
         """ multi quadratic"""
@@ -57,8 +57,8 @@ class layer_1(object):
             for j in range(self.Lc):
                 tmp=0
                 for l in range(self.d):
-                    tmp+=(self.x[i,l]-self.c[j,l])**2
-                self.P[i,j]=math.exp(-np.sqrt(tmp+(self.sp**2))/(2.0*self.sig))        
+                    tmp+=((self.x[i,l]-self.c[j,l])**2)
+                self.P[i,j]=math.exp(-np.sqrt(tmp+(self.sp**2)) / (2.0*self.sig**2) )        
         
 
         
@@ -83,15 +83,17 @@ class layer_1(object):
             for j in range(self.Lc):
                 tmp2=0
                 for l in range(self.d):
-                    tmp2+=(self.x[i,l]-self.c[j,l])**2
-                tmp2=math.exp(-np.sqrt(tmp2 + (self.sp**2))/(2.0*self.sig))
+                    tmp2+=((self.x[i,l]-self.c[j,l])**2)
+                tmp2=math.exp(-np.sqrt(tmp2 + (self.sp**2)) / (2.0*self.sig**2) )
                 tmp1+=self.w[j]*tmp2
             self.pred[i]=tmp1
             
-    def load_weight1(self,val):
+    def load_weight1(self,f_name,val):
         """ load weight dueing prediction"""
-        pass
-
+        with open('./rbfout_2/cavity_w2_pd_ga_r1c%s_%s.pkl'%(self.c.shape[0],f_name), 'rb') as infile:
+            result = pickle.load(infile)
+            tmp=result[val]
+            self.w=np.transpose(tmp)[:,0]
 
 class layer_2(object):
 
@@ -133,8 +135,8 @@ class layer_2(object):
             for j in range(self.Lc):
                 tmp=0
                 for l in range(self.d):
-                    tmp+=(self.x[i,l]-self.c[j,l])**2
-                self.P[i,j]=math.exp(-np.sqrt(tmp+(self.sp**2))/(2.0*self.sig))
+                    tmp+=((self.x[i,l]-self.c[j,l])**2)
+                self.P[i,j]=math.exp(-np.sqrt(tmp+(self.sp**2)) / (2.0*self.sig**2) )
 
     def ls_solve(self):
         """ LS solver """
@@ -161,15 +163,76 @@ class layer_2(object):
                 for j in range(self.Lc):
                     tmp2=0
                     for l in range(self.d):
-                        tmp2+=(self.x[i,m]-self.c[j,l])**2
-                    tmp2=math.exp(-np.sqrt(tmp2+(self.sp**2))/(2.0*self.sig))
+                        tmp2+=((self.x[i,m]-self.c[j,l])**2)
+                    tmp2=math.exp(-np.sqrt(tmp2+(self.sp**2)) / (2.0*self.sig**2) )
                     tmp1+=self.w[j,m]*tmp2
                 self.pred[i,m]=tmp1
     
-    def load_weight2(self,val):
+    def load_weight2(self,f_name,val):
         """ load weight 2 during prediction"""
         """ val=1 for u-eight, 2 for v-weigth"""
         
-        with open('./rbfout_2/cavity_w2_ga_w5_200.pkl', 'rb') as infile:
+        with open('./rbfout_2/cavity_w2_%s_r5c%s.pkl'%(f_name,self.y.shape[1]), 'rb') as infile:
             result = pickle.load(infile)
             self.w=result[val]
+            
+            
+class lagrange_layer_2(object):
+
+    """Implementation of Layer-2
+    
+    This layer approximates the first layer weight with given input.
+    For cavity case, first layer weights are approximated as a func. of Re.
+            
+    """
+        
+    def __init__(self, x,y,c,Lx,Lc,d,sp):
+        self.Lx = Lx
+        self.Lc = Lc
+        self.d  = d
+        self.sp = sp
+        self.x = x
+        self.y = y
+        self.c = c
+        self.P = np.zeros((self.Lx,self.c.shape[0]))
+        self.pred = np.zeros((self.y.shape[0],self.y.shape[1]))
+        self.sig = 1.0
+
+
+    def f_lagrange(self):
+        """ multi quadratic"""
+        """f=( (x-xc)^2 + c^2 )^1/2"""
+        for i in range(self.Lx):
+            for j in range(self.Lc):
+                tmp=0
+                for l in range(self.d):
+                    tmp+=(self.x[i,l]-self.c[j,l])**2
+                self.P[i,j]=np.sqrt(tmp+(self.sp**2))
+
+
+
+    def ls_solve(self):
+        """ LS solver """
+        self.w,self.res,self.Prank,_=np.linalg.lstsq(self.P,self.y,rcond=None)
+
+
+    def pred_f_lagrange(self):
+        for i in range(self.Lx):
+            for m in range(self.y.shape[1]):
+                tmp1=0
+                for j in range(self.Lc):
+                    tmp2=0
+                    for l in range(self.d):
+                        tmp2+=(self.x[i,m]-self.c[j,l])**2
+                    tmp2=np.sqrt(tmp2+(self.sp**2))
+                    tmp1+=self.w[j,m]*tmp2
+                self.pred[i,m]=tmp1
+
+    
+    def load_weight2(self,f_name,val):
+        """ load weight 2 during prediction"""
+        """ val=1 for u-eight, 2 for v-weigth"""
+        
+        with open('./rbfout_2/cavity_w2_%s_r5c%s.pkl'%(f_name,self.y.shape[1]), 'rb') as infile:
+            result = pickle.load(infile)
+            self.w=result[val]            

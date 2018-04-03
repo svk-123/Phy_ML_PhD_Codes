@@ -42,7 +42,7 @@ ytmp=[]
 reytmp=[]
 utmp=[]
 vtmp=[]
-flist=['Re100','Re200','Re300','Re500','Re1000']
+flist=['Re1000','Re2000','Re3000','Re5000','Re7000','Re8000','Re9000']
 #flist=['Re500']
 for ii in range(len(flist)):
     #x,y,Re,u,v
@@ -68,7 +68,7 @@ np.random.shuffle(I)
 n=N
 
 #normalize
-reytmp=reytmp/1000.
+reytmp=reytmp/10000.
 
 my_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
 my_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)
@@ -95,7 +95,7 @@ def ClusterIndicesComp(clustNum, labels_array): #list comprehension
 kmeans = KMeans(n_clusters=k, random_state=0).fit(x)
 c=kmeans.cluster_centers_
 
-'''
+
 sd1=[]
 sdn=[]
 for i in range(k):
@@ -105,11 +105,14 @@ for i in range(k):
 sd1=np.asarray(sd1)
 sdn=np.asarray(sdn)
 
-data_rbf=[c,sd1,sdn]
-with open('./rbfcom/data_cavity_c%s_l1.pkl'%(k), 'wb') as outfile:
+name=['1-centre','2-std_dev_1','3_std_dev_n']
+data_rbf=[c,sd1,sdn,name]
+with open('./rbfcom/data_cavity_re1k-10k_c%s_l1.pkl'%(k), 'wb') as outfile:
     pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
-'''
 
+
+
+'''
 with open('./rbfout/centers.pkl', 'rb') as infile:
     result = pickle.load(infile)
 print('found centers')
@@ -234,7 +237,7 @@ with open('./rbfout_1/data_cavity_cw%s_%s_v.pkl'%(k,flist[0]), 'wb') as outfile:
     
 print('Prank',Prank)    
 print("--- %s seconds ---" % (time.time() - start_time))
-
+'''
 
 
 

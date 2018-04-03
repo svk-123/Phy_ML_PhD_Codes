@@ -50,7 +50,7 @@ ytmp=[]
 reytmp=[]
 utmp=[]
 vtmp=[]
-flist=['Re100','Re200','Re300','Re500','Re1000']
+flist=['Re1000','Re2000','Re3000','Re4000','Re5000','Re7000','Re8000','Re9000']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -73,10 +73,10 @@ vtmp=np.asarray(vtmp)
 N= len(utmp)
 I = np.arange(N)
 np.random.shuffle(I)
-n=20000
+n=70000
 
 #normalize
-reytmp=reytmp/1000.
+reytmp=reytmp/10000.
 
 my_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
 my_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)
@@ -101,7 +101,7 @@ g =Dense(2, activation='linear')(xx)
 #model = Model(inputs=a, outputs=g)
 model = Model(inputs=[aa], outputs=[g])
 #callbacks
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1, mode='min',verbose=1 ,patience=300, min_lr=1.0e-8)
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2, mode='min',verbose=1 ,patience=300, min_lr=1.0e-8)
 
 e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-8, patience=500, verbose=1, mode='auto')
 
@@ -111,12 +111,12 @@ chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
                                 save_best_only=False, save_weights_only=False, mode='auto', period=500)
 
 # Compile model
-opt = Adam(lr=2.5e-4,decay=1.0e-12)
+opt = Adam(lr=2.5e-5,decay=1.0e-12)
 
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 hist = model.fit([xtr0], [ttr1], validation_split=0.1,\
-                 epochs=25000, batch_size=16,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
+                 epochs=50000, batch_size=256,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
 
 #save model
 model.save('./model/final_sf.hdf5') 

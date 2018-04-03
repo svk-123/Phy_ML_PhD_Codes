@@ -21,7 +21,7 @@ import os, shutil
 
 #rbf commons
 #layer-1 centres
-with open('./rbfcom/data_cavity_c200_l1.pkl', 'rb') as infile:
+with open('./rbfcom/data_cavity_re1k-10k_c500_l1.pkl', 'rb') as infile:
     result = pickle.load(infile)
 print('found centers')
 c1=result[0]
@@ -29,13 +29,14 @@ sig1=result[1]
 sig1=1.0
 
 #layer-2 centers
-c2=np.asarray([0.1,0.2,0.3,0.5,1.0])
-c2=np.reshape(c2,(5,1))
+c2=np.asarray([0.1,0.2,0.3,0.4,0.5,0.7,0.8,0.9])
+c2=np.reshape(c2,(8,1))
 sig2=1.0
 
 #for mq-sp1-0.2,sp2-0.4
 sp1=0.2
 sp2=0.4
+rey_nor=10000.
 
 def fit_layer1(mylist):
     
@@ -72,7 +73,7 @@ def fit_layer1(mylist):
         n=10000
         
         #normalize
-        reytmp=reytmp/1000.
+        reytmp=reytmp/rey_nor
         
         my_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
         my_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)
@@ -119,8 +120,8 @@ def fit_layer1(mylist):
         print('l1-res-u',l1u.res)
         print('l1-res-v',l1v.res)
 
-flist=['Re100','Re200','Re300','Re500','Re1000']
-#flist=['Re100']      
+#flist=['Re1000','Re2000','Re3000','Re5000','Re7000','Re8000','Re9000']
+#flist=['Re4000']      
 #fit_layer1(flist)
 
  
@@ -149,7 +150,7 @@ def fit_layer2(mylist,myreno,Lc):
     #normalize
     nor_par=max(abs(wtmp_u.max()),abs(wtmp_u.min()),abs(wtmp_v.max()),abs(wtmp_v.min()))
     wtmp=wtmp_u/nor_par
-    reytmp=reytmp/1000.
+    reytmp=reytmp/rey_nor
     
     my_inp=reytmp
     my_out=wtmp
@@ -180,12 +181,14 @@ def fit_layer2(mylist,myreno,Lc):
     l2v.pred_f_ga()
     predv=l2v.pred
     
+       
     def plot2(x,y,name):
-        plt.plot(x,y, 'o', label='')
+        plt.plot(x,y, 'ob', label='')
         plt.plot([-0.65,1.6],[-0.65,1.6] ,'r')
         plt.xlabel('true',fontsize=16)
         plt.ylabel('pred',fontsize=16)
         plt.legend(fontsize=16)
+        plt.title('rbf')
         plt.savefig('rbf_u',format='png', dpi=100)
         plt.show()
     
@@ -200,15 +203,15 @@ def fit_layer2(mylist,myreno,Lc):
     print('l2-res-u',l2u.res)
     print('l2-res-v',l2v.res)
         
-    return (wtmp_u,wtmp_v)    
+    return (predu)    
     
-flist=['Re100','Re200','Re300','Re500','Re1000']
-reno=[100,200,300,500,1000]
+flist=['Re1000','Re2000','Re3000','Re4000','Re5000','Re7000','Re8000','Re9000']
+reno=[1000,2000,3000,4000,5000,7000,8000,9000]
 
 #flist=['Re100']
 #reno=[100]
 
-#wtmp_u,wtmp_v=fit_layer2(flist,reno,200)
+fit_layer2(flist,reno,1000)
 
 
 def pred_layer2(myreno,Lc):
@@ -217,7 +220,7 @@ def pred_layer2(myreno,Lc):
     
     my_inp=np.full(Lc,myreno)
     my_inp=np.reshape(my_inp,(1,len(my_inp)))
-    my_inp=my_inp/1000.
+    my_inp=my_inp/rey_nor
     
     x=my_inp
     y=my_out.copy()
@@ -242,4 +245,9 @@ def pred_layer2(myreno,Lc):
 
     return predu
 
-predu=pred_layer2(600,200)
+k=1000
+pred_layer2(1000,k)
+pred_layer2(5000,k)
+pred_layer2(6000,k)
+pred_layer2(8000,k)
+pred_layer2(10000,k)

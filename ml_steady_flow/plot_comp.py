@@ -176,7 +176,7 @@ line_plot2()
 '''
 
 
-
+'''
 flist=['Re800']
 Lc=200
 
@@ -234,15 +234,64 @@ def line_plot2():
     plt.savefig('./plot/%s-v_com_sp2'%(flist[0]), format='png', dpi=100)
     plt.show() 
 
+line_plot1()
+line_plot2()
+'''
 
+
+flist=['Re1200']
+Lc=200
+
+#u-t,u-rbf,v-t,v-rbf
+with open('./plot/cavity_la_sp1_0.2_sp2_0.4_c200_%s.pkl'%flist[0], 'rb') as infile:
+    r1 = pickle.load(infile)
+ 
+with open('./plot/cavity_ga_sp1_0.2_sp2_0.4_c7-200_%s.pkl'%flist[0], 'rb') as infile:
+    r2 = pickle.load(infile)
+    
+
+def line_plot1():
+    plt.figure(figsize=(5, 5), dpi=100)
+    plt0, =plt.plot(r1[0],r1[1],'-ob',linewidth=2,label='true')
+    
+    plt0, =plt.plot(r1[2],r1[3],'g',linewidth=2,label='lagrange')    
+    plt0, =plt.plot(r2[2],r2[3],'r',linewidth=2,label='rbf') 
+
+    
+    plt.legend(fontsize=16)
+    plt.xlabel('u',fontsize=16)
+    plt.ylabel('y',fontsize=16)
+    plt.title('%s-u'%(flist[ii]),fontsize=16)
+    #plt.legend(loc='right center', bbox_to_anchor=(0.4, 1.0), ncol=1, fancybox=False, shadow=False)
+    plt.legend()
+    #plt.xlim(-0.4,0.9)
+    #plt.ylim(-0.05,1.4)    
+    plt.savefig('./plot/%s-u_com_sp2'%(flist[0]), format='png', dpi=100)
+    plt.show() 
+    
+def line_plot2():
+    plt.figure(figsize=(5, 5), dpi=100)
+    plt0, =plt.plot(r1[4],r1[5],'-ob',linewidth=2,label='true')
+    
+    plt0, =plt.plot(r1[6],r1[7],'g',linewidth=2,label='lagrange')    
+    plt0, =plt.plot(r2[6],r2[7],'r',linewidth=2,label='rbf') 
+ 
+    
+    
+    
+    #plt.legend(fontsize=16)
+    plt.xlabel('x ',fontsize=16)
+    plt.ylabel('v' ,fontsize=16)
+    plt.title('%s-v'%(flist[ii]),fontsize=16)
+    #plt.legend(loc='left center', bbox_to_anchor=(0.5, 1.0), ncol=1, fancybox=False, shadow=False)
+    plt.legend()
+    #plt.xlim(-0.05,1.1)
+    #plt.ylim(-0.6,0.6)    
+    plt.savefig('./plot/%s-v_com_sp2'%(flist[0]), format='png', dpi=100)
+    plt.show() 
 
 line_plot1()
 line_plot2()
-
-
-
-
-
 
 
 

@@ -45,7 +45,7 @@ reytmp=[]
 utmp=[]
 vtmp=[]
 
-flist=['Re1500']
+flist=['Re10000']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -63,12 +63,12 @@ utmp=np.asarray(utmp)
 vtmp=np.asarray(vtmp)    
 
 #normalize
-reytmp=reytmp/1000.
+reytmp=reytmp/10000.
 val_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
 val_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)    
 
 #load_model
-model_test=load_model('./selected_model/model_sf_1500_0.000014_0.000022.hdf5') 
+model_test=load_model('./selected_model/Re1000-10000/final_sf.hdf5') 
 out=model_test.predict([val_inp])    
   
 #plot

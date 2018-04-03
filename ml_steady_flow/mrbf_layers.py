@@ -88,9 +88,9 @@ class layer_1(object):
                 tmp1+=self.w[j]*tmp2
             self.pred[i]=tmp1
             
-    def load_weight1(self,f_name,val):
+    def load_weight1(self,name,f_name,val):
         """ load weight dueing prediction"""
-        with open('./rbfout_2/cavity_w2_pd_ga_r1c%s_%s.pkl'%(self.c.shape[0],f_name), 'rb') as infile:
+        with open('./rbfout_2/cavity_w2_pd_%s_r1c%s_%s.pkl'%(name,self.c.shape[0],f_name), 'rb') as infile:
             result = pickle.load(infile)
             tmp=result[val]
             self.w=np.transpose(tmp)[:,0]
@@ -172,10 +172,13 @@ class layer_2(object):
         """ load weight 2 during prediction"""
         """ val=1 for u-eight, 2 for v-weigth"""
         
-        with open('./rbfout_2/cavity_w2_%s_r5c%s.pkl'%(f_name,self.y.shape[1]), 'rb') as infile:
+        with open('./rbfout_2/cavity_w2_%s_r8c%s.pkl'%(f_name,self.y.shape[1]), 'rb') as infile:
             result = pickle.load(infile)
             self.w=result[val]
             
+
+
+
             
 class lagrange_layer_2(object):
 
@@ -204,10 +207,16 @@ class lagrange_layer_2(object):
         """f=( (x-xc)^2 + c^2 )^1/2"""
         for i in range(self.Lx):
             for j in range(self.Lc):
-                tmp=0
+                tmp1=1.
+                tmp2=1.
                 for l in range(self.d):
-                    tmp+=(self.x[i,l]-self.c[j,l])**2
-                self.P[i,j]=np.sqrt(tmp+(self.sp**2))
+                    tmp1*=(self.x[i,l]-self.c[j,l])
+                    for k in range(self.Lc):    
+                        if(self.c[j,l] != self.c[k,l]):
+                            tmp2*=(self.c[j,l]-self.c[k,l])
+                    if(tmp2==0):
+                        print 'tmp2 0'
+                self.P[i,j]=tmp1/tmp2
 
 
 
@@ -221,11 +230,15 @@ class lagrange_layer_2(object):
             for m in range(self.y.shape[1]):
                 tmp1=0
                 for j in range(self.Lc):
-                    tmp2=0
+                    tmp21=1.
+                    tmp22=1.
                     for l in range(self.d):
-                        tmp2+=(self.x[i,m]-self.c[j,l])**2
-                    tmp2=np.sqrt(tmp2+(self.sp**2))
-                    tmp1+=self.w[j,m]*tmp2
+                        tmp21*=(self.x[i,m]-self.c[j,l])
+                        for k in range(self.Lc):
+                            if(self.c[j,l] != self.c[k,l]):
+                                tmp22*=(self.c[j,l]-self.c[k,l])                      
+                    tmp21=tmp21/tmp22
+                    tmp1+=self.w[j,m]*tmp21
                 self.pred[i,m]=tmp1
 
     

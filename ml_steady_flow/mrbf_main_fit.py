@@ -77,7 +77,6 @@ def fit_layer1(mylist):
         
         my_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
         my_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)
-
         
         x=my_inp[:,0:2]
         y=my_out[:,0]

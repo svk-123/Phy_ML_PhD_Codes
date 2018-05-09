@@ -50,6 +50,7 @@ ytmp=[]
 reytmp=[]
 utmp=[]
 vtmp=[]
+ptmp=[]
 flist=['Re1000','Re2000','Re3000','Re4000','Re5000','Re7000','Re8000','Re9000']
 for ii in range(len(flist)):
     #x,y,Re,u,v
@@ -60,13 +61,14 @@ for ii in range(len(flist)):
     reytmp.extend(result[2])
     utmp.extend(result[3])
     vtmp.extend(result[4])
+    ptmp.extend(result[5])   
     
 xtmp=np.asarray(xtmp)
 ytmp=np.asarray(ytmp)
 reytmp=np.asarray(reytmp)
 utmp=np.asarray(utmp)
 vtmp=np.asarray(vtmp)
-
+ptmp=np.asarray(ptmp) 
 
 # ---------ML PART:-----------#
 #shuffle data
@@ -79,7 +81,7 @@ n=70000
 reytmp=reytmp/10000.
 
 my_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
-my_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)
+my_out=np.concatenate((utmp[:,None],vtmp[:,None],ptmp[:,None]),axis=1)
 
 
 ## Training sets
@@ -96,7 +98,8 @@ xx =Dense(30, activation='relu')(xx)
 xx =Dense(30, activation='relu')(xx)
 xx =Dense(30, activation='relu')(xx)
 xx =Dense(30, activation='relu')(xx)
-g =Dense(2, activation='linear')(xx)
+xx =Dense(30, activation='relu')(xx)
+g =Dense(3, activation='linear')(xx)
 
 #model = Model(inputs=a, outputs=g)
 model = Model(inputs=[aa], outputs=[g])
@@ -116,7 +119,7 @@ opt = Adam(lr=2.5e-5,decay=1.0e-12)
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 hist = model.fit([xtr0], [ttr1], validation_split=0.1,\
-                 epochs=50000, batch_size=256,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
+                 epochs=5000, batch_size=256,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
 
 #save model
 model.save('./model/final_sf.hdf5') 

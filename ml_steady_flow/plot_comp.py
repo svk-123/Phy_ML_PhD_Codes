@@ -239,24 +239,30 @@ line_plot2()
 '''
 
 
-flist=['Re1200']
+flist=['Re10000']
 Lc=200
 
 #u-t,u-rbf,v-t,v-rbf
-with open('./plot/cavity_la_sp1_0.2_sp2_0.4_c200_%s.pkl'%flist[0], 'rb') as infile:
+with open('./plot/cavity_ga_sp1_0.2_sp2_0.4_c200_%s.pkl'%flist[0], 'rb') as infile:
     r1 = pickle.load(infile)
  
-with open('./plot/cavity_ga_sp1_0.2_sp2_0.4_c7-200_%s.pkl'%flist[0], 'rb') as infile:
+with open('./plot/cavity_ga_sp1_0.2_sp2_0.4_c500_%s.pkl'%flist[0], 'rb') as infile:
     r2 = pickle.load(infile)
     
+with open('./plot/cavity_ga_sp1_0.2_sp2_0.4_c1000_%s.pkl'%flist[0], 'rb') as infile:
+    r3 = pickle.load(infile)
 
+with open('./plot/cavity_nn_%s.pkl'%flist[0], 'rb') as infile:
+    r4 = pickle.load(infile)
+    
 def line_plot1():
     plt.figure(figsize=(5, 5), dpi=100)
-    plt0, =plt.plot(r1[0],r1[1],'-ob',linewidth=2,label='true')
+    plt0, =plt.plot(r1[0],r1[1],'-ok',linewidth=2,label='true')
     
-    plt0, =plt.plot(r1[2],r1[3],'g',linewidth=2,label='lagrange')    
-    plt0, =plt.plot(r2[2],r2[3],'r',linewidth=2,label='rbf') 
-
+    plt0, =plt.plot(r1[2],r1[3],'g',linewidth=2,label='rbf-c200')    
+    plt0, =plt.plot(r2[2],r2[3],'b',linewidth=2,label='rbf-c500') 
+    plt0, =plt.plot(r3[2],r3[3],'c',linewidth=2,label='rbf-c1000') 
+    plt0, =plt.plot(r4[2],r4[3],'r',linewidth=2,label='nn') 
     
     plt.legend(fontsize=16)
     plt.xlabel('u',fontsize=16)
@@ -271,10 +277,12 @@ def line_plot1():
     
 def line_plot2():
     plt.figure(figsize=(5, 5), dpi=100)
-    plt0, =plt.plot(r1[4],r1[5],'-ob',linewidth=2,label='true')
+    plt0, =plt.plot(r1[4],r1[5],'-ok',linewidth=2,label='true')
     
-    plt0, =plt.plot(r1[6],r1[7],'g',linewidth=2,label='lagrange')    
-    plt0, =plt.plot(r2[6],r2[7],'r',linewidth=2,label='rbf') 
+    plt0, =plt.plot(r1[6],r1[7],'g',linewidth=2,label='rbf-c200')    
+    plt0, =plt.plot(r2[6],r2[7],'b',linewidth=2,label='rbf-c500') 
+    plt0, =plt.plot(r3[6],r3[7],'c',linewidth=2,label='rbf-c1000') 
+    plt0, =plt.plot(r4[6],r4[7],'r',linewidth=2,label='nn') 
  
     
     

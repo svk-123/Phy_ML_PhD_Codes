@@ -24,6 +24,7 @@ from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
 from keras.layers import merge, Input, dot
 from sklearn.metrics import mean_squared_error
 import random
+from keras import backend as K
 
 from keras.models import model_from_json
 from keras.models import load_model
@@ -37,7 +38,7 @@ import pandas
 from scipy import interpolate
 from numpy import linalg as LA
 
-from rbflayer import RBFLayer, InitCentersRandom       
+from rbflayer import RBFLayer, InitCentersRandom, InitCentersKmeans
 
 #load data
 xtmp=[]
@@ -46,7 +47,7 @@ reytmp=[]
 utmp=[]
 vtmp=[]
 
-flist=['Re600']
+flist=['Re1000']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -76,32 +77,24 @@ ttr1 = val_out
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(3,))
-xx=RBFLayer(200, initializer=InitCentersRandom(xtr0), betas=2.0, input_shape=(3,))(aa)
+x1=RBFLayer(50, initializer=InitCentersKmeans(xtr0), betas=0.3, input_shape=(3,))(aa)
+get_x1 = K.function(inputs=[aa], outputs=[x1])
 
-#xx=RBFLayer(10)(xx)
-
-'''xx =Dense(30,  kernel_initializer='random_normal', activation='relu')(aa)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)'''
-
-g =Dense(2, activation='linear')(xx)
+x2=RBFLayer(50, initializer=InitCentersKmeans(get_x1([xtr0])[0]),betas=0.3)(x1)
+g =Dense(2, activation='linear')(x2)
 
 #model = Model(inputs=a, outputs=g)
 model = Model(inputs=[aa], outputs=[g])
 #load_model
 #model_test=load_model('./selected_model/model_sf_500_0.003811_0.003768.hdf5') 
-model_test=model.load_weights('./model/final_sf.hdf5')
+model_test=model.load_weights('./model/model_sf_2200_0.017186_0.016593.hdf5')
 out=model.predict([val_inp])    
-  
+#out=np.concatenate((out,out),axis=1)  
 #plot
 def line_plot1():
     plt.figure(figsize=(8, 5), dpi=100)
     plt0, =plt.plot(u1a,ya,'-og',linewidth=2,label='true')
-    plt0, =plt.plot(u2a,ya,'r',linewidth=2,label='nn')
+    plt0, =plt.plot(u2a,ya,'r',linewidth=2,label='rbf')
     plt.legend(fontsize=16)
     plt.xlabel('u',fontsize=16)
     plt.ylabel('y',fontsize=16)
@@ -115,7 +108,7 @@ def line_plot1():
 def line_plot2():
     plt.figure(figsize=(8, 5), dpi=100)
     plt0, =plt.plot(xb,v1a,'-og',linewidth=2,label='true')
-    plt0, =plt.plot(xb,v2a,'r',linewidth=2,label='nn')    
+    plt0, =plt.plot(xb,v2a,'r',linewidth=2,label='rbf')    
     plt.legend(fontsize=16)
     plt.xlabel('x ',fontsize=16)
     plt.ylabel('v' ,fontsize=16)
@@ -145,11 +138,11 @@ def plot(xp,yp,zp,nc,name):
     plt.show()
           
 plot(xtmp,ytmp,val_out[:,0],20,'u-cfd')
-plot(xtmp,ytmp,out[:,0],20,'u-nn')
+plot(xtmp,ytmp,out[:,0],20,'u-rbf')
 plot(xtmp,ytmp,abs(out[:,0]-val_out[:,0]),20,'u-error')
     
 plot(xtmp,ytmp,val_out[:,1],20,'v-cfd')
-plot(xtmp,ytmp,out[:,1],20,'v-nn')
+plot(xtmp,ytmp,out[:,1],20,'v-rbf')
 plot(xtmp,ytmp,abs(out[:,1]-val_out[:,1]),20,'v-error')
 
 

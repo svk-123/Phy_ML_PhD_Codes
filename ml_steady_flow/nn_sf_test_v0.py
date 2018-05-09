@@ -44,6 +44,7 @@ ytmp=[]
 reytmp=[]
 utmp=[]
 vtmp=[]
+ptmp=[]
 
 flist=['Re10000']
 for ii in range(len(flist)):
@@ -55,17 +56,19 @@ for ii in range(len(flist)):
     reytmp.extend(result[2])
     utmp.extend(result[3])
     vtmp.extend(result[4])
+    ptmp.extend(result[5])    
     
 xtmp=np.asarray(xtmp)
 ytmp=np.asarray(ytmp)
 reytmp=np.asarray(reytmp)
 utmp=np.asarray(utmp)
 vtmp=np.asarray(vtmp)    
+ptmp=np.asarray(ptmp) 
 
 #normalize
 reytmp=reytmp/10000.
 val_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
-val_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)    
+val_out=np.concatenate((utmp[:,None],vtmp[:,None],ptmp[:,None]),axis=1)    
 
 #load_model
 model_test=load_model('./selected_model/Re1000-10000/final_sf.hdf5') 
@@ -174,8 +177,10 @@ for i in range(len(ya)):
 line_plot1()
 line_plot2()
 
-
-
+func_name='nn'
+data_rbf=[u1a,ya,u2a,ya,xb,v1a,xb,v2a]
+with open('./plot/cavity_%s_%s.pkl'%(func_name,flist[0]), 'wb') as outfile:
+    pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
 
 
 

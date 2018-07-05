@@ -40,6 +40,11 @@ from keras import backend as K
 from numpy import linalg as LA
 import os, shutil
 
+import matplotlib
+matplotlib.rc('xtick', labelsize=18) 
+matplotlib.rc('ytick', labelsize=18) 
+
+
 """----------Sample--------------------"""
 """ >>>with open('./datafile/to_ml/ml_allData_r0_l1.pkl', 'rb') as infile:
     >>>    result = pickle.load(infile)
@@ -57,7 +62,7 @@ with open(path+data_file,'rb') as infile:
     result = pickle.load(infile)
 coord=result
 
-indir=path+"/polar_val"
+indir=path+"/polar_tv"
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
 name=[]   
@@ -162,6 +167,12 @@ my_error=[]
 #load_model
 #model_test=load_model('./model_cnn/final_af_cnn.hdf5') 
 model_test=load_model('./selected_model/naca456_nscc/model_af_cnn_250_0.002791_0.002807.hdf5')  
+
+
+#spread plot
+plt.figure(figsize=(6, 5), dpi=100) 
+plt0, =plt.plot([-0.5,1.6],[-0.5,1.6],'k',lw=3) 
+
 for i in range(55):
     
     #Re, d1, d2, d3, alp, cl, cd
@@ -178,30 +189,72 @@ for i in range(55):
     val_inp1=np.reshape(val_inp1,(len(val_inp1),216,216,1))    
     #test-val
     out=model_test.predict([val_inp1,val_inp2])
-    
-    
+        
     #plot
-    
-    plt.figure(figsize=(8, 5), dpi=100)
+    '''plt.figure(figsize=(6, 5), dpi=100)
     plt0, =plt.plot(val_inp2[:,1],val_out,'-og',linewidth=2,label='true')
     plt1, =plt.plot(val_inp2[:,1],out,'-or',linewidth=2,label='cnn')  
-    plt.legend(fontsize=16)
-    plt.xlabel('alpha',fontsize=16)
-    plt.ylabel('cl',fontsize=16)
-    plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
+    plt.legend(fontsize=20)
+    plt.xlabel('AoA',fontsize=20)
+    plt.ylabel('$C_l$',fontsize=20)
+    #plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
     #plt.xlim(-0.1,1.2)
-    #plt.ylim(-0.01,1.4)    
-    plt.savefig('./plot_out/NACA%sRe=%se6'%(name[i],rey_no[i]), format='png', dpi=100)
-    plt.show() 
+    #plt.ylim(-0.01,1.4)   
+    plt.savefig('./plot_out/NACA%sRe=%se6'%(name[i],rey_no[i]), format='png', bbox_inches='tight',dpi=100)
+    plt.show()'''
+    
+    
+    #spread
+    plt0, =plt.plot(val_out,out,'og') 
+  
+#plt.legend(fontsize=20)
+plt.xlabel('True $C_l$',fontsize=20)
+plt.ylabel('Predicted $C_l$',fontsize=20)
+#plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
+#plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
+#plt.xlim(-0.1,1.2)
+#plt.ylim(-0.01,1.4) 
+
+plt.savefig('val1', format='png',bbox_inches='tight', dpi=100)    
+plt.show()
+
+
+'''path='./selected_model/naca456_cnn_latest'
+data_file='/hist.pkl'
+with open(path + data_file, 'rb') as infile:
+    result = pickle.load(infile)
+history=result[0]
+#hist
+plt.figure(figsize=(6,5),dpi=100)
+plt.plot(range(len(history['loss'])),history['loss'],'r',lw=3,label='training error')
+plt.plot(range(len(history['val_loss'])),history['val_loss'],'b',lw=3,label='validation error')
+plt.legend(fontsize=20)
+plt.xlabel('Training Epochs',fontsize=20)
+plt.ylabel('MSE',fontsize=20)
+plt.yscale('log')
+#plt.xlim([-10,5000])
+#plt.ylim([-0.2,0.2])    
+plt.savefig('convergence.png')
+plt.show()  '''  
+    
     
 
-    #Error
+    
+    
+    
+    
+    
+    
+    
+    
+
+'''#Error
     tmp1=abs(out-val_out[:,None])
     tmp2=LA.norm(tmp1)/LA.norm(val_out)
     tmp3=(tmp2)*100
     my_error.append(tmp3)
-    print tmp3
+    print tmp3'''
 
 
 

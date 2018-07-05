@@ -57,7 +57,7 @@ for the_file in os.listdir(folder):
 """------------------------------------"""
 
 # ref:[data,name]
-path='./naca4'
+path='./naca456'
 data_file='/data_airfoil_inverse.pkl'
 
 with open(path + data_file, 'rb') as infile:
@@ -264,12 +264,12 @@ chkpt_weight= ModelCheckpoint(filepath_weight, monitor='val_loss', verbose=0,\
 opt = Adam(lr=2.5e-4,decay=1e-10)
 
 #scaler
-model.load_weights('./selected_model/naca4_cnn_ws/weight_model_af_cnn_100_0.003_0.004.hdf5')
+#model.load_weights('./selected_model/naca4_cnn_ws/weight_model_af_cnn_100_0.003_0.004.hdf5')
 
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 hist = model.fit([xtr1,xtr2], [ttr1], validation_split=0.2,\
-                 epochs=100, batch_size=32,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=False)
+                 epochs=2000, batch_size=256,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=False)
 
 #hist = model.fit([xtr0,xtr5], [ttr5], validation_split=0.3,\
 #                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)
@@ -286,6 +286,9 @@ print("--- %s seconds ---" % (time.time() - start_time))
 
 
 
+data1=[hist.history]
+with open('./model_cnn/hist.pkl', 'wb') as outfile:
+    pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
 
 

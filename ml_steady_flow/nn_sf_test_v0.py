@@ -36,7 +36,9 @@ import pandas
 
 from scipy import interpolate
 from numpy import linalg as LA
-       
+import matplotlib
+matplotlib.rc('xtick', labelsize=18) 
+matplotlib.rc('ytick', labelsize=18) 
 
 #load data
 xtmp=[]
@@ -46,7 +48,7 @@ utmp=[]
 vtmp=[]
 ptmp=[]
 
-flist=['Re10000']
+flist=['Re1500']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -66,41 +68,41 @@ vtmp=np.asarray(vtmp)
 ptmp=np.asarray(ptmp) 
 
 #normalize
-reytmp=reytmp/10000.
+reytmp=reytmp/1000.
 val_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
 val_out=np.concatenate((utmp[:,None],vtmp[:,None],ptmp[:,None]),axis=1)    
 
 #load_model
-model_test=load_model('./selected_model/Re1000-10000/final_sf.hdf5') 
+model_test=load_model('./selected_model/Re100-1000/final_sf.hdf5') 
 out=model_test.predict([val_inp])    
   
 #plot
 def line_plot1():
-    plt.figure(figsize=(8, 5), dpi=100)
-    plt0, =plt.plot(u1a,ya,'-og',linewidth=2,label='true')
-    plt0, =plt.plot(u2a,ya,'r',linewidth=2,label='nn')
-    plt.legend(fontsize=16)
-    plt.xlabel('u',fontsize=16)
-    plt.ylabel('y',fontsize=16)
-    plt.title('%s-u'%(flist[ii]),fontsize=16)
+    plt.figure(figsize=(6, 5), dpi=100)
+    plt0, =plt.plot(u1a,ya,'-og',linewidth=3,label='true')
+    plt0, =plt.plot(u2a,ya,'r',linewidth=3,label='NN')
+    plt.legend(fontsize=20)
+    plt.xlabel('u-velocity',fontsize=20)
+    plt.ylabel('Y',fontsize=20)
+    #plt.title('%s-u'%(flist[ii]),fontsiuze=16)
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.01,1.4)    
-    plt.savefig('%s-u'%(flist[ii]), format='png', dpi=100)
+    plt.savefig('%s-u'%(flist[ii]), format='png',bbox_inches='tight', dpi=100)
     plt.show() 
     
 def line_plot2():
-    plt.figure(figsize=(8, 5), dpi=100)
-    plt0, =plt.plot(xb,v1a,'-og',linewidth=2,label='true')
-    plt0, =plt.plot(xb,v2a,'r',linewidth=2,label='nn')    
-    plt.legend(fontsize=16)
-    plt.xlabel('x ',fontsize=16)
-    plt.ylabel('v' ,fontsize=16)
-    plt.title('%s-v'%(flist[ii]),fontsize=16)
+    plt.figure(figsize=(6, 5), dpi=100)
+    plt0, =plt.plot(xb,v1a,'-og',linewidth=3,label='true')
+    plt0, =plt.plot(xb,v2a,'r',linewidth=3,label='NN')    
+    plt.legend(fontsize=20)
+    plt.xlabel('X ',fontsize=20)
+    plt.ylabel('v-velocity' ,fontsize=20)
+    #plt.title('%s-v'%(flist[ii]),fontsize=16)
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.01,1.4)    
-    plt.savefig('%s-v'%(flist[ii]), format='png', dpi=100)
+    plt.savefig('%s-v'%(flist[ii]), format='png',bbox_inches='tight', dpi=100)
     plt.show()     
     
 #plot
@@ -115,10 +117,10 @@ def plot(xp,yp,zp,nc,name):
     #cp = pyplot.scatter(ys, zs, pp)
     #pyplot.clabel(cp, inline=False,fontsize=8)
     plt.colorbar()
-    plt.title('%s  '%flist[ii]+name)
-    plt.xlabel('X ')
-    plt.ylabel('Y ')
-    plt.savefig('%s'%flist[ii]+name, format='png', dpi=100)
+    #plt.title('%s  '%flist[ii]+name)
+    plt.xlabel('X ',fontsize=20)
+    plt.ylabel('Y ',fontsize=20)
+    plt.savefig('%s'%flist[ii]+name, format='png',bbox_inches='tight', dpi=100)
     plt.show()
           
 plot(xtmp,ytmp,val_out[:,0],20,'u-cfd')

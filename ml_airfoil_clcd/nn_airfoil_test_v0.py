@@ -35,6 +35,10 @@ import cPickle as pickle
 import pandas
 
 from numpy import linalg as LA
+import matplotlib
+matplotlib.rc('xtick', labelsize=18) 
+matplotlib.rc('ytick', labelsize=18) 
+
        
 indir="./naca4/polar_val"
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
@@ -93,10 +97,14 @@ for i in range(len(name)):
     
 my_error=[]    
 #load_model
-model_test=load_model('./model/final.hdf5') 
-  
+model_test=load_model('./selected_model/naca4_nn/final.hdf5') 
+
+#spread plot
+plt.figure(figsize=(6, 5), dpi=100) 
+plt0, =plt.plot([-0.05,1.6],[-0.05,1.6],'k',lw=3) 
+
 for i in range(len(data1)):
-    
+#for i in range(1):    
     #Re, d1, d2, d3, alp, cl, cd
     data2=data1[i]
     
@@ -108,30 +116,73 @@ for i in range(len(data1)):
     
     #test-val
     out=model_test.predict([val_inp])
-    
+
     
     #plot
-    '''
-    plt.figure(figsize=(8, 5), dpi=100)
-    plt0, =plt.plot(val_inp[:,4],val_out,'-og',linewidth=2,label='true')
-    plt1, =plt.plot(val_inp[:,4],out,'-or',linewidth=2,label='nn')  
-    plt.legend(fontsize=16)
-    plt.xlabel('alpha',fontsize=16)
-    plt.ylabel('cl',fontsize=16)
-    plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
+    '''plt.figure(figsize=(6, 5), dpi=100)
+    plt0, =plt.plot(val_inp[:,4],val_out,'-og',linewidth=3,label='true')
+    plt1, =plt.plot(val_inp[:,4],out,'-or',linewidth=3,label='NN')  
+    plt.legend(fontsize=20)
+    plt.xlabel('AoA',fontsize=20)
+    plt.ylabel('$C_l$',fontsize=20)
+    #plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
     #plt.xlim(-0.1,1.2)
-    #plt.ylim(-0.01,1.4)    
-    plt.savefig('NACA%sRe=%se6'%(name[i],rey_no[i]), format='png', dpi=100)
-    plt.show() 
-    '''
+    #plt.ylim(-0.01,1.4) 
 
-    #Error
-    tmp1=abs(out-val_out[:,None])
-    tmp2=LA.norm(tmp1)/LA.norm(val_out)
-    tmp3=(tmp2)*100
-    my_error.append(tmp3)
-    print tmp3
+    plt.savefig('./train/NACA%sRe=%se6'%(name[i],rey_no[i]), format='png',bbox_inches='tight', dpi=100)
+    plt.show() '''
+    
+    
+    #spread
+    plt0, =plt.plot(val_out,out,'og') 
+  
+#plt.legend(fontsize=20)
+plt.xlabel('True $C_l$',fontsize=20)
+plt.ylabel('Predicted $C_l$',fontsize=20)
+#plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
+#plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
+#plt.xlim(-0.1,1.2)
+#plt.ylim(-0.01,1.4) 
+
+plt.savefig('val1', format='png',bbox_inches='tight', dpi=100)    
+plt.show()
+
+
+path='./selected_model/naca4_nn'
+data_file='/hist.pkl'
+with open(path + data_file, 'rb') as infile:
+    result = pickle.load(infile)
+history=result[0]
+#hist
+plt.figure(figsize=(6,5),dpi=100)
+plt.plot(range(len(history['loss'])),history['loss'],'r',lw=3,label='training error')
+plt.plot(range(len(history['val_loss'])),history['val_loss'],'b',lw=3,label='validation error')
+plt.legend(fontsize=20)
+plt.xlabel('Training Epochs',fontsize=20)
+plt.ylabel('MSE',fontsize=20)
+plt.yscale('log')
+#plt.xlim([-10,5000])
+#plt.ylim([-0.2,0.2])    
+plt.savefig('convergence.png')
+plt.show()
+
+
+
+
+
+
+
+
+
+
+    
+#Error
+'''tmp1=abs(out-val_out[:,None])
+tmp2=LA.norm(tmp1)/LA.norm(val_out)
+tmp3=(tmp2)*100
+my_error.append(tmp3)
+print tmp3'''
     
 
 

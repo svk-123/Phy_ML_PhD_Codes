@@ -45,7 +45,7 @@ for the_file in os.listdir(folder):
         print(e)
 
 
-indir="./naca4digit/polar_train"
+indir="./naca4/polar_train"
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
 #read polar
@@ -128,10 +128,10 @@ ttr1 = my_out[I][:n]
 
 aa=Input(shape=(5,))
 xx =Dense(10,  kernel_initializer='random_normal', activation='relu')(aa)
-#xx =Dense(30, activation='relu')(xx)
-#xx =Dense(30, activation='relu')(xx)
-#xx =Dense(30, activation='relu')(xx)
-#xx =Dense(30, activation='relu')(xx)
+xx =Dense(30, activation='relu')(xx)
+xx =Dense(30, activation='relu')(xx)
+xx =Dense(30, activation='relu')(xx)
+xx =Dense(30, activation='relu')(xx)
 g =Dense(1, activation='linear')(xx)
 
 #model = Model(inputs=a, outputs=g)
@@ -152,7 +152,7 @@ opt = Adam(lr=2.5e-5,decay=1.0e-12)
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 hist = model.fit([xtr0], [ttr1], validation_split=0.1,\
-                 epochs=25000, batch_size=16,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
+                 epochs=10000, batch_size=16,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
 
 #save model
 model.save('./model/final.hdf5') 
@@ -165,7 +165,9 @@ print"\n"
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
-
+data1=[hist.history]
+with open('./model_cnn/hist.pkl', 'wb') as outfile:
+    pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
 
 

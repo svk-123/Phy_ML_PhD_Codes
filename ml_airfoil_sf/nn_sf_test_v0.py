@@ -37,6 +37,9 @@ import pandas
 from scipy import interpolate
 from numpy import linalg as LA
        
+import matplotlib
+matplotlib.rc('xtick', labelsize=18) 
+matplotlib.rc('ytick', labelsize=18) 
 
 #load data
 xtmp=[]
@@ -51,7 +54,7 @@ flist=['Re800','Re1000','Re2000']
 AoA=range(0,11)
 foil='n0012'
 
-data=np.loadtxt('/home/vino/n0012.dat')
+data=np.loadtxt('n0012.dat')
 zz=np.zeros(len(data))
 zz[:]=0.0
 
@@ -107,72 +110,72 @@ for ii in range(len(flist)):
         #plot
         def line_plot1():
             plt.figure(figsize=(8, 5), dpi=100)
-            plt0, =plt.plot(u1a+0.0,ya,'-og',linewidth=2,label='cfd')
-            plt0, =plt.plot(u1b+1.5,yb,'-og',linewidth=2)
-            plt0, =plt.plot(u1c+3.0,yc,'-og',linewidth=2)
-            plt0, =plt.plot(u1d+4.5,yd,'-og',linewidth=2)
+            plt0, =plt.plot(u1a+0.0,ya,'-og',linewidth=3,label='CFD')
+            plt0, =plt.plot(u1b+1.0,yb,'-og',linewidth=3)
+            plt0, =plt.plot(u1c+2.0,yc,'-og',linewidth=3)
+            plt0, =plt.plot(u1d+3.0,yd,'-og',linewidth=3)
             
-            plt0, =plt.plot(u2a+0.0,ya,'r',linewidth=2,label='nn')
-            plt0, =plt.plot(u2b+1.5,yb,'r',linewidth=2)
-            plt0, =plt.plot(u2c+3.0,yc,'r',linewidth=2)
-            plt0, =plt.plot(u2d+4.5,yd,'r',linewidth=2)
+            plt0, =plt.plot(u2a+0.0,ya,'r',linewidth=3,label='NN')
+            plt0, =plt.plot(u2b+1.0,yb,'r',linewidth=3)
+            plt0, =plt.plot(u2c+2.0,yc,'r',linewidth=3)
+            plt0, =plt.plot(u2d+3.0,yd,'r',linewidth=3)
             
-            plt.legend(fontsize=16)
-            plt.xlabel('u',fontsize=16)
-            plt.ylabel('y',fontsize=16)
-            plt.title('%s-AoA-%s-u'%(flist[ii],AoA[jj]),fontsize=16)
-            #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
-            #plt.xlim(-0.1,1.2)
-            #plt.ylim(-0.01,1.4)    
-            plt.savefig('./plot/%s_AoA-%s_u'%(flist[ii],AoA[jj]), format='png', dpi=100)
+            #plt.legend(fontsize=20)
+            plt.xlabel('u-velocity',fontsize=20)
+            plt.ylabel('Y',fontsize=20)
+            #plt.title('%s-AoA-%s-u'%(flist[ii],AoA[jj]),fontsize=16)
+            plt.legend(loc='upper center',fontsize=20, bbox_to_anchor=(0.5, 1.0), ncol=2, fancybox=False, shadow=False)
+            #plt.xlim(-0.1,6)
+            plt.ylim(-0.01,1.3)    
+            plt.savefig('./plot/%s_AoA-%s_u'%(flist[ii],AoA[jj]), format='png',bbox_inches='tight', dpi=100)
             plt.show() 
             
         def line_plot2():
             plt.figure(figsize=(8, 5), dpi=100)
-            plt0, =plt.plot(v1a+0.0,ya,'-og',linewidth=2,label='cfd')
-            plt0, =plt.plot(v1b+0.5,yb,'-og',linewidth=2)
-            plt0, =plt.plot(v1c+1.0,yc,'-og',linewidth=2)
-            plt0, =plt.plot(v1d+1.5,yd,'-og',linewidth=2)
+            plt0, =plt.plot(v1a+0.0,ya,'-og',linewidth=3,label='CFD')
+            plt0, =plt.plot(v1b+0.5,yb,'-og',linewidth=3)
+            plt0, =plt.plot(v1c+1.0,yc,'-og',linewidth=3)
+            plt0, =plt.plot(v1d+1.5,yd,'-og',linewidth=3)
             
-            plt0, =plt.plot(v2a+0.0,ya,'r',linewidth=2,label='nn')
-            plt0, =plt.plot(v2b+0.5,yb,'r',linewidth=2)
-            plt0, =plt.plot(v2c+1.0,yc,'r',linewidth=2)
-            plt0, =plt.plot(v2d+1.5,yd,'r',linewidth=2)  
+            plt0, =plt.plot(v2a+0.0,ya,'r',linewidth=3,label='NN')
+            plt0, =plt.plot(v2b+0.5,yb,'r',linewidth=3)
+            plt0, =plt.plot(v2c+1.0,yc,'r',linewidth=3)
+            plt0, =plt.plot(v2d+1.5,yd,'r',linewidth=3)  
             
-            plt.legend(fontsize=16)
-            plt.xlabel('x ',fontsize=16)
-            plt.ylabel('v' ,fontsize=16)
-            plt.title('%s-AoA-%s-v'%(flist[ii],AoA[jj]),fontsize=16)
-            #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
+            #plt.legend(fontsize=20)
+            plt.xlabel('v-velocity',fontsize=20)
+            plt.ylabel('Y' ,fontsize=20)
+            #plt.title('%s-AoA-%s-v'%(flist[ii],AoA[jj]),fontsize=16)
+            plt.legend(loc='upper center',fontsize=20,  bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
             #plt.xlim(-0.1,1.2)
-            #plt.ylim(-0.01,1.4)    
-            plt.savefig('./plot/%s_AoA-%s_v'%(flist[ii],AoA[jj]), format='png', dpi=100)
+            plt.ylim(-0.01,1.3)    
+            plt.savefig('./plot/%s_AoA-%s_v'%(flist[ii],AoA[jj]), format='png',bbox_inches='tight', dpi=100)
             plt.show()     
             
             
         def line_plot3():
-            plt.figure(figsize=(8, 5), dpi=100)
-            plt0, =plt.plot(xu,pu1,'og',linewidth=2,label='cfd-upper')
-            plt0, =plt.plot(xl,pl1,'oc',linewidth=2,label='cfd-lower') 
+            plt.figure(figsize=(6, 5), dpi=100)
+            plt0, =plt.plot(xu,pu1,'og',linewidth=3,label='CFD-upper')
+            plt0, =plt.plot(xl,pl1,'oc',linewidth=3,label='CFD-lower') 
             
-            plt0, =plt.plot(xu,pu2,'r',linewidth=2,label='nn-upper')
-            plt0, =plt.plot(xl,pl2,'k',linewidth=2,label='nn-lower')     
+            plt0, =plt.plot(xu,pu2,'r',linewidth=3,label='NN-upper')
+            plt0, =plt.plot(xl,pl2,'k',linewidth=3,label='NN-lower')     
             
-            plt.legend(fontsize=16)
-            plt.xlabel('x ',fontsize=16)
-            plt.ylabel('p' ,fontsize=16)
-            plt.title('%s-AoA-%s-p'%(flist[ii],AoA[jj]),fontsize=16)
+            plt.legend(fontsize=20)
+            plt.xlabel('X',fontsize=20)
+            plt.ylabel('$p/P_o$' ,fontsize=20)
+            #plt.title('%s-AoA-%s-p'%(flist[ii],AoA[jj]),fontsize=16)
             #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
             #plt.xlim(-0.1,1.2)
             #plt.ylim(-0.01,1.4)    
-            plt.savefig('./plot/%s_AoA-%s_p'%(flist[ii],AoA[jj]), format='png', dpi=100)
+            plt.savefig('./plot/%s_AoA-%s_p'%(flist[ii],AoA[jj]), format='png',bbox_inches='tight', dpi=100)
             plt.show()     
             
             
         #plot
         def plot(xp,yp,zp,nc,name):
         
-            plt.figure(figsize=(6, 5), dpi=200)
+            plt.figure(figsize=(6, 5), dpi=100)
             #cp = pyplot.tricontour(ys, zs, pp,nc)
             cp = plt.tricontourf(xp,yp,zp,nc,cmap=cm.jet)
             plt.tricontourf(data[:,0],data[:,1],zz,colors='w')
@@ -182,30 +185,30 @@ for ii in range(len(flist)):
             #cp = pyplot.scatter(ys, zs, pp)
             #pyplot.clabel(cp, inline=False,fontsize=8)
             plt.colorbar(cp)
-            plt.title('%s_AoA-%s_%s'%(flist[ii],AoA[jj],name))
-            plt.xlabel('X ')
-            plt.ylabel('Y ')
+            #plt.title('%s_AoA-%s_%s'%(flist[ii],AoA[jj],name))
+            plt.xlabel('X ',fontsize=20)
+            plt.ylabel('Y ',fontsize=20)
             plt.xlim([-2,3])
             plt.ylim([-2,2])
-            plt.plot(data[:,0],data[:,1],'w',lw=1)
-            plt.savefig('./plot/%s_AoA-%s_%s'%(flist[ii],AoA[jj],name), format='png', dpi=100)
+            plt.plot(data[:,0],data[:,1],'w',lw=2)
+            plt.savefig('./plot/%s_AoA-%s_%s'%(flist[ii],AoA[jj],name), format='png',bbox_inches='tight', dpi=100)
             plt.show()
         
-        '''plot(xtmp,ytmp,val_out[:,0],20,'u-cfd')
+        plot(xtmp,ytmp,val_out[:,0],20,'u-cfd')
         plot(xtmp,ytmp,out[:,0],20,'u-nn')
-        #plot(xtmp,ytmp,abs(out[:,0]-val_out[:,0]),20,'u-error')
+        plot(xtmp,ytmp,abs(out[:,0]-val_out[:,0]),20,'u-error')
             
         plot(xtmp,ytmp,val_out[:,1],20,'v-cfd')
-        plot(xtmp,ytmp,out[:,1],20,'v-nn')'''
-        #plot(xtmp,ytmp,abs(out[:,1]-val_out[:,1]),20,'v-error')
+        plot(xtmp,ytmp,out[:,1],20,'v-nn')
+        plot(xtmp,ytmp,abs(out[:,1]-val_out[:,1]),20,'v-error')
 
-        plot(xtmp,ytmp,val_out[:,2],20,'p-cfd')
-        plot(xtmp,ytmp,out[:,2],20,'p-nn')
+        #plot(xtmp,ytmp,val_out[:,2],20,'p-cfd')
+        #plot(xtmp,ytmp,out[:,2],20,'p-nn')
 
         #LinearNDinterpolator
         pD=np.asarray([xtmp,ytmp]).transpose()
         xa=np.linspace(0.0,0.0,50)
-        ya=np.linspace(0.01,0.99,50)
+        ya=np.linspace(0.001,0.99,50)
         
         xb=np.linspace(0.5,0.5,50)
         yb=np.linspace(0.04,0.99,50)
@@ -316,9 +319,9 @@ for ii in range(len(flist)):
             pl2[i]=f2p(xl[i],yl[i])
         
             
-        #line_plot1()
+        line_plot1()
         line_plot2()
-        #line_plot3()
+        line_plot3()
 
 '''
 plt.figure(figsize=(6, 5), dpi=200)

@@ -48,7 +48,7 @@ import os, shutil
 """------------------------------------"""
 
 # ref:[data,name]
-path='./'
+path='./naca456/'
 data_file='data_cp.pkl'
 
 with open(path + data_file, 'rb') as infile:
@@ -56,30 +56,48 @@ with open(path + data_file, 'rb') as infile:
 inp_up=result[0]
 inp_lr=result[1]
 my_out=result[2]
-name=result[3]
+reno=result[3]
+aoa=result[4]
+name=result[5]
 
 inp_up=np.asarray(inp_up)
 inp_lr=np.asarray(inp_lr)
 my_out=np.asarray(my_out)
+reno=np.asarray(reno)
+aoa=np.asarray(aoa)
 
-'''inp_up=inp_up[0:100,:,:]
-inp_lr=inp_lr[0:100,:,:]
-my_out=my_out[0:100,:,:]'''
+N= len(inp_up)
+I = np.arange(N)
+np.random.shuffle(I)
+
+J=range(100)
+
+inp_up=inp_up[J,:,:]
+inp_lr=inp_lr[J,:,:]
+my_out=my_out[J,:,:]
+reno=reno[J]
+aoa=aoa[J]
+
+myname=[]
+for nn in range(len(J)):
+    myname.append(name[J[nn]])
+
+
 
 xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3) 
 ttr1=np.reshape(my_out,(len(my_out),216,216,1))  
 
-'''del result
+del result
 del inp_up
 del inp_lr
-del my_out'''
+del my_out
 
-model_test=load_model('./from_nscc/airfoil_inv_cnn_sig_bce/model_cnn_sig_bce/model_enc_cnn_1000_0.024_0.065.hdf5')  
+model_test=load_model('./from_nscc/airfoil_inv_cnn_re_aoa/model_enc_cnn_250_0.040_0.051.hdf5')  
 
         
 out=model_test.predict([xtr1])
 
-for k in range(0,1):
+for k in range(0,100):
 
 
     c=out[k,:,:,0].copy()
@@ -89,23 +107,23 @@ for k in range(0,1):
                 c[i,j]=0
     c=c/c.max()            
 
-    '''fig = plt.figure(figsize=(6*5, 3*5),dpi=100)
+    fig = plt.figure(figsize=(6, 3),dpi=100)
     ax1 = fig.add_subplot(1,2,1)
     ax1.imshow(ttr1[k,:,:,0],cmap='gray')
-    plt.title('true-%s'%name[k])
+    plt.title('true-%s-%se5-%s'%(myname[k],reno[k]*3,aoa[k]*10))
     
     ax2 = fig.add_subplot(1,2,2)
     ax2.imshow(out[k,:,:,0],cmap='gray')
-    plt.title('pred-%s'%name[k])
+    plt.title('pred-%s-%se5-%s'%(myname[k],reno[k]*3,aoa[k]*10))
     
     #ax3 = fig.add_subplot(1,3,3)
     #ax3.imshow(c,cmap='gray')
     #plt.title('filtered')
     
-    plt.savefig('./plot_out/val_n%s'%k)
-    plt.show()'''
+    plt.savefig('./plot_out1/1_val_n%s'%k)
+    plt.show()
 
-    a=ttr1[k,:,:,0]
+    '''a=ttr1[k,:,:,0]
     b=out[k,:,:,0]
     # for column
     for n in range(216):
@@ -137,29 +155,51 @@ for k in range(0,1):
     co_p=np.concatenate((tmp[0][:,None],tmp[1][:,None]),axis=1)
     co_p=co_p[np.argsort(co_p[:,1])]
 
-    list1=[29]
-    list2=[35,40,45,50,55,60,80,100,120,140,160,180,185]
-    list3=[190]
+    list1=[27]
+    
+    list2=[]
+    list2.append(30)
+    
+    for ii in range(31,50):
+        if(ii%3==0):
+            list2.append(ii)
+            
+    for ii in range(51,160):
+        if(ii%5==0):
+            list2.append(ii)     
+            
+    for ii in range(161,190):
+        if(ii%3==0):
+            list2.append(ii)   
+            
+    list3=[190,191,192,193]
     
     # for true
-    tmp=[]
-    '''for p in range(len(list1)):
+
+    tmpf=[]
+    f_t=[]
+    for p in range(len(list1)):
         tmp1=[]
         for n in range(len(co_t)):
             if(co_t[n,1]==list1[p]):
                 tmp1.append(co_t[n,0])
                 
-        tmp.append(tmp1)      '''  
+        tmpf.append(tmp1)
+    tmpf=tmpf[0]    
+    f_t=tmpf[np.argmax(a[tmpf,list1[p]])]     
         
-    '''for p in range(len(list3)):
+       
+    tmpr=[]    
+    for p in range(len(list3)):
         tmp1=[]        
         for n in range(len(co_t)):
 
             if(co_t[n,1]==list2[p]):
                 tmp1.append(co_t[n,0])
                 
-        tmp.append(tmp1)'''    
-    
+        tmpr.append(tmp1)    
+        
+    tmp=[]
     for p in range(len(list2)):
         tmp1=[]
         for n in range(len(co_t)):
@@ -183,8 +223,13 @@ for k in range(0,1):
             
         elif (len(tmp)%2 ==0):
             l=len(tmp)
-            tmp1=tmp[:l/2]
-            tmp2=tmp[-l/2:]
+            
+            for q in range(l-1):
+                if (tmp[q]+1 != tmp[q+1]):
+                    mkr=q+1
+                    
+            tmp1=tmp[:mkr]
+            tmp2=tmp[mkr:]
             tmp_up.append(tmp1[np.argmax(a[tmp1,list2[p]])])
             tmp_lr.append(tmp2[np.argmax(a[tmp2,list2[p]])])            
             
@@ -193,33 +238,31 @@ for k in range(0,1):
             
             for q in range(l-1):
                 if (tmp[q]+1 != tmp[q+1]):
-                    mkr=q
+                    mkr=q+1
+                    
             tmp1=tmp[:mkr]
             tmp2=tmp[mkr:]
+            
             tmp_up.append(tmp1[np.argmax(a[tmp1,list2[p]])])
             tmp_lr.append(tmp2[np.argmax(a[tmp2,list2[p]])])         
     t_up=tmp_up
     t_lr=tmp_lr
     
     # for pred
-    tmp=[]
-    '''for p in range(len(list1)):
+    tmpf=[]
+    f_p=[]
+    for p in range(len(list1)):
         tmp1=[]
-        for n in range(len(co_t)):
-            if(co_t[n,1]==list1[p]):
-                tmp1.append(co_t[n,0])
+        for n in range(len(co_p)):
+            if(co_p[n,1]==list1[p]):
+                tmp1.append(co_p[n,0])
                 
-        tmp.append(tmp1)      '''  
-        
-    '''for p in range(len(list3)):
-        tmp1=[]        
-        for n in range(len(co_t)):
-
-            if(co_t[n,1]==list2[p]):
-                tmp1.append(co_t[n,0])
-                
-        tmp.append(tmp1)'''    
-    
+        tmpf.append(tmp1)
+    tmpf=tmpf[0]    
+    f_p=tmpf[np.argmax(b[tmpf,list1[p]])]    
+   
+    tmp=[]
+   
     for p in range(len(list2)):
         tmp1=[]
         for n in range(len(co_p)):
@@ -235,30 +278,42 @@ for k in range(0,1):
         tmp=val[p]
         
         tmp=np.sort(tmp)
-        print tmp
+
         if (len(tmp)==2):
             tmp_up.append(tmp[0])
             tmp_lr.append(tmp[1])
             
         elif (len(tmp)%2 ==0):
             l=len(tmp)
+            mkr=0
             for q in range(l-1):
                 if (tmp[q]+1 != tmp[q+1]):
-                    mkr=q
-            tmp1=tmp[:mkr]
-            tmp2=tmp[mkr:]
+                    mkr=q+1
+                    
+            if (mkr!=0):        
+                tmp1=tmp[:mkr]
+                tmp2=tmp[mkr:]
+            else: 
+                tmp1=tmp[:l/2]
+                tmp2=tmp[l/2:]
             
             tmp_up.append(tmp1[np.argmax(b[tmp1,list2[p]])])
             tmp_lr.append(tmp2[np.argmax(b[tmp2,list2[p]])])            
             
         elif (len(tmp)%2 ==1):
             l=len(tmp)
-            
+            mkr=0
             for q in range(l-1):
                 if (tmp[q]+1 != tmp[q+1]):
-                    mkr=q
-            tmp1=tmp[:mkr]
-            tmp2=tmp[mkr:]
+                    mkr=q+1
+                    
+            if (mkr!=0):        
+                tmp1=tmp[:mkr]
+                tmp2=tmp[mkr:]
+            else: 
+                tmp1=tmp[:l/2]
+                tmp2=tmp[l/2:]
+
             tmp_up.append(tmp1[np.argmax(b[tmp1,list2[p]])])
             tmp_lr.append(tmp2[np.argmax(b[tmp2,list2[p]])])       
             
@@ -266,19 +321,53 @@ for k in range(0,1):
     p_lr=tmp_lr
     
     pix=1/167.0
+    list1=np.asarray(list1)*pix
+    f_t=np.asarray(f_t)*pix
+    f_p=np.asarray(f_p)*pix
+    
     list2=np.asarray(list2)*pix
     t_up=np.asarray(t_up)*pix
     t_lr=np.asarray(t_lr)*pix
     p_up=np.asarray(p_up)*pix
     p_lr=np.asarray(p_lr)*pix    
     
+    newlist=np.zeros((len(list1)+len(list2)))
+    newlist[:len(list1)]=list1
+    newlist[len(list1):]=list2    
+
+    nt_up=np.zeros((len(list1)+len(list2)))
+    nt_up[:len(list1)]=f_t
+    nt_up[len(list1):]=t_up      
+
+    nt_lr=np.zeros((len(list1)+len(list2)))
+    nt_lr[:len(list1)]=f_t
+    nt_lr[len(list1):]=t_lr      
+ 
+    np_up=np.zeros((len(list1)+len(list2)))
+    np_up[:len(list1)]=f_p
+    np_up[len(list1):]=p_up      
+
+    np_lr=np.zeros((len(list1)+len(list2)))
+    np_lr[:len(list1)]=f_p
+    np_lr[len(list1):]=p_lr   
     
     fig = plt.figure(figsize=(9, 3),dpi=100)
-    plt.plot(list2,t_up,'o')
-    plt.plot(list2,t_lr,'o')
-    plt.plot(list2,p_up,'-o')
-    plt.plot(list2,p_lr,'-o')    
-    plt.show()
+    
+    newlist=newlist-27*pix
+    nt_up=nt_up-f_t
+    nt_lr=nt_lr-f_t
+    np_up=np_up-f_t
+    np_lr=np_lr-f_t    
+    
+    
+    
+    plt.plot(newlist,nt_up,'-ro',lw=2,label='true')
+    plt.plot(newlist,nt_lr,'-ro',lw=2)
+    plt.plot(newlist,np_up,'b',lw=2,label='prediction')
+    plt.plot(newlist,np_lr,'b',lw=2)    
+    plt.legend()
+    plt.savefig('%s.png'%k)
+    plt.show()'''
 
 
 

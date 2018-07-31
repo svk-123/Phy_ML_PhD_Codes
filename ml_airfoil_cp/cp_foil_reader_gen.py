@@ -92,13 +92,10 @@ lr_mm=[]
 #not good plot
 unname=np.genfromtxt('airfoil_plot_not_good',dtype='str')
 
-cp_up=[]
-cp_lr=[]
-
 xx=np.loadtxt('xx.txt')
-
-#for i in range(len(tmp2)):
-for i in range(10):
+cp_mat=[]
+for i in range(len(tmp2)):
+#for i in range(10):
     print i
     if name[i] not in unname:
         n=tmp2[i].shape[0]
@@ -109,60 +106,83 @@ for i in range(10):
             up=tmp2[i][:(n/2)+1,:]
             lr=tmp2[i][(n/2):,:]
     
-            up_x
+        up_x=up[:,0]
+        up_y=up[:,1]
+            
+        lr_x=lr[:,0]
+        lr_y=lr[:,1]
 
-    
-xx=np.loadtxt('xx.txt')   
-img_mat=[]
-
-#for i in range(len(coord)):
-for i in range(10):
-    print i
-    if name[i] not in unname:  
-        l=len(coord[i])
-        ind=((l-1)/2)
-        
-        up_x=coord[i][:ind+1,0]
-        up_y=coord[i][:ind+1,1]
-        
-        lr_x=coord[i][ind:,0]
-        lr_y=coord[i][ind:,1]    
-        
         up_x[0]=1
-        up_x[-1:]=0
+        up_x[-1:]=0            
         
-        lr_x[0]=0    
-        lr_x[-1:]=1
+        lr_x[0]=0
+        lr_x[-1:]=1   
         
         fu = interpolate.interp1d(up_x, up_y)
-        u_yy = fu(xx)
+        cp_up = fu(xx)
         
         fl = interpolate.interp1d(lr_x, lr_y)
-        l_yy = fl(xx)   
+        cp_lr = fl(xx)   
         
         
-        yout=np.zeros(len(u_yy)*2)
-        yout[0:len(xx)]=u_yy
-        yout[len(xx):]=l_yy    
-        img_mat.append(yout)
+        yout=np.zeros(len(cp_up)*2)
+        yout[0:len(xx)]=cp_up
+        yout[len(xx):]=cp_lr 
+        cp_mat.append(yout)
         
         #plot
         figure=plt.figure(figsize=(6,4))
-        plt0, =plt.plot(coord[i][:,0],coord[i][:,1],'k',linewidth=2,label='true')
-        plt0, =plt.plot(xx,u_yy)
-        plt0, =plt.plot(xx,l_yy)    
+        plt0, =plt.plot(up_x,up_y,'og',linewidth=2,label='true')
+        plt0, =plt.plot(lr_x,lr_y,'or',linewidth=2,label='true')
+        plt0, =plt.plot(xx,cp_up)
+        plt0, =plt.plot(xx,cp_lr)    
         #plt1, =plt.plot(val_inp[:,4],out,'-or',linewidth=2,label='nn')  
         #plt.legend(fontsize=16)
         #plt.xlabel('alpha',fontsize=16)
         #plt.ylabel('cl',fontsize=16)
         #plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
         #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
-        plt.xlim(-0.05,1.05)
-        plt.ylim(-0.18,0.18)    
-        plt.axis('off')
+        #plt.xlim(-0.05,1.05)
+        #plt.ylim(-0.18,0.18)    
+        #plt.axis('off')
         plt.savefig('./plot/%s.png'%name[i])
         plt.show() 
         print i
+
+     
+    
+ 
+img_mat=[]
+for i in range(len(coord)):
+#for i in range(10):
+    print i
+    if name[i] not in unname:  
+        #plot
+        figure=plt.figure(figsize=(2,2))
+        plt0, =plt.plot(coord[i][:,0],coord[i][:,1],'k',linewidth=2,label='true')
+        #plt1, =plt.plot(val_inp[:,4],out,'-or',linewidth=2,label='nn')  
+        #plt.legend(fontsize=16)
+        #plt.xlabel('alpha',fontsize=16)
+        #plt.ylabel('cl',fontsize=16)
+        #plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
+        #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
+        plt.xlim(0,1.)
+        plt.ylim(-0.18,0.18)    
+        plt.axis('off')
+        #plt.grid(True)
+        #patch.set_facecolor('black')
+        plt.savefig('./plot/coord_%s'%name[i], format='png')
+        plt.show() 
+    
+        img = io.imread('./plot/coord_%s'%name[i], as_grey=True)  # load the image as grayscale
+        img = util.invert(img)
+        img_mat.append(img)
+        print 'image matrix size: ', img.shape      # print the size of image
+        #print '\n First 5 columns and rows of the image matrix: \n', img[150:210,170:180] 
+        #viewer.ImageViewer(img).show()  
+        #img=img-1
+        #img=abs(img)
+        #viewer.ImageViewer(img).show()
     
 
 
@@ -179,8 +199,8 @@ with open(path+'data_cp_fp_1600.pkl', 'wb') as outfile:
     
 
 
-data2=[cp_up,cp_lr,img_mat,xx,nname]
-with open(path+'foil_cp_1600.pkl', 'wb') as outfile:
+data2=[cp_mat,img_mat,xx,nname]
+with open(path+'foil_cp_s144_1343.pkl', 'wb') as outfile:
     pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
     
     

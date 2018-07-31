@@ -57,29 +57,29 @@ for the_file in os.listdir(folder):
 """------------------------------------"""
 
 # ref:[data,name]
-path='./'
-data_file='data_1600_tr.pkl'
+path='./airfoil_1600_1aoa_1re/'
+data_file='foil_cp_s144_1343.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
-inp_up=result[0]
-inp_lr=result[1]
-out=result[2]
+inp=result[1]
+out=result[0]
+xx=result[2]
 name=result[3]
 
-inp_up=np.asarray(inp_up)
-inp_lr=np.asarray(inp_lr)
+inp=np.asarray(inp)
 out=np.asarray(out)
-out=out/0.18
 
-xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3) 
-ttr1=out 
+xtr1=inp
+ttr1=out
 
 del result
-del inp_up
-del inp_lr
+del inp
 del out
 del name
+
+xtr1=np.reshape(xtr1,(len(xtr1),144,144,1))  
+
 
 # print dataset values
 print('xtr shape:', xtr1.shape)
@@ -88,15 +88,15 @@ print('ttr shape:', ttr1.shape)
 # Multilayer Perceptron
 # create model
 # construct model
-aa = Input([144,144,2])
+aa = Input([144,144,1])
 
 # 2 3x3 convolutions followed by a max pool
 conv1 = Conv2D(32, (4, 4), activation='relu', padding='same')(aa)
-#conv1 = Conv2D(32, (4, 4), activation='relu', padding='same')(conv1)
+conv1 = Conv2D(32, (4, 4), activation='relu', padding='same')(conv1)
 pool1 = MaxPooling2D(pool_size=(3, 3))(conv1)
 
 conv2 = Conv2D(64, (4, 4), activation='relu', padding='same')(pool1)
-#conv2 = Conv2D(64, (4, 4), activation='relu', padding='same')(conv2)
+conv2 = Conv2D(64, (4, 4), activation='relu', padding='same')(conv2)
 pool2 = MaxPooling2D(pool_size=(3, 3))(conv2)
 
 conv3 = Conv2D(128, (4, 4), activation='relu', padding='same')(pool2)
@@ -105,12 +105,12 @@ pool3 = MaxPooling2D(pool_size=(3, 3))(conv3)
 conv4 = Conv2D(128, (2, 2), activation='relu', padding='same')(pool3)
 pool4 = MaxPooling2D(pool_size=(2, 2))(conv4)
 
-#conv5 = Conv2D(128, (2, 2), activation='relu', padding='same')(pool4)
-#pool5 = MaxPooling2D(pool_size=(2, 2))(conv5)
+conv5 = Conv2D(128, (2, 2), activation='relu', padding='same')(pool4)
+pool5 = MaxPooling2D(pool_size=(2, 2))(conv5)
 
 # flatten the 4D array (batch, height, width, depth) into 
 # a 2D array (batch, n). Perform a fully connected layer
-flat5 = Flatten()(pool4)
+flat5 = Flatten()(pool5)
 
 flat5 = Dense(100, activation='relu')(flat5)
 flat5 = Dense(100, activation='relu')(flat5)
@@ -127,8 +127,8 @@ print ('conv3',K.int_shape(conv3))
 print ('pool3',K.int_shape(pool3))
 print ('conv4',K.int_shape(conv4))
 print ('pool4',K.int_shape(pool4))
-#print ('conv5',K.int_shape(conv5))
-#print ('pool5',K.int_shape(pool5))
+print ('conv5',K.int_shape(conv5))
+print ('pool5',K.int_shape(pool5))
 
 
 #model = Model(inputs=a, outputs=g)
@@ -140,8 +140,8 @@ reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,
 
 e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-8, patience=30, verbose=1, mode='auto')
 
-filepath="./model_cnn/model_enc_cnn_{epoch:02d}_{loss:.6f}_{val_loss:.6f}.hdf5"
-filepath_weight="./model_cnn/weight_model_enc_cnn_{epoch:02d}_{loss:.6f}_{val_loss:.6f}.hdf5"
+filepath="./model_cnn/model_cnn_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
+filepath_weight="./model_cnn/weight_model_cnn_{epoch:02d}_{loss:.3f}_{val_loss:.3f}.hdf5"
 
 chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
                                 save_best_only=False, save_weights_only=False, mode='auto', period=25)
@@ -152,20 +152,20 @@ chkpt_weight= ModelCheckpoint(filepath_weight, monitor='val_loss', verbose=0,\
 opt = Adam(lr=2.5e-5,decay=1e-10)
 
 #scaler
-#model.load_weights('./selected_model/final_enc_cnn.hdf5')
+#model.load_weights('./selected_model/weight_model_enc_cnn_225_0.001_0.001.hdf5')
 
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 #model.compile(loss= 'binary_crossentropy',optimizer= opt,metrics=['accuracy'])
 
 
-hist = model.fit([xtr1], [ttr1], validation_split=0.2,\
+hist = model.fit([xtr1], [ttr1], validation_split=0.1,\
                  epochs=5000, batch_size=64,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=True)
 
 #hist = model.fit([xtr0,xtr5], [ttr5], validation_split=0.3,\
 #                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)
 
 #save model
-model.save('./model_cnn/final_enc_cnn.hdf5') 
+model.save('./model_cnn/final_cnn.hdf5') 
 
 print"\n"
 print("loss = %f to %f"%(np.asarray(hist.history["loss"][:1]),np.asarray(hist.history["loss"][-1:])))
@@ -173,6 +173,7 @@ print"\n"
 print("val_loss = %f to %f"%(np.asarray(hist.history["val_loss"][:1]),np.asarray(hist.history["val_loss"][-1:])))
 print"\n"
 print("--- %s seconds ---" % (time.time() - start_time))
+
 
 data1=[hist.history]
 with open('./model_cnn/hist.pkl', 'wb') as outfile:

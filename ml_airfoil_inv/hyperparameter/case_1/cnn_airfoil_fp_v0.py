@@ -159,7 +159,7 @@ model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 
 hist = model.fit([xtr1], [ttr1], validation_split=0.2,\
-                 epochs=1, batch_size=64,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=True)
+                 epochs=5000, batch_size=64,callbacks=[reduce_lr,e_stop,chkpt,chkpt_weight],verbose=1,shuffle=True)
 
 #hist = model.fit([xtr0,xtr5], [ttr5], validation_split=0.3,\
 #                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)

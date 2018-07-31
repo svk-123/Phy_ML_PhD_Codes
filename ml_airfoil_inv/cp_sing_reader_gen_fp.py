@@ -29,7 +29,7 @@ from skimage import io, viewer,util
 np.set_printoptions(threshold=np.inf)
 
 
-path='./airfoil_naca/'
+path='./airfoil_1600_1aoa_1re/'
 
 import xlrd
 excel_sheet = xlrd.open_workbook(path+'/Cp_Graph.xlsx')
@@ -52,7 +52,7 @@ for i in range(len(name)):
    
 coord=[]
 for i in range(len(name)):
-    coord.append(np.loadtxt(path+'naca131/%s.dat'%name[i],skiprows=1))
+    coord.append(np.loadtxt(path+'coord_seligFmt_formatted/%s.dat'%name[i],skiprows=1))
 
 
 tmp = pd.read_excel(path+'/Cp_Graph.xlsx',sep=",",delimiter=",",header=None,skiprows=1)
@@ -113,6 +113,7 @@ for i in range(len(tmp2)):
         
         figure=plt.figure(figsize=(3,3))
         plt0, =plt.plot(up[:,0],up[:,1],'k',linewidth=2,label='true')
+        plt0, =plt.plot(lr[:,0],lr[:,1],'k',linewidth=2,label='true')
         #plt0, =plt.plot(lr[:,0],lr[:,1],'b',linewidth=2,label='true')
         #plt1, =plt.plot(val_inp[:,4],out,'-or',linewidth=2,label='nn')  
         #plt.legend(fontsize=16)
@@ -125,41 +126,22 @@ for i in range(len(tmp2)):
         plt.axis('off')
         #plt.grid(True)
         #patch.set_facecolor('black')
-        plt.savefig('./plot/up_%s'%i, format='png')
+        plt.savefig('./plot_sing/up_%s'%i, format='png')
         plt.show() 
-    
-        
-        figure=plt.figure(figsize=(3,3))
-        plt0, =plt.plot(lr[:,0],lr[:,1],'k',linewidth=2,label='true')
-        #plt1, =plt.plot(val_inp[:,4],out,'-or',linewidth=2,label='nn')  
-        #plt.legend(fontsize=16)
-        #plt.xlabel('alpha',fontsize=16)
-        #plt.ylabel('cl',fontsize=16)
-        #plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
-        #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
-        plt.xlim(-0.05,1.05)
-        plt.ylim(-2.0,1.0)    
-        plt.axis('off')
-        #plt.grid(True)
-        #patch.set_facecolor('black')
-        plt.savefig('./plot/lr_%s'%i, format='png')
-        plt.show() 
-                
-        img_up = io.imread('./plot/up_%s'%i, as_grey=True)  # load the image as grayscale
+            
+               
+        img_up = io.imread('./plot_sing/up_%s'%i, as_grey=True)  # load the image as grayscale
         img_up = util.invert(img_up)
         img_mat_up.append(img_up)
         print 'image matrix size: ', img_up.shape      # print the size of image
         
-        img_lr = io.imread('./plot/lr_%s'%i, as_grey=True)  # load the image as grayscale
-        img_lr = util.invert(img_lr)
-        img_mat_lr.append(img_lr)
-        print 'image matrix size: ', img_lr.shape      # print the size of image
+
 
     
 xx=np.loadtxt('xx.txt')   
 img_mat=[]
 
-'''for i in range(len(coord)):
+for i in range(len(coord)):
     print i
     if name[i] not in unname:  
         l=len(coord[i])
@@ -189,7 +171,7 @@ img_mat=[]
         yout[len(xx):]=l_yy    
         img_mat.append(yout)
         #plot
-        figure=plt.figure(figsize=(6,4))
+        '''figure=plt.figure(figsize=(6,4))
         plt0, =plt.plot(coord[i][:,0],coord[i][:,1],'k',linewidth=2,label='true')
         plt0, =plt.plot(xx,u_yy)
         plt0, =plt.plot(xx,l_yy)    
@@ -203,8 +185,8 @@ img_mat=[]
         plt.ylim(-0.18,0.18)    
         plt.axis('off')
         plt.savefig('./plot/%s.png'%name[i])
-        plt.show() 
-        print i'''
+        plt.show() '''
+        print i
     
 
 
@@ -213,9 +195,11 @@ for kk in range(len(name)):
     if name[kk] not in unname: 
         nname.append(name[kk])
 
-'''data1=[img_mat_up,img_mat_lr,img_mat,xx,nname]
-with open(path+'data_cp_fp_naca.pkl', 'wb') as outfile:
-    pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)'''
+
+
+data1=[img_mat_up,img_mat,xx,nname]
+with open(path+'data_cp_sing_fp_216_1600.pkl', 'wb') as outfile:
+    pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
 '''data2=[cp_up,cp_lr,img_mat,xx,nname]
 with open(path+'cp_foil_1600.pkl', 'wb') as outfile:

@@ -40,7 +40,7 @@ matplotlib.rc('xtick', labelsize=18)
 matplotlib.rc('ytick', labelsize=18) 
 
        
-indir="./naca4/polar_val"
+indir="./naca4/polar_train"
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
 #read polar
@@ -135,10 +135,10 @@ for i in range(len(data1)):
     
     
     #spread
-    plt0, =plt.plot(val_out,out,'og') 
+    #plt0, =plt.plot(val_out,out,'og') 
   
 #plt.legend(fontsize=20)
-plt.xlabel('True $C_l$',fontsize=20)
+'''plt.xlabel('True $C_l$',fontsize=20)
 plt.ylabel('Predicted $C_l$',fontsize=20)
 #plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
 #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
@@ -165,11 +165,10 @@ plt.yscale('log')
 #plt.xlim([-10,5000])
 #plt.ylim([-0.2,0.2])    
 plt.savefig('convergence.png')
-plt.show()
+plt.show()'''
 
 
-
-
+endtime=time.time()
 
 
 

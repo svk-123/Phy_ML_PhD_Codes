@@ -41,41 +41,81 @@ import cPickle as pickle
 import pandas
 from skimage import io, viewer,util 
 np.set_printoptions(threshold=np.inf)
-
+from scipy import interpolate
 
 
 #co-fomatting
-'''
-path='./coord_seligFmt_original'
+path='./airfoil_1600_1aoa_1re/naca'
 
 indir=path
-outdir='./coord_seligFmt_formatted'
+outdir='./airfoil_1600_1aoa_1re/naca131'
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
+
 nname=[]
 for i in range(len(fname)):
     nname.append(fname[i].split('.dat')[0])
-    
-#load coord
-for i in range(len(fname)):
-#for i in range(10):
-    with open(path+'/%s'%fname[i], 'r') as infile:
-        data0=infile.readlines()
+   
+xx=np.loadtxt('./airfoil_1600_1aoa_1re/n0012.dat')      
 
+xxu=xx[:66,0]
+xxl=xx[66:,0]
+
+    
+for i in range(len(fname)):
+    
+    print i
+    coord=np.loadtxt(path+'/%s'%fname[i],skiprows=1)
+        
+    l=len(coord)
+    ind=((l-1)/2)
+    
+    up_x=coord[:ind+1,0]
+    up_y=coord[:ind+1,1]
+        
+    lr_x=coord[ind:,0]
+    lr_y=coord[ind:,1]    
+        
+    up_x[0]=1
+    up_x[-1:]=0
+        
+    lr_x[0]=0    
+    lr_x[-1:]=1
+    
+    fu = interpolate.interp1d(up_x, up_y)
+    u_yy = fu(xxu)
+        
+    fl = interpolate.interp1d(lr_x, lr_y)
+    l_yy = fl(xxl)      
+    
     fp= open(outdir+"/%s"%fname[i],"w+")
     fp.write('%s\n'%nname[i])    
-    for j in range(1,len(data0)):
-        fp.write("%s"%(data0[j])) 
-
+    
+    for j in range(len(xxu)):
+        fp.write("%f %f\n"%(xxu[j],u_yy[j])) 
+        
+    for j in range(len(xxl)):
+        fp.write("%f %f\n"%(xxl[j],l_yy[j])) 
+        
     fp.close()
     
-'''    
     
-#coordinate-check
-indir='./coord_seligFmt_formatted'
-fname = [f for f in listdir(indir) if isfile(join(indir, f))]
-coord=[]
-for i in range(len(fname)):
-    coord.append(np.loadtxt(indir+'/%s'%fname[i],skiprows=1))
+     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+##coordinate-check
+#indir='./coord_seligFmt_formatted'
+#fname = [f for f in listdir(indir) if isfile(join(indir, f))]
+#coord=[]
+#for i in range(len(fname)):
+#    coord.append(np.loadtxt(indir+'/%s'%fname[i],skiprows=1))
     
     
     

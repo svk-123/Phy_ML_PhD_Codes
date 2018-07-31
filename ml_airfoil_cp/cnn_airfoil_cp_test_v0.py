@@ -52,55 +52,44 @@ matplotlib.rc('ytick', labelsize=18)
 """------------------------------------"""
 
 # ref:[data,name]
-path='./airfoil_naca/'
-data_file='data_cp_fp_naca.pkl'
+path='./airfoil_1600_1aoa_1re/'
+data_file='data_cp_s144_tr.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
-inp_up=result[0]
-inp_lr=result[1]
-my_out=result[2]
-xx=result[3]
-name=result[4]
+inp=result[1]
+out=result[0]
+xx=result[2]
+name=result[3]
 
-inp_up=np.asarray(inp_up)
-inp_lr=np.asarray(inp_lr)
-my_out=np.asarray(my_out)
+inp=np.asarray(inp)
+my_out=np.asarray(out)
 
-xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3) 
+xtr1=inp
 ttr1=my_out 
 
-
-path='./airfoil_1600_1aoa_1re/'
-data_file='cp_foil_1600.pkl'
-
-with open(path + data_file, 'rb') as infile:
-    result = pickle.load(infile)
-cp_up=result[0]
-cp_lr=result[1]
-
-
-model_test=load_model('./selected_model/final_enc_cnn.hdf5')  
+xtr1=np.reshape(xtr1,(len(xtr1),144,144,1))  
+model_test=load_model('./selected_model/model_cnn_1000_0.005_0.021.hdf5')  
        
 out=model_test.predict([xtr1])
-out=out*0.18
 
-for k in range(len(name)):
+
+'''for k in range(143):
 
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(xx,my_out[k][0:35],'ro',markersize=8,label='true')
     plt.plot(xx,my_out[k][35:],'ro',markersize=8)
     plt.plot(xx,out[k][0:35],'b',lw=3,label='CNN')
     plt.plot(xx,out[k][35:],'b',lw=3)
-    plt.xlim([-0.05,1.05])
-    plt.ylim([-0.2,0.2])
+    #plt.xlim([-0.05,1.05])
+    #plt.ylim([-0.2,0.2])
     plt.legend(fontsize=20)
     plt.xlabel('X',fontsize=20)
-    plt.ylabel('Y',fontsize=20)  
+    plt.ylabel('$C_p$',fontsize=20)  
     #plt.axis('off')
     plt.tight_layout()
-    plt.savefig('./plot/ts_%s_%s.png'%(k,name[k]), bbox_inches='tight',dpi=100)
-    plt.show()
+    plt.savefig('./plot_out_ts/ts_%s_%s.png'%(k,name[k]), bbox_inches='tight',dpi=100)
+    plt.show()'''
     
     
 '''fig = plt.figure(figsize=(8, 4),dpi=100)
@@ -148,10 +137,9 @@ for k in range(len(name)):
     tmp2=tmp/out[k]
     train_l1.append(sum(abs(tmp2))/len(out))
 
-
 #spread_plot
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot([-1,1],[-1,1],'k',lw=3)
+plt.plot([-2,1.5],[-2,1.5],'k',lw=3)
 plt.plot(my_out[0],out[0],'ro')
 for k in range(len(name)):
     
@@ -159,8 +147,8 @@ for k in range(len(name)):
 plt.legend(fontsize=20)
 plt.xlabel('True',fontsize=20)
 plt.ylabel('Prediction',fontsize=20)
-plt.xlim([-0.20,0.20])
-plt.ylim([-0.20,0.20])    
+#lt.xlim([-1.5,1.5])
+#plt.ylim([-1.5,1.5])    
 plt.savefig('train_spread.png', bbox_inches='tight',dpi=100)
 plt.show()          
 
@@ -172,6 +160,8 @@ plt.ylabel('number of Samples',fontsize=20)
 plt.savefig('train_error.png', bbox_inches='tight',dpi=100)
 plt.show()
 
+
+
 '''path='./selected_model/case_3_fp'
 data_file='/hist.pkl'
 with open(path + data_file, 'rb') as infile:
@@ -179,16 +169,15 @@ with open(path + data_file, 'rb') as infile:
 history=result[0]
 #hist
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot(range(len(history['loss'])),history['loss'],'r',lw=3,label='training_error')
-plt.plot(range(len(history['val_loss'])),history['val_loss'],'b',lw=3,label='validation_error')
-plt.legend(fontsize=20)
-plt.xlabel('Training Epochs',fontsize=20)
-plt.ylabel('MSE',fontsize=20)
-plt.yscale('log')
+plt.plot(range(len(history['loss'])),history['loss'],'r',lw=2,label='training_error')
+plt.plot(range(len(history['val_loss'])),history['val_loss'],'b',lw=2,label='validation_error')
+plt.legend(fontsize=16)
+plt.xlabel('Iteration',fontsize=16)
+plt.ylabel('MSE',fontsize=16)
 #plt.xlim([-0.05,1.05])
 #plt.ylim([-0.2,0.2])    
-plt.savefig('convergence.png', bbox_inches='tight',dpi=100)
-plt.show()'''
-
+plt.savefig('./plot_out/convergence.png')
+plt.show()
+'''
 
 

@@ -127,7 +127,8 @@ ttr1 = my_out[I][:n]
 
 
 aa=Input(shape=(5,))
-xx =Dense(10,  kernel_initializer='random_normal', activation='relu')(aa)
+xx =Dense(30,  kernel_initializer='random_normal', activation='relu')(aa)
+xx =Dense(30, activation='relu')(xx)
 xx =Dense(30, activation='relu')(xx)
 xx =Dense(30, activation='relu')(xx)
 xx =Dense(30, activation='relu')(xx)
@@ -152,7 +153,7 @@ opt = Adam(lr=2.5e-5,decay=1.0e-12)
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 hist = model.fit([xtr0], [ttr1], validation_split=0.1,\
-                 epochs=10000, batch_size=16,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
+                 epochs=10000, batch_size=64,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
 
 #save model
 model.save('./model/final.hdf5') 

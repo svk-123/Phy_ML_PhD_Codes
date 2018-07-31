@@ -48,68 +48,29 @@ import os, shutil
 """------------------------------------"""
 
 # ref:[data,name]
-path='./airfoil_1600_1aoa_1re/'
-data_file='cp_foil_1600.pkl'
+path='./airfoil_1600_1aoa_1re/naca'
+indir=path
 
-with open(path + data_file, 'rb') as infile:
-    result = pickle.load(infile)
-cp_up=result[0]
-cp_lr=result[1]
-foil=result[2]
-xx=result[3]
-name=result[4]
-
-'''
-data_file='data_cp_fp_1600.pkl'
-with open(path + data_file, 'rb') as infile:
-    result = pickle.load(infile)
-name1=result[4]
-for i in range(len(name)):
-    if (name[i]!=name1[i]):
-        print 'Not match'
-'''
-
-l=10
-plt.figure(figsize=(6,5),dpi=100)
-for k in range(100):
-   
-    plt.plot(xx,foil[k][0:35],'-k',lw=0.2)
-    plt.plot(xx,foil[k][35:],'-k',lw=0.2)   
-    
-plt.plot(xx,foil[l][0:35],'r',lw=2,label='true')
-plt.plot(xx,foil[l][35:],'r',lw=2)
-
-plt.xlim([-0.05,1.05])
-plt.ylim([-0.2,0.2])
-#plt.legend(fontsize=16)
-plt.xlabel('X',fontsize=16)
-plt.ylabel('Y',fontsize=16)  
-#plt.axis('off')
-plt.tight_layout()
-plt.savefig('./plot_out/foil.png')
-plt.show()
+fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
 
 plt.figure(figsize=(6,5),dpi=100)
-for k in range(100):
-
+for i in range(len(fname)):
     
-    plt.plot(cp_up[k][:,0],cp_up[k][:,1],'-k',lw=0.2)
-    plt.plot(cp_lr[k][:,0],cp_lr[k][:,1],'-k',lw=0.2)   
-  
+    
+    cd=np.loadtxt(path+'/%s'%fname[i],skiprows=1)
+    cd1=np.loadtxt('./airfoil_1600_1aoa_1re/naca131/%s'%fname[i],skiprows=1)    
 
-plt.plot(cp_up[l][:,0],cp_up[l][:,1],'r',lw=2,label='true')
-plt.plot(cp_lr[l][:,0],cp_lr[l][:,1],'r',lw=2)
-
-plt.xlim([-0.05,1.05])
-plt.ylim([-2,1.1])
-#plt.legend(fontsize=16)
-plt.xlabel('c',fontsize=16)
-plt.ylabel('Cp',fontsize=16)  
-#plt.axis('off')
-plt.tight_layout()
-plt.savefig('./plot_out/cp.png')
-plt.show()
+    plt.plot(cd[:,0],cd[:,1],'-k',lw=3.0)
+    plt.plot(cd1[:,0],cd1[:,1],'-r',lw=2.0)  
+    
+    plt.xticks([])
+    plt.yticks([])
+    plt.ylim([-0.2,0.2])
+    plt.grid()
+    plt.tight_layout()
+    plt.savefig('./naca_out/%s_%s.png'%(i,fname[i]),bbox_inches='tight',dpi=100)
+    plt.show()
 
 
 

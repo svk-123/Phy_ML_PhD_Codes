@@ -49,18 +49,18 @@ import os, shutil
 
 # ref:[data,name]
 path='./airfoil_1600_1aoa_1re/'
-data_file='data_cp_fp_1600.pkl'
+data_file='data_cp_sing_fp_216_1600.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
 up=result[0]
-lr=result[1]
-foil=result[2]
-xx=result[3]
-name=result[4]
+#lr=result[1]
+foil=result[1]
+xx=result[2]
+name=result[3]
 
 up=np.asarray(up)
-lr=np.asarray(lr)
+#lr=np.asarray(lr)
 foil=np.asarray(foil)
 name=np.asarray(name)
 
@@ -72,29 +72,36 @@ n=1200
 
 #training
 up_tr=up[I][:n]
-lr_tr=lr[I][:n]
+#lr_tr=lr[I][:n]
 foil_tr=foil[I][:n]
 name_tr=name[I][:n]
 
 #test
 up_ts=up[I][n:]
-lr_ts=lr[I][n:]
+#lr_ts=lr[I][n:]
 foil_ts=foil[I][n:]
 name_ts=name[I][n:]
 
 
 
-data1=[up_tr,lr_tr,foil_tr,xx,name_tr]
-with open(path+'data_1600_tr.pkl', 'wb') as outfile:
+'''data1=[up_tr,lr_tr,foil_tr,xx,name_tr]
+with open(path+'data_sing_144_1600_tr.pkl', 'wb') as outfile:
     pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
 data2=[up_ts,lr_ts,foil_ts,xx,name_ts]
-with open(path+'data_1600_ts.pkl', 'wb') as outfile:
+with open(path+'data_sing_144_1600_ts.pkl', 'wb') as outfile:
+    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)'''
+
+
+
+#cp_sing
+data1=[up_tr,foil_tr,xx,name_tr]
+with open(path+'data_sing_216_1600_tr.pkl', 'wb') as outfile:
+    pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
+
+data2=[up_ts,foil_ts,xx,name_ts]
+with open(path+'data_sing_216_1600_ts.pkl', 'wb') as outfile:
     pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
-
-
-
-
 
 
 

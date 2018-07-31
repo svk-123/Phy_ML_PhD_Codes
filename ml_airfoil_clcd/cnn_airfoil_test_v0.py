@@ -56,13 +56,13 @@ matplotlib.rc('ytick', labelsize=18)
 
 # ref:[data,name]
 path='./naca456'
-data_file='/data_airfoil.pkl'
+data_file='/data_airfoil_inverse.pkl'
 
 with open(path+data_file,'rb') as infile:
     result = pickle.load(infile)
 coord=result
 
-indir=path+"/polar_tv"
+indir=path+"/polar_train"
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
 name=[]   
@@ -166,14 +166,14 @@ val_out=data2[:,5]
 my_error=[]    
 #load_model
 #model_test=load_model('./model_cnn/final_af_cnn.hdf5') 
-model_test=load_model('./selected_model/naca456_nscc/model_af_cnn_250_0.002791_0.002807.hdf5')  
+model_test=load_model('./selected_model/model_af_cnn_1000_0.003_0.003.hdf5')  
 
 
 #spread plot
-plt.figure(figsize=(6, 5), dpi=100) 
-plt0, =plt.plot([-0.5,1.6],[-0.5,1.6],'k',lw=3) 
+#plt.figure(figsize=(6, 5), dpi=100) 
+#plt0, =plt.plot([-0.5,1.6],[-0.5,1.6],'k',lw=3) 
 
-for i in range(55):
+for i in range(len(name)):
     
     #Re, d1, d2, d3, alp, cl, cd
     data2=data1[i]
@@ -192,8 +192,8 @@ for i in range(55):
         
     #plot
     '''plt.figure(figsize=(6, 5), dpi=100)
-    plt0, =plt.plot(val_inp2[:,1],val_out,'-og',linewidth=2,label='true')
-    plt1, =plt.plot(val_inp2[:,1],out,'-or',linewidth=2,label='cnn')  
+    plt0, =plt.plot(val_inp2[:,1]*10,val_out,'-og',linewidth=3,label='true')
+    plt1, =plt.plot(val_inp2[:,1]*10,out,'-or',linewidth=3,label='CNN')  
     plt.legend(fontsize=20)
     plt.xlabel('AoA',fontsize=20)
     plt.ylabel('$C_l$',fontsize=20)
@@ -206,10 +206,10 @@ for i in range(55):
     
     
     #spread
-    plt0, =plt.plot(val_out,out,'og') 
+    #plt0, =plt.plot(val_out,out,'og') 
   
 #plt.legend(fontsize=20)
-plt.xlabel('True $C_l$',fontsize=20)
+'''plt.xlabel('True $C_l$',fontsize=20)
 plt.ylabel('Predicted $C_l$',fontsize=20)
 #plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
 #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
@@ -217,7 +217,7 @@ plt.ylabel('Predicted $C_l$',fontsize=20)
 #plt.ylim(-0.01,1.4) 
 
 plt.savefig('val1', format='png',bbox_inches='tight', dpi=100)    
-plt.show()
+plt.show()'''
 
 
 '''path='./selected_model/naca456_cnn_latest'
@@ -241,8 +241,7 @@ plt.show()  '''
     
 
     
-    
-    
+print (start_time-time.time())    
     
     
     

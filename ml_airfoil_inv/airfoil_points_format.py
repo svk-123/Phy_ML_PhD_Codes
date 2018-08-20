@@ -48,26 +48,43 @@ from scipy import interpolate
 path='./airfoil_1600_1aoa_1re/naca'
 
 indir=path
-outdir='./airfoil_1600_1aoa_1re/naca131'
+outdir='./airfoil_1600_1aoa_1re/naca_sp_131'
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 
 nname=[]
 for i in range(len(fname)):
     nname.append(fname[i].split('.dat')[0])
+
+
    
-xx=np.loadtxt('./airfoil_1600_1aoa_1re/n0012.dat')      
+'''xx=np.loadtxt('./airfoil_1600_1aoa_1re/n0012.dat')      
+xxu=xx[:66,0].copy()
+t1=np.linspace(0,0.001,11)
+t2=np.linspace(0.002,0.05,15)
+t3=np.linspace(0.055,0.1,10)
+t4=np.concatenate((t1,t2,t3),axis=0)
+xu_n=np.concatenate((xxu[:51],t4[::-1]),axis=0)'''
 
-xxu=xx[:66,0]
-xxl=xx[66:,0]
+nn=100
 
-    
-for i in range(len(fname)):
+xu_n=np.zeros((nn))
+for i in range(nn):
+    theta= (np.pi/float(nn))*i
+    xu_n[i]=1.0-np.cos(theta)
+xu_n=xu_n/xu_n.max()
+
+xu_n=xu_n[::-1]
+xl_n=xu_n[::-1]
+
+# upper lower interp    
+for i in range(61,len(fname)):
     
     print i
-    coord=np.loadtxt(path+'/%s'%fname[i],skiprows=1)
-        
-    l=len(coord)
-    ind=((l-1)/2)
+    co=np.loadtxt(path+'/%s'%fname[i],skiprows=1)
+    
+    coord=co.copy()
+
+    ind=np.argmin(co[:,0])
     
     up_x=coord[:ind+1,0]
     up_y=coord[:ind+1,1]
@@ -75,33 +92,53 @@ for i in range(len(fname)):
     lr_x=coord[ind:,0]
     lr_y=coord[ind:,1]    
         
-    up_x[0]=1
-    up_x[-1:]=0
-        
-    lr_x[0]=0    
-    lr_x[-1:]=1
-    
+    # interp1
     fu = interpolate.interp1d(up_x, up_y)
-    u_yy = fu(xxu)
+    u_yy = fu(xu_n)
         
     fl = interpolate.interp1d(lr_x, lr_y)
-    l_yy = fl(xxl)      
+    l_yy = fl(xl_n)
+    
+    #interp2
+    '''fu = interpolate.splrep(up_x[::-1], up_y[::-1])
+    u_yy = interpolate.splev(xu_n,fu)
+        
+    fl = interpolate.splrep(lr_x, lr_y)
+    l_yy = interpolate.splev(xl_n,fl) '''
+    
+    
     
     fp= open(outdir+"/%s"%fname[i],"w+")
     fp.write('%s\n'%nname[i])    
     
-    for j in range(len(xxu)):
-        fp.write("%f %f\n"%(xxu[j],u_yy[j])) 
+    for j in range(len(xu_n)):
+        fp.write("%f %f\n"%(xu_n[j],u_yy[j])) 
         
-    for j in range(len(xxl)):
-        fp.write("%f %f\n"%(xxl[j],l_yy[j])) 
+    for j in range(1,len(xl_n)):
+        fp.write("%f %f\n"%(xl_n[j],l_yy[j])) 
         
-    fp.close()
+    fp.close()          
     
+
+    pts=np.loadtxt(outdir+'/%s'%fname[i],skiprows=1)   
     
-     
+    plt.figure(figsize=(12,10))
     
+    plt.plot(co[:,0],co[:,1],'g')
+    plt.plot(pts[:,0],pts[:,1],'r',ms=4)
+  
     
+    plt.xlabel('x',fontsize=16)
+    plt.ylabel('y',fontsize=16)
+    
+    #plt.yscale('log')
+    #plt.xticks(range(0,2001,500))
+    plt.xlim([-0.05,0.3])
+    plt.ylim([-0.15,0.15])    
+    
+    plt.savefig('./plot/%d_%s.png'%(i,nname[i]), format='png', bbox_inches='tight',dpi=300)
+    plt.show()
+
     
     
     

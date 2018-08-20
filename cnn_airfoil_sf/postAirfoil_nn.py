@@ -171,6 +171,9 @@ for ii in range(len(fname)):
         vi = interpolate.griddata(xy, v, (grid_x, grid_y), method='linear')
         pi = interpolate.griddata(xy, p, (grid_x, grid_y), method='linear')
         
+        if (np.isnan([ui,vi,pi]).any() == True):
+            raise ValueError('Error')            
+        
         #z1n=z1.copy()
         #plt.imshow(ui)
         plot(grid_x, grid_y,ui,20,'name')  
@@ -198,7 +201,7 @@ info=['0-myinp, 1-myout_p, 2-myout_u, 3-myout_v, 4-myco, 5-mybor, 6-myins, 7-nna
 
 data1 = [myinp, myout_p, myout_u, myout_v, myco, mybor, myins, nname, info ]
 
-with open(filepath+'foil_inout.pkl', 'wb') as outfile1:
+with open(filepath+'/foil_inout.pkl', 'wb') as outfile1:
     pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
     

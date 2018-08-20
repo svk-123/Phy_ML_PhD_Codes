@@ -55,6 +55,9 @@ xu_n=xl_n[::-1]
 xi=np.concatenate((xu_n,xl_n),axis=0)
 xi=xi.astype(int)
 
+tot_bor=[]
+tot_ins=[]
+
 for i in range(len(fname)):
     print i
     pts=np.loadtxt(indir+'/%s'%fname[i],skiprows=1)
@@ -111,6 +114,7 @@ for i in range(len(fname)):
         bor.append([yi[j],xi[j]])
     img_foil_n=img_foil.copy()
     bor=np.asarray(bor)
+    tot_bor.append(bor)
     
     for m in range(img_foil.shape[0]):
         for n in range(img_foil.shape[1]):
@@ -137,7 +141,9 @@ for i in range(len(fname)):
                 ins.append([tmp[j,0],tmp1[k]])
     xtmp=np.asarray(xtmp)            
     ytmp=np.asarray(ytmp)
-  
+    tot_ins.append(ins)
+    
+    
     for m in range(len(xtmp)):
         
         if (([ ytmp[m],xtmp[m] ] == bor).all(1).any() == False):
@@ -165,7 +171,7 @@ for i in range(len(fname)):
      
     
     
-    plt.figure(figsize=(6, 5), dpi=100)
+    '''plt.figure(figsize=(6, 5), dpi=100)
     #cp = pyplot.tricontour(ys, zs, pp,nc)
     xp, yp = np.meshgrid(range(216), range(216))
     cp = plt.contourf(xp,yp[::-1],img_foil_n,10,cmap=cm.jet)
@@ -179,9 +185,9 @@ for i in range(len(fname)):
     plt.xlabel('X ',fontsize=20)
     plt.ylabel('Y ',fontsize=20)
     plt.savefig('./plot_df/%d_%s.png'%(i,nname[i]), format='png',bbox_inches='tight', dpi=100)
-    plt.show()    
+    plt.show()    '''
     
-data2=[coord_mat,img_mat,img_mat_n,bor,ins,nname,'0-coord,1-imag,2-img_df,3-bor(yx),4-ins(xy)r,5-nname']
+data2=[coord_mat,img_mat,img_mat_n,tot_bor,tot_ins,nname,'0-coord,1-imag,2-img_df,3-bor(yx),4-ins(xy)r,5-nname']
 with open(path+'/foil_df.pkl', 'wb') as outfile:
     pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)    
     

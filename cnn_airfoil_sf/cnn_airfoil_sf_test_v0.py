@@ -74,28 +74,40 @@ name=result[7][st:end]
 my_inp=np.asarray(my_inp)
 my_out=np.asarray(my_out)
 
-
 xtr1=np.reshape(my_inp,(len(my_inp),216,216,1))  
 ttr1=my_out  
 
 model_test=load_model('./selected_model/model_cnn_400_0.000321_0.000272.hdf5')  
 out=model_test.predict([xtr1])
 
-
-def plot(zp,nc,name):
+def plot(zp1,zp2,nc,name):
     xp, yp = np.meshgrid(np.linspace(-1,2,216), np.linspace(1,-1,216))
-    plt.figure(figsize=(6, 5))
-    plt.contourf(xp,yp,zp,nc,cmap=cm.jet)
+    
+    plt.figure(figsize=(16, 6))
+    
+    plt.subplot(121)
+    plt.contourf(xp,yp,zp1,nc,cmap=cm.jet)
     plt.colorbar()
-    plt.title('%s'%name)
+    plt.title('CFD-%s'%name)
+    
+    plt.subplot(122)
+    plt.contourf(xp,yp,zp2,nc,cmap=cm.jet)
+    plt.colorbar()
+    #plt.yticks([])
+    #plt.yaxis('off')
+    plt.title('Prediction-%s'%name)  
     #plt.xlim([-0.1,1.1])
     #plt.ylim([-0.1,0.1])
-    #plt.savefig('./plotc/%04d_%s.png'%(ii,nname[ii]), format='png')
+    plt.savefig('./plotc/%s.png'%(name), format='png',dpi=200)
     plt.show()
 
+
+
+
+
+
 for k in range(10):
-    
-    
+        
     p1=my_out[k].copy()
     p2=out[k,:,:,0].copy()
     
@@ -110,11 +122,8 @@ for k in range(10):
     
     p2[xb,yb]= np.nan
     p2[yi,xi]= np.nan
-    
-    
-    plot(p1,20,'%s-t'%name[k])
-    plot(p2,20,'%s-p'%name[k])
-    
-    plot(p1-p2,20,'%s-e'%name[k])
-
+        
+    plot(p1,p2,20,'ts_%s'%name[k])
+        
+    #plot(p1-p2,20,'%s-e'%name[k])
 

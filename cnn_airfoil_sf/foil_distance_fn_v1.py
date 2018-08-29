@@ -32,7 +32,7 @@ np.set_printoptions(threshold=np.inf)
 
 path='./airfoil_data'
 
-indir=path+'/foil200'
+indir=path+'/foil200_aoa'
 
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 fname.sort()
@@ -49,7 +49,7 @@ coord_mat=[]
 a=72
 zl=108
 b=108
-pz=1/72.
+px=1/72.
     
 xu_n=np.linspace(a,2*a-1,a)
 xl_n=xu_n
@@ -61,65 +61,42 @@ xi=xi.astype(int)
 tot_bor=[]
 tot_ins=[]
 
-for i in range(5,6):
+for i in range(3,4):
     print i
     pts=np.loadtxt(indir+'/%s'%fname[i],skiprows=1)
-    coord_mat.append(pts)
-    coord=pts.copy()
     
-    ind=99
-    up_x=coord[:ind+1,0]
-    up_y=coord[:ind+1,1]
+    
+    figure=plt.figure(figsize=(3,4))
+    plt0, =plt.plot(pts[:,0],pts[:,1],'k',linewidth=1e-6,label='true')
+    #plt0, =plt.plot((xu_n-a)/(a-1),uy,linewidth=2,label='true')
+    #plt0, =plt.plot((xl_n-a)/(a-1),ly,linewidth=2,label='true')
+    
+    #plt0, =plt.plot(up_x,lr_x,linewidth=2,label='true')
+    #plt0, =plt.plot(up_y,lr_y,linewidth=2,label='true')
         
-    lr_x=coord[ind:,0]
-    lr_y=coord[ind:,1]    
-    
-
-    
-    # interp1
-    fu = interpolate.interp1d(up_x, up_y)
-    u_yy = fu( (xu_n-a)/(a-1) )
-        
-    fl = interpolate.interp1d(lr_x, lr_y)
-    l_yy = fl( (xl_n-a)/(a-1) )
-    
-    uy= zl - (u_yy*(b-1)) 
-    for j in range(len(uy)):
-        uy[j]=round(uy[j],0)
-    uy=uy.astype(int)   
-    
-    ly= zl - (l_yy*(b-1)) 
-    for j in range(len(ly)):
-        ly[j]=round(ly[j],0)
-    ly=ly.astype(int)     
-    
-    yi=np.concatenate((uy,ly),axis=0)
-    
-    figure=plt.figure(figsize=(3,3))
-    plt0, =plt.plot(pts[:,0],pts[:,1],'k',linewidth=2,label='true')
-    plt0, =plt.plot((xu_n-a)/(a-1),uy,linewidth=2,label='true')
-    plt0, =plt.plot((xl_n-a)/(a-1),ly,linewidth=2,label='true')
     plt.xlim(-1,2)
     plt.ylim(-1,1)    
     plt.axis('off')
+    
     #plt.grid(True)
     #patch.set_facecolor('black')
     plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-    plt.savefig('./plot/%d_%s'%(i,nname[i]), format='png')
-    plt.show() 
+    plt.savefig('./plot/%d_%s.eps'%(i,nname[i]), format='eps')
+    #plt.show() 
+    plt.close()
                
-    img_foil = io.imread('./plot/%d_%s'%(i,nname[i]), as_grey=True)  # load the image as grayscale
+    img_foil = io.imread('./plot/%d_%s.eps'%(i,nname[i]), as_grey=True)  # load the image as grayscale
     img_mat.append(img_foil)
     print('image matrix size: ', img_foil.shape )     # print the size of image
         
-    #bor=np.argwhere(img_foil==0.0)
-    # outer-innner both
-    bor=[]
-    for j in range(len(xi)):
-        bor.append([yi[j],xi[j]])
-    img_foil_n=img_foil.copy()
+    bor=np.argwhere(img_foil==0.0)
     bor=np.asarray(bor)
     tot_bor.append(bor)
+    
+    # outer-innner both
+    img_foil_n=img_foil.copy()
+    
+    
     
     for m in range(img_foil.shape[0]):
         for n in range(img_foil.shape[1]):
@@ -128,12 +105,36 @@ for i in range(5,6):
                 dist=LA.norm((bor-[m,n]),axis=1).min()
                 
                 img_foil_n[m,n]=dist*0.01
-
-    
-    tmp=np.concatenate((xi[:,None],yi[:,None]),axis=1)
-    tmp=tmp[tmp[:,0].argsort()]
+        
     
     #inner
+    xi=bor[:,1].copy()
+    yi=bor[:,0].copy()
+    tmp=np.concatenate((xi[:,None],yi[:,None]),axis=1)
+    tmp=tmp[tmp[:,1].argsort()]
+    tmp=tmp[tmp[:,0].argsort(kind='mergesort')]
+    
+    unique, counts = np.unique(tmp[:,0], return_counts=True)
+    
+    if (np.any(counts==1) == True):
+        ind1=np.argwhere(counts==1)
+        raise ValueError('singe Value exits Error')
+        
+    if (np.any(counts%2 ==1) == True):    
+        ind2=np.argwhere(counts%2 ==1)
+        for j in range(len(ind2)):
+            
+            num=unique[ind2[j]]
+            ind3 = np.argwhere(tmp[:,0]==num)
+            tmpval=tmp[ind3,1]
+    
+            for k in range(len(tmpval)-1):
+                if(tmpval[k]+1==tmpval[k+1]):
+                    if(tmpval[k]==tmpval.min()):
+                        tmp=np.delete(tmp,ind3[k],0)
+                    if(tmpval[k+1]==tmpval.max()):
+                        tmp=np.delete(tmp,ind3[k+1],0)
+                        
     xtmp=[]
     ytmp=[]
     ins=[]
@@ -147,36 +148,35 @@ for i in range(5,6):
     xtmp=np.asarray(xtmp)            
     ytmp=np.asarray(ytmp)
     tot_ins.append(ins)
-    
-    
+        
     for m in range(len(xtmp)):
         
         if (([ ytmp[m],xtmp[m] ] == bor).all(1).any() == False):
          
             dist=LA.norm((bor-[ ytmp[m],xtmp[m] ]),axis=1).min()
                 
-            img_foil_n[ ytmp[m], xtmp[m] ]= -1*dist*0.01   
+            img_foil_n[ ytmp[m], xtmp[m] ]= -1*dist*0.01
 
-    
-    
-    
-    
-    #img_foil_n[ytmp,xtmp]=2.0 # for visibility
-    img_foil_n[yi,xi]=0.0 # for visible plotting chnage to 1.0
-    if(img_foil_n[yi[0],xi[0]]!=0):
-        raise ValueError('Error')
-    img_mat_n.append(img_foil_n)
-    
-    
-    '''plt.imshow(img_foil_n)
-    plt.xlim(70,145)
-    plt.ylim(120,90) 
-    plt.savefig('./plot_df/%d_%s.eps'%(i,nname[i]), format='eps')
-    plt.axis('off')'''
      
     
     
-    plt.figure(figsize=(6, 5), dpi=100)
+    #img_foil_n[ytmp,xtmp]=2.0 # for visibility
+    img_foil_n[bor[:,0],bor[:,1]]=0.0 # for visible plotting chnage to 1.0
+    if(img_foil_n[yi[0],xi[0]]!=0):
+        raise ValueError('Error')
+    img_mat_n.append(img_foil_n)
+        
+    plt.imshow(img_foil_n,aspect=3/4.)
+    #plt.xlim(70,145)
+    #plt.ylim(155,135) 
+    #plt.yticks(np.arange(0,288, 2.0))
+    #plt.grid(linewidth=1e-3, linestyle='-',alpha=0.1)
+    #plt.axis().set_aspect(3./4)
+    plt.savefig('./plot_df/%d_%s.eps'%(i,nname[i]), format='eps',dpi=300)
+    plt.close()
+    #plt.axis('off')
+        
+    '''plt.figure(figsize=(6, 5), dpi=100)
     #cp = pyplot.tricontour(ys, zs, pp,nc)
     xp, yp = np.meshgrid(range(216), range(216))
     cp = plt.contourf(xp,yp[::-1],img_foil_n,10,cmap=cm.jet)
@@ -190,11 +190,11 @@ for i in range(5,6):
     plt.xlabel('X ',fontsize=20)
     plt.ylabel('Y ',fontsize=20)
     plt.savefig('./plot_df/%s.png'%(nname[i]), format='png',bbox_inches='tight', dpi=100)
-    plt.show()
+    plt.show()'''
     
-'''data2=[coord_mat,img_mat,img_mat_n,tot_bor,tot_ins,nname,'0-coord,1-imag,2-img_df,3-bor(yx),4-ins(xy)r,5-nname']
-with open(path+'/foil_dfxx.pkl', 'wb') as outfile:
-    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)    '''
+data2=[coord_mat,img_mat,img_mat_n,tot_bor,tot_ins,nname,'0-coord,1-imag,2-img_df,3-bor(yx),4-ins(xy)r,5-nname']
+with open(path+'/foil_aoa_df.pkl', 'wb') as outfile:
+    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
     
     
 

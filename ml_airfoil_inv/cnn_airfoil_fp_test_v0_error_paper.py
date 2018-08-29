@@ -53,7 +53,7 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./airfoil_1600_1aoa_1re/'
-data_file='data_144_1600_tr.pkl'
+data_file='data_cp_fp_144_1600.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -71,7 +71,7 @@ xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3)
 ttr1=my_out 
 
 
-model_test=load_model('./hyper_selected/case144/case_3/final_enc_cnn.hdf5')  
+model_test=load_model('./hyper_selected/for_choosing_foil/model_enc_cnn_4000_0.000016.hdf5')  
        
 out=model_test.predict([xtr1])
 out=out*0.18
@@ -118,12 +118,16 @@ num=np.asarray(range(len(train_l2)))
 train_l2=np.asarray(train_l2)
 tmp=np.concatenate((train_l2[:,None],num[:,None]),axis=1)
 tmp = tmp[tmp[:,0].argsort()]
+
 fp=open('ts_30.dat','w+')
 for i in range(30):
     fp.write('%d\n'%tmp[i,1])
 fp.close()
     
 
-
+fp=open('best_of_1343_foils.dat','w+')
+for i in range(len(name)):
+    fp.write('%s\n'%name[int(tmp[i,1])])
+fp.close()
 
 

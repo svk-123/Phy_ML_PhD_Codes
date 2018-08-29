@@ -74,7 +74,7 @@ name=np.asarray(name)
 xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3) 
 ttr1=my_out 
 
-tmp=np.loadtxt('ts_30.dat')
+tmp=np.loadtxt('ts_foil_no_144.dat')
 tmp=tmp.astype(int)
 
 xtr1=xtr1[tmp]
@@ -95,15 +95,19 @@ model_test=load_model('./hyper_selected/case144/case_3/final_enc_cnn.hdf5')
 out=model_test.predict([xtr1])
 out=out*0.18
 
+pname=['RG1410','MH92','SD8020']
+#pname=['GIIIG','GOE335','HQ07']
+pk=0
 #plot one CNN
-for k in range(len(name)):
-
+for k in [1,2,7]:
+   
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(xx,my_out[k][0:35],'o',mfc='grey',mec='grey',ms=10,label='true')
     plt.plot(xx,my_out[k][35:],'o',mfc='grey',mec='grey',ms=10,)
     plt.plot(xx,out[k][0:35],'k',lw=3,label='CNN')
     plt.plot(xx,out[k][35:],'k',lw=3)
-#    
+    plt.text(0.5,-0.18,'%s'%pname[pk],horizontalalignment='center',fontsize=22)
+    pk=pk+1
 #    f1 = interp1d(xx,out[k][0:35], kind='cubic')
 #    f2 = interp1d(xx,out[k][35:], kind='cubic')
 #
@@ -116,11 +120,12 @@ for k in range(len(name)):
     plt.ylim([-0.2,0.2])
     plt.legend(loc="upper left", bbox_to_anchor=[0.0, 1], ncol=2, fontsize=24, \
                frameon=False, shadow=False, fancybox=False,title='')
+    
     plt.xlabel('X',fontsize=24)
     plt.ylabel('Y',fontsize=24)  
     #plt.axis('off')
     plt.tight_layout()
-    plt.savefig('./plot/ts_%s_%s.png'%(k,name[k]), format='png', bbox_inches='tight',dpi=100)
+    plt.savefig('./plot/ts_%s_%s.eps'%(k,name[k]), format='eps', bbox_inches='tight',dpi=100)
     plt.show()
     
 

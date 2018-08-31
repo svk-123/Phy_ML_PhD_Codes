@@ -29,29 +29,37 @@ boundary not loaded: may be required?
 """
 
 # read data from below dir...
-path='./OF_results'
+path='./OF_results/cases_naca_aoa'
 
 indir = path
 
 fname = [f for f in listdir(indir) if isdir(join(indir, f))]
 fname.sort()
 
-nname=[]
-for i in range(len(fname)):
-    nname.append(fname[i].split('_')[1])
+#nname=[]
+#for i in range(len(fname)):
+#    nname.append(fname[i].split('_')[1])
+
+nname=fname
 
 #bor(yx),ins(xy)
-datafile='./airfoil_data/foil_df.pkl'
+datafile='./airfoil_data/foil_aoa_df.pkl'
 with open(datafile, 'rb') as infile:
     result = pickle.load(infile)
     
 print result[-1:]
 
-coord=result[0]
+
 inp=result[2]
 bor=result[3]
 ins=result[4]
 name=result[5]
+
+coord=[]
+for nn in range(len(fname)):
+    pts=np.loadtxt('./airfoil_data/foil200_aoa/%s.dat'%fname[nn],skiprows=1)
+    coord.append(pts)
+
 
 myinp=[]
 myout_p=[]
@@ -62,7 +70,7 @@ mybor=[]
 myins=[]
 
 for ii in range(len(fname)):
-    for jj in range(1):
+    if 'naca23012' not in fname[ii]:
         
         print ii
         
@@ -142,7 +150,7 @@ for ii in range(len(fname)):
         
         #plot
         def plot(xp,yp,zp,nc,name):
-            plt.figure(figsize=(3, 3))
+            plt.figure(figsize=(3, 4))
             #cp = pyplot.tricontour(ys, zs, pp,nc)
             cp = plt.contourf(xp,yp,zp,nc,cmap=cm.jet)
             #cp=pyplot.tricontourf(x1,y1,z1)
@@ -157,15 +165,16 @@ for ii in range(len(fname)):
             #plt.grid(True)
             #patch.set_facecolor('black')
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-            plt.savefig('./plotc/%04d_%s.png'%(ii,nname[ii]), format='png')
-              
+            plt.savefig('./plotc/%s.eps'%(nname[ii]), format='eps')
+            plt.close()
+            
         #plot(x,y,u,20,'name')    
         
         
         xy=np.concatenate((x[:,None],y[:,None]),axis=1)
         
         # y axis inverted for correct imshow
-        grid_x, grid_y = np.meshgrid(np.linspace(-1,2,216), np.linspace(1,-1,216))
+        grid_x, grid_y = np.meshgrid(np.linspace(-1,2,216), np.linspace(1,-1,288))
         
         ui = interpolate.griddata(xy, u, (grid_x, grid_y), method='linear')
         vi = interpolate.griddata(xy, v, (grid_x, grid_y), method='linear')
@@ -201,7 +210,7 @@ info=['0-myinp, 1-myout_p, 2-myout_u, 3-myout_v, 4-myco, 5-mybor, 6-myins, 7-nna
 
 data1 = [myinp, myout_p, myout_u, myout_v, myco, mybor, myins, nname, info ]
 
-with open(filepath+'/foil_inout.pkl', 'wb') as outfile1:
+with open(filepath+'/foil_aoa_inoutxxx.pkl', 'wb') as outfile1:
     pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
     

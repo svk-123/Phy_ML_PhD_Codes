@@ -56,7 +56,7 @@ plt.rc('font', family='serif')
 # ref:[data,name]
 path='./airfoil_1600_1aoa_1re/'
 
-data_file='data_144_1600_ts.pkl'
+data_file='data_144_1600_tr.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -74,7 +74,7 @@ name=np.asarray(name)
 xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3) 
 ttr1=my_out 
 
-tmp=np.loadtxt('ts_foil_no_144.dat')
+tmp=np.loadtxt('ts_144_50.dat')
 tmp=tmp.astype(int)
 
 xtr1=xtr1[tmp]
@@ -95,19 +95,16 @@ model_test=load_model('./hyper_selected/case144/case_3/final_enc_cnn.hdf5')
 out=model_test.predict([xtr1])
 out=out*0.18
 
-pname=['RG1410','MH92','SD8020']
-#pname=['GIIIG','GOE335','HQ07']
-pk=0
 #plot one CNN
-for k in [1,2,7]:
+for k in range(len(name)):
    
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(xx,my_out[k][0:35],'o',mfc='grey',mec='grey',ms=10,label='true')
     plt.plot(xx,my_out[k][35:],'o',mfc='grey',mec='grey',ms=10,)
     plt.plot(xx,out[k][0:35],'k',lw=3,label='CNN')
     plt.plot(xx,out[k][35:],'k',lw=3)
-    plt.text(0.5,-0.18,'%s'%pname[pk],horizontalalignment='center',fontsize=22)
-    pk=pk+1
+    plt.text(0.5,-0.18,'%s'%name[k].upper(),horizontalalignment='center',fontsize=22)
+
 #    f1 = interp1d(xx,out[k][0:35], kind='cubic')
 #    f2 = interp1d(xx,out[k][35:], kind='cubic')
 #

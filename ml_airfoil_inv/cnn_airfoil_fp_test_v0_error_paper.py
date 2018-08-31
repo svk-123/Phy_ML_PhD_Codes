@@ -53,7 +53,7 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./airfoil_1600_1aoa_1re/'
-data_file='data_cp_fp_144_1600.pkl'
+data_file='best_144_1100_tr.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -71,8 +71,8 @@ xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3)
 ttr1=my_out 
 
 
-model_test=load_model('./hyper_selected/for_choosing_foil/model_enc_cnn_4000_0.000016.hdf5')  
-       
+
+model_test=load_model('./hyper_selected/case144/case_3/final_enc_cnn.hdf5')  
 out=model_test.predict([xtr1])
 out=out*0.18
 
@@ -89,20 +89,19 @@ for k in range(len(name)):
     train_l1.append(sum(abs(tmp2))/len(out))
 
 
-##spread_plot
-#plt.figure(figsize=(6,5),dpi=100)
-#plt.plot([-1,1],[-1,1],'k',lw=3)
-#for k in range(len(name)):
-#    
-#    plt.plot(my_out[k],out[k],'+',c='grey')
-#    
-#plt.legend(fontsize=20)
-#plt.xlabel('True',fontsize=20)
-#plt.ylabel('Prediction',fontsize=20)
-#plt.xlim([-0.20,0.20])
-#plt.ylim([-0.20,0.20])    
-#plt.savefig('tr_spread.eps', format='eps', bbox_inches='tight',dpi=100)
-#plt.show()          
+#spread_plot
+plt.figure(figsize=(6,5),dpi=100)
+plt.plot([-1,1],[-1,1],'k',lw=3)
+for k in range(len(name)):
+    
+    plt.plot(my_out[k],out[k],'o',c='grey')
+    
+plt.xlabel('True',fontsize=20)
+plt.ylabel('Prediction',fontsize=20)
+plt.xlim([-0.20,0.20])
+plt.ylim([-0.20,0.20])    
+plt.savefig('tr_spread.eps', format='eps', bbox_inches='tight',dpi=100)
+plt.show()          
 
 #error plot
 plt.figure(figsize=(6,5),dpi=100)
@@ -119,15 +118,15 @@ train_l2=np.asarray(train_l2)
 tmp=np.concatenate((train_l2[:,None],num[:,None]),axis=1)
 tmp = tmp[tmp[:,0].argsort()]
 
-fp=open('ts_30.dat','w+')
-for i in range(30):
-    fp.write('%d\n'%tmp[i,1])
-fp.close()
+#fp=open('tr_144_50.dat','w+')
+#for i in range(50):
+#    fp.write('%d\n'%tmp[i,1])
+#fp.close()
     
 
-fp=open('best_of_1343_foils.dat','w+')
-for i in range(len(name)):
-    fp.write('%s\n'%name[int(tmp[i,1])])
-fp.close()
+#fp=open('best_of_1343_foils.dat','w+')
+#for i in range(len(name)):
+#    fp.write('%s\n'%name[int(tmp[i,1])])
+#fp.close()
 
 

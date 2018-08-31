@@ -61,7 +61,7 @@ xi=xi.astype(int)
 tot_bor=[]
 tot_ins=[]
 
-for i in range(3,4):
+for i in range(len(fname)):
     print i
     pts=np.loadtxt(indir+'/%s'%fname[i],skiprows=1)
     
@@ -95,9 +95,7 @@ for i in range(3,4):
     
     # outer-innner both
     img_foil_n=img_foil.copy()
-    
-    
-    
+        
     for m in range(img_foil.shape[0]):
         for n in range(img_foil.shape[1]):
             if (([m,n] == bor).all(1).any() == False):
@@ -106,7 +104,6 @@ for i in range(3,4):
                 
                 img_foil_n[m,n]=dist*0.01
         
-    
     #inner
     xi=bor[:,1].copy()
     yi=bor[:,0].copy()
@@ -114,26 +111,58 @@ for i in range(3,4):
     tmp=tmp[tmp[:,1].argsort()]
     tmp=tmp[tmp[:,0].argsort(kind='mergesort')]
     
+    #delete single values
     unique, counts = np.unique(tmp[:,0], return_counts=True)
-    
     if (np.any(counts==1) == True):
         ind1=np.argwhere(counts==1)
-        raise ValueError('singe Value exits Error')
+        val1=unique[ind1]
+        for k in range(len(val1)):
+            ind12=np.argwhere(tmp[:,0]==val1[k][0])
+            tmp=np.delete(tmp,ind12,0)
+            
+    #delete continuous   
+    unique, counts = np.unique(tmp[:,0], return_counts=True)
+    if (np.any(counts > 2) == True):
+        ind1=np.argwhere(counts > 2)
+        val1=unique[ind1]
         
+        for k in range(len(val1)):
+            ind12=np.argwhere(tmp[:,0]==val1[k][0])
+            tmpval=tmp[ind12,1]
+            for k in range(len(tmpval)-1):
+                checker=0
+                if(tmpval[k]+1==tmpval[k+1]):    
+                    checker=1
+            if(checker==1):
+                tmp=np.delete(tmp,ind12,0)
+        
+                    
+                    
+    #delete extra marker 
+    unique, counts = np.unique(tmp[:,0], return_counts=True)           
+    delcount=0    
     if (np.any(counts%2 ==1) == True):    
         ind2=np.argwhere(counts%2 ==1)
+        
         for j in range(len(ind2)):
-            
             num=unique[ind2[j]]
             ind3 = np.argwhere(tmp[:,0]==num)
             tmpval=tmp[ind3,1]
-    
+                
             for k in range(len(tmpval)-1):
                 if(tmpval[k]+1==tmpval[k+1]):
                     if(tmpval[k]==tmpval.min()):
                         tmp=np.delete(tmp,ind3[k],0)
+                        delcount = delcount+1
+                        ind3 = np.argwhere(tmp[:,0]==num)
+                        
                     if(tmpval[k+1]==tmpval.max()):
                         tmp=np.delete(tmp,ind3[k+1],0)
+                        delcount = delcount+1
+                        ind3 = np.argwhere(tmp[:,0]==num)
+                        
+    if(delcount > 1):
+        print 'Delete More than one Encountered'
                         
     xtmp=[]
     ytmp=[]
@@ -156,10 +185,7 @@ for i in range(3,4):
             dist=LA.norm((bor-[ ytmp[m],xtmp[m] ]),axis=1).min()
                 
             img_foil_n[ ytmp[m], xtmp[m] ]= -1*dist*0.01
-
-     
-    
-    
+   
     #img_foil_n[ytmp,xtmp]=2.0 # for visibility
     img_foil_n[bor[:,0],bor[:,1]]=0.0 # for visible plotting chnage to 1.0
     if(img_foil_n[yi[0],xi[0]]!=0):

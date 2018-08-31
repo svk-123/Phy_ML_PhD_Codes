@@ -55,17 +55,17 @@ matplotlib.rc('ytick', labelsize=18)
 # ref:[data,name]
 # ref:[data,name]
 path='./airfoil_data/'
-data_file='foil_inout.pkl'
+data_file='foil_aoa_inout.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
 print result[-1:]    
 
-st=100
-end=124
+st=0
+end=100
 
 my_inp=result[0][st:end]
-my_out=result[2][st:end]
+my_out=result[1][st:end]
 myco=result[4][st:end]
 mybor=result[5][st:end]
 myins=result[6][st:end]
@@ -74,14 +74,14 @@ name=result[7][st:end]
 my_inp=np.asarray(my_inp)
 my_out=np.asarray(my_out)
 
-xtr1=np.reshape(my_inp,(len(my_inp),216,216,1))  
+xtr1=np.reshape(my_inp,(len(my_inp),288,216,1))  
 ttr1=my_out  
 
-model_test=load_model('./selected_model/model_cnn_400_0.000321_0.000272.hdf5')  
+model_test=load_model('./selected_model/p/p_model_cnn_250_0.000176_0.000174.hdf5')  
 out=model_test.predict([xtr1])
 
 def plot(zp1,zp2,nc,name):
-    xp, yp = np.meshgrid(np.linspace(-1,2,216), np.linspace(1,-1,216))
+    xp, yp = np.meshgrid(np.linspace(-1,2,216), np.linspace(1,-1,288))
     
     plt.figure(figsize=(16, 6))
     

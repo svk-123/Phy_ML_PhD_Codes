@@ -58,21 +58,22 @@ for the_file in os.listdir(folder):
 
 # ref:[data,name]
 path='./airfoil_data/'
-data_file='foil_inout.pkl'
+data_file='foil_aoa_inout.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
 print result[-1:]    
 
-inp=result[0][:100]
-out=result[2][:100]
+
+inp=result[0][:800]
+out=result[2][:800]
 
 inp=np.asarray(inp)
 out=np.asarray(out)
 
 
-xtr1=np.reshape(inp,(len(inp),216,216,1))  
-ttr1=np.reshape(out,(len(out),216,216,1))  
+xtr1=np.reshape(inp,(len(inp),288,216,1))  
+ttr1=np.reshape(out,(len(out),288,216,1))  
 
 del result
 del inp
@@ -87,7 +88,7 @@ print('ttr shape:', ttr1.shape)
 # construct model
 
 # construct model
-aa = Input([216,216,1])
+aa = Input([288,216,1])
 
 # 2 3x3 convolutions followed by a max pool
 conv1 = Conv2D(32, (3, 3), activation='relu', padding='same')(aa)
@@ -129,7 +130,7 @@ print ('conv5',K.int_shape(conv5))
 
 # 1 3x3 transpose convolution and concate conv4 on the depth dim
 # ZeroPadding2D(top_pad, bottom_pad), (left_pad, right_pad)
-up6 = concatenate([ZeroPadding2D(((1,0),(1,0)))(Conv2DTranspose(256, (2, 2), strides=(2, 2), padding='same')(conv5)), conv4], axis=3)
+up6 = concatenate([ZeroPadding2D(((0,0),(1,0)))(Conv2DTranspose(256, (2, 2), strides=(2, 2), padding='same')(conv5)), conv4], axis=3)
 
 # 2 3x3 convolutions
 conv6 = Conv2D(256, (3, 3), activation='relu', padding='same')(up6)
@@ -199,7 +200,7 @@ chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
                                 save_best_only=False, save_weights_only=False, mode='auto', period=25)
 
 # Compile model
-opt = Adam(lr=2.5e-5,decay=1e-10)
+opt = Adam(lr=2.5e-5,decay=1e-12)
 
 #scaler
 #model.load_weights('./selected_model/naca4_cnn_ws/weight_model_af_cnn_100_0.003_0.004.hdf5')
@@ -207,7 +208,7 @@ opt = Adam(lr=2.5e-5,decay=1e-10)
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 hist = model.fit([xtr1], [ttr1], validation_split=0.1,\
-                 epochs=1, batch_size=34,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
+                 epochs=5000, batch_size=34,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
 
 #hist = model.fit([xtr0,xtr5], [ttr5], validation_split=0.3,\
 #                 epochs=10000, batch_size=100,callbacks=[reduce_lr,e_stop,chkpt,tb],verbose=1,shuffle=True)

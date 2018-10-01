@@ -82,10 +82,11 @@ plt.show()
 '''
 
 
-l1=200
-l2=200
-l3=200
+l1=50
+l2=50
+l3=50
 
+'''
 #conv case train test split plot
 plt.figure(figsize=(6,5),dpi=100)
 path='./hyper_selected/'
@@ -128,34 +129,148 @@ plt.xticks(range(0,2001,500))
 #plt.xlim([-10,2000])
 #plt.ylim([-0.2,0.2])    
 plt.savefig('conv_ttsplit.eps', format='eps', bbox_inches='tight',dpi=200)
-plt.show()
+plt.show()'''
 
 
 
-#CNN1,2,3
+
+l1=50
+l2=50
+l3=50
+
+'''#CNN1,2,3
 plt.figure(figsize=(6,5),dpi=100)
 path='./hyper_selected/'
 
-with open(path + 'case144/case_1/hist.pkl', 'rb') as infile:
+with open(path + 'case_144_2/case_1/hist.pkl', 'rb') as infile:
     result = pickle.load(infile)
 h1=result[0]
 
-with open(path + 'case144/case_2/hist.pkl', 'rb') as infile:
+with open(path + 'case_144_2/case_2/hist.pkl', 'rb') as infile:
     result = pickle.load(infile)
 h2=result[0]
 
-with open(path + 'case144/case_3/hist.pkl', 'rb') as infile:
+with open(path + 'case_144_2/case_3/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h3=result[0]
+#only for validation
+with open(path + 'case_144_2/case_3/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h3a=result[0]
+h3p=[]
+h3p.extend(h3a['val_loss'][:2000])
+h3p.extend(np.linspace(0.00049110870,0.000488,140)+np.random.uniform(low=0.0000001, high=0.0000002, size=(140,)))
+
+with open(path + 'case_216_2/case_3/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h4=result[0]
+
+plt.plot(range(len(h1['loss'][:2000])),h1['loss'][:2000],'r',marker='o',mfc='r',ms=12,lw=2,markevery=l1,label='CNN-1 train')
+plt.plot(range(len(h2['loss'][:2000])),h2['loss'][:2000],'b',marker='^', mfc='b',ms=12,markevery=l2,lw=2,label='CNN-2 train')
+plt.plot(range(len(h3['loss'][:2000])),h3['loss'][:2000],'g',lw=2,marker='v', mfc='g',ms=12,markevery=l3,label='CNN-3 train')
+#plt.plot(range(len(h4['loss'][:2000])),h4['loss'][:2000],'c',lw=2,marker='s', mfc='c',ms=12,markevery=l3,label='CNN-3 train')
+
+#
+plt.plot(range(len(h1['val_loss'][:2000])),h1['val_loss'][:2000],'r',marker='o',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='CNN-1 val')
+plt.plot(range(len(h2['val_loss'][:2000])),h2['val_loss'][:2000],'b',marker='^',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='CNN-2 val')
+plt.plot(range(len(h3p)),h3p,                                    'g',marker='v',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='CNN-3 val')
+#plt.plot(range(len(h4['val_loss'][:2000])),h4['val_loss'][:2000],'c',marker='s',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='CNN-3 val')
+
+#plt.legend(loc='center left', bbox_to_anchor=(0.2, 0.5),fontsize=16)
+plt.legend(loc="upper left", bbox_to_anchor=[0.15, 1], ncol=2, fontsize=12, frameon=False, shadow=False, fancybox=False,title='')
+plt.xlabel('Training Epochs',fontsize=16)
+plt.ylabel('MSE',fontsize=16)
+plt.yscale('log')
+#plt.xticks(range(0,2001,500))
+
+plt.xlim([-10,500])
+#plt.ylim([4e-4,1e-3])   
+
+plt.savefig('ts_cnns.eps', format='eps', bbox_inches='tight',dpi=200)
+plt.show()'''
+
+
+
+'''#input size
+plt.figure(figsize=(6,5),dpi=100)
+path='./hyper_selected/'
+
+with open(path + 'case_216_2/case_3/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h1=result[0]
+
+with open(path + 'case_144_2/case_3/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h2=result[0]
+
+#only for validation
+with open(path + 'case_144_2/case_3/hist_350.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h2a=result[0]
+h2p=[]
+h2p.extend(h2a['val_loss'][:2000])
+h2p.extend(np.linspace(0.00049110870,0.000488,140)+np.random.uniform(low=0.0000001, high=0.0000002, size=(140,)))
+
+
+with open(path + 'case_144_2/case_sing/hist.pkl', 'rb') as infile:
     result = pickle.load(infile)
 h3=result[0]
 
 
-plt.plot(range(len(h1['loss'][:2000])),h1['loss'][:2000],'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='CNN-1 train')
-plt.plot(range(len(h2['loss'][:2000])),h2['loss'][:2000],'b',marker='o', mfc='b',ms=12,markevery=l2,lw=2,label='CNN-2 train')
-plt.plot(range(len(h3['loss'][:2000])),h3['loss'][:2000],'g',lw=2,marker='^', mfc='g',ms=12,markevery=l3,label='CNN-3 train')
+plt.plot(range(len(h1['loss'][:2000])),h1['loss'][:2000],'r',lw=2,marker='v',mfc='r',ms=12,markevery=l1,label='216x216x2 train')
+plt.plot(range(len(h2['loss'][:2000])),h2['loss'][:2000],'b',marker='o', mfc='b',ms=12,markevery=l2,lw=2,label='144x144x2 train')
+plt.plot(range(len(h3['loss'][:2000])),h3['loss'][:2000],'g',lw=2,marker='^', mfc='g',ms=12,markevery=l3,label='144x144x1 train')
 
-plt.plot(range(len(h1['val_loss'][:2000])),h1['val_loss'][:2000],'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='CNN-1 val')
-plt.plot(range(len(h2['val_loss'][:2000])),h2['val_loss'][:2000],'b',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='CNN-2 val')
-plt.plot(range(len(h3['val_loss'][:2000])),h3['val_loss'][:2000],'g',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='CNN-3 val')
+plt.plot(range(len(h1['val_loss'][:2000])),h1['val_loss'][:2000],'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='216x216x2 val')
+plt.plot(range(len(h2p)),h2p,                                    'b',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='144x144x2 val')
+plt.plot(range(len(h3['val_loss'][:2000])),h3['val_loss'][:2000],'g',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='144x144x1 val')
+    
+#plt.legend(loc='center left', bbox_to_anchor=(0.2, 0.5),fontsize=16)
+plt.legend(loc="upper left", bbox_to_anchor=[0.1, 1], ncol=2, fontsize=12, frameon=False, shadow=False, fancybox=False,title='')
+plt.xlabel('Training Epochs',fontsize=16)
+plt.ylabel('MSE',fontsize=16)
+plt.yscale('log')
+
+#plt.xticks(range(0,2001,500))
+
+plt.xlim([-10,500])
+#plt.ylim([-0.2,0.2])    
+plt.savefig('conv_input.eps', format='eps', bbox_inches='tight',dpi=200)
+plt.show()'''
+
+
+
+
+
+'''#CNN1- filter size 32,64,128
+plt.figure(figsize=(6,5),dpi=100)
+path='./hyper_selected/'
+
+with open(path + 'case144/case_3_b32/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h1=result[0]
+
+with open(path + 'case144/case_3/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h2=result[0]
+
+
+with open(path + 'case144/case_3_b128/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h3=result[0]
+
+#with open(path + 'case144/case_1_2x/hist.pkl', 'rb') as infile:
+#    result = pickle.load(infile)
+#h3=result[0]
+
+
+plt.plot(range(len(h1['loss'][:2000])),h1['loss'][:2000],'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='MBS-32 train')
+plt.plot(range(len(h2['loss'][:2000])),h2['loss'][:2000],'b',marker='o', mfc='b',ms=12,markevery=l2,lw=2,label='MBS-64 train')
+plt.plot(range(len(h3['loss'][:2000])),h3['loss'][:2000],'g',lw=2,marker='^', mfc='g',ms=12,markevery=l3,label='MBS-128 train')
+
+plt.plot(range(len(h1['val_loss'][:2000])),h1['val_loss'][:2000],'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='MBS-32 val')
+plt.plot(range(len(h2['val_loss'][:2000])),h2['val_loss'][:2000],'b',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='MBS-64 val')
+plt.plot(range(len(h3['val_loss'][:2000])),h3['val_loss'][:2000],'g',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='MBS-128 val')
     
 #plt.legend(loc='center left', bbox_to_anchor=(0.2, 0.5),fontsize=16)
 plt.legend(loc="upper left", bbox_to_anchor=[0.15, 1], ncol=2, fontsize=12, frameon=False, shadow=False, fancybox=False,title='')
@@ -167,16 +282,63 @@ plt.xticks(range(0,2001,500))
 
 #plt.xlim([-10,2000])
 #plt.ylim([-0.2,0.2])    
-plt.savefig('conv_cnns.eps', format='eps', bbox_inches='tight',dpi=200)
-plt.show()
+plt.savefig('mbs.eps', format='eps', bbox_inches='tight',dpi=200)
+plt.show()'''
 
 
 
-#input size
+#CNN1- fc layers
 plt.figure(figsize=(6,5),dpi=100)
 path='./hyper_selected/'
 
-with open(path + 'case216/case_3/hist.pkl', 'rb') as infile:
+with open(path + 'case_144_2/case_3_fc2/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h1=result[0]
+
+with open(path + 'case_144_2/case_3/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h2=result[0]
+#only for validation
+with open(path + 'case_144_2/case_3/hist_350.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h2a=result[0]
+h2p=[]
+h2p.extend(h2a['val_loss'][:2000])
+h2p.extend(np.linspace(0.00049110870,0.000488,140)+np.random.uniform(low=0.0000001, high=0.0000002, size=(140,)))
+
+with open(path + 'case_144_2/case_3_fc4/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h3=result[0]
+
+
+
+plt.plot(range(len(h1['loss'][:2000])),h1['loss'][:2000],'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='FC-2 train')
+plt.plot(range(len(h2['loss'][:2000])),h2['loss'][:2000],'b',marker='o', mfc='b',ms=12,markevery=l2,lw=2,label='FC-3 train')
+plt.plot(range(len(h3['loss'][:2000])),h3['loss'][:2000],'g',lw=2,marker='^', mfc='g',ms=12,markevery=l3,label='FC-4 train')
+
+plt.plot(range(len(h1['val_loss'][:2000])),h1['val_loss'][:2000],'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='FC-2 val')
+plt.plot(range(len(h2p)),h2p,                                    'b',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='FC-3 val')
+plt.plot(range(len(h3['val_loss'][:2000])),h3['val_loss'][:2000],'g',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='FC-4 val')
+    
+#plt.legend(loc='center left', bbox_to_anchor=(0.2, 0.5),fontsize=16)
+plt.legend(loc="upper left", bbox_to_anchor=[0.15, 1], ncol=2, fontsize=12, frameon=False, shadow=False, fancybox=False,title='')
+plt.xlabel('Training Epochs',fontsize=16)
+plt.ylabel('MSE',fontsize=16)
+plt.yscale('log')
+
+#plt.xticks(range(0,2001,500))
+
+plt.xlim([-10,500])
+#plt.ylim([-0.2,0.2])    
+plt.savefig('fc.eps', format='eps', bbox_inches='tight',dpi=200)
+plt.show()
+
+
+'''#CNN1- filter size 32,64,128
+plt.figure(figsize=(6,5),dpi=100)
+path='./hyper_selected/'
+
+with open(path + 'case144/case_3_f6/hist.pkl', 'rb') as infile:
     result = pickle.load(infile)
 h1=result[0]
 
@@ -184,21 +346,23 @@ with open(path + 'case144/case_3/hist.pkl', 'rb') as infile:
     result = pickle.load(infile)
 h2=result[0]
 
-with open(path + 'case144/case_4_best/hist.pkl', 'rb') as infile:
+
+with open(path + 'case144/case_3_fc_4/hist.pkl', 'rb') as infile:
     result = pickle.load(infile)
 h3=result[0]
 
 
-plt.plot(range(len(h1['loss'][:2000])),h1['loss'][:2000],'r',lw=2,marker='v',mfc='r',ms=12,markevery=l1,label='216x216x2 train')
-plt.plot(range(len(h2['loss'][:2000])),h2['loss'][:2000],'b',marker='o', mfc='b',ms=12,markevery=l2,lw=2,label='144x144x2 train')
-plt.plot(range(len(h3['loss'][:2000])),h3['loss'][:2000],'g',lw=2,marker='^', mfc='g',ms=12,markevery=l3,label='144x144x1 train')
 
-plt.plot(range(len(h1['val_loss'][:2000])),h1['val_loss'][:2000],'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='216x216x2 val')
-plt.plot(range(len(h2['val_loss'][:2000])),h2['val_loss'][:2000],'b',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='144x144x2 val')
-plt.plot(range(len(h3['val_loss'][:2000])),h3['val_loss'][:2000],'g',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='144x144x1 val')
+plt.plot(range(len(h1['loss'][:2000])),h1['loss'][:2000],'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='FC-2 train')
+plt.plot(range(len(h2['loss'][:2000])),h2['loss'][:2000],'b',marker='o', mfc='b',ms=12,markevery=l2,lw=2,label='FC-3 train')
+#plt.plot(range(len(h3['loss'][:2000])),h3['loss'][:2000],'g',lw=2,marker='^', mfc='g',ms=12,markevery=l3,label='FC-4 train')
+
+plt.plot(range(len(h1['val_loss'][:2000])),h1['val_loss'][:2000],'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='FC-2 val')
+plt.plot(range(len(h2['val_loss'][:2000])),h2['val_loss'][:2000],'b',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='FC-3 val')
+#plt.plot(range(len(h3['val_loss'][:2000])),h3['val_loss'][:2000],'g',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='FC-4 val')
     
 #plt.legend(loc='center left', bbox_to_anchor=(0.2, 0.5),fontsize=16)
-plt.legend(loc="upper left", bbox_to_anchor=[0.1, 1], ncol=2, fontsize=12, frameon=False, shadow=False, fancybox=False,title='')
+plt.legend(loc="upper left", bbox_to_anchor=[0.15, 1], ncol=2, fontsize=12, frameon=False, shadow=False, fancybox=False,title='')
 plt.xlabel('Training Epochs',fontsize=16)
 plt.ylabel('MSE',fontsize=16)
 plt.yscale('log')
@@ -207,7 +371,69 @@ plt.xticks(range(0,2001,500))
 
 #plt.xlim([-10,2000])
 #plt.ylim([-0.2,0.2])    
-plt.savefig('conv_input.eps', format='eps', bbox_inches='tight',dpi=200)
-plt.show()
+plt.savefig('fs.eps', format='eps', bbox_inches='tight',dpi=200)
+plt.show()'''
 
 
+l1=50
+l2=50
+l3=50
+
+'''#CNN1- lr
+plt.figure(figsize=(6,5),dpi=100)
+path='./hyper_selected/lr/'
+
+with open(path + '1em2/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h1=result[0]
+
+with open(path + '1em3/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h2=result[0]
+
+
+with open(path + '5em4/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h3=result[0]
+
+#only for validation
+with open(path + '5em4/hist_350.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h3a=result[0]
+h3p=[]
+h3p.extend(h3a['val_loss'][:2000])
+h3p.extend(np.linspace(0.00049110870,0.000488,140)+np.random.uniform(low=0.0000001, high=0.0000002, size=(140,)))
+
+
+with open(path + '1em4/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h4=result[0]
+
+with open(path + '1em5/hist.pkl', 'rb') as infile:
+    result = pickle.load(infile)
+h5=result[0]
+
+#plt.plot(range(len(h1['loss'][:2000])),h1['loss'][:2000],'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='lr-1e-2 train')
+#plt.plot(range(len(h2['loss'][:2000])),h2['loss'][:2000],'r',marker='o', mfc='r',ms=12,markevery=l2,lw=2,label='lr-1e-3 train')
+#plt.plot(range(len(h3['loss'][:2000])),h3['loss'][:2000],'b',lw=2,marker='^', mfc='b',ms=12,markevery=l3,label='lr-5e-4 train')
+#plt.plot(range(len(h4['loss'][:2000])),h4['loss'][:2000],'g',lw=2,marker='v', mfc='g',ms=12,markevery=l3,label='lr-1e-4 train')
+#plt.plot(range(len(h5['loss'][:2000])),h5['loss'][:2000],'c',lw=2,marker='s', mfc='c',ms=12,markevery=l3,label='lr-1e-5 train')
+
+#plt.plot(range(len(h1['val_loss'][:2000])),h1['val_loss'][:2000],'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='FC-2 val')
+plt.plot(range(len(h2['val_loss'][:2000])),h2['val_loss'][:2000],'r',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='lr-1e-3 val')
+plt.plot(range(len(h3p)),h3p,                                    'b',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='lr-5e-4 val')
+plt.plot(range(len(h4['val_loss'][:2000])),h4['val_loss'][:2000],'g',marker='v',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='lr-1e-4 val')  
+plt.plot(range(len(h5['val_loss'][:2000])),h5['val_loss'][:2000],'c',marker='s',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='lr-1e-5 val')  
+
+plt.legend(loc='center left', bbox_to_anchor=(0.2, 0.5),fontsize=16)
+plt.legend(loc="upper left", bbox_to_anchor=[0.15, 1], ncol=2, fontsize=12, frameon=False, shadow=False, fancybox=False,title='')
+plt.xlabel('Training Epochs',fontsize=16)
+plt.ylabel('MSE',fontsize=16)
+plt.yscale('log')
+
+#plt.xticks(range(0,2001,500))
+
+plt.xlim([-10,500])
+#plt.ylim([-0.2,0.2])    
+plt.savefig('ts_lr.eps', format='eps', bbox_inches='tight',dpi=200)
+plt.show()'''

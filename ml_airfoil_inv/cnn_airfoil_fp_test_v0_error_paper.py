@@ -53,7 +53,7 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./airfoil_1600_1aoa_1re/'
-data_file='best_144_1100_tr.pkl'
+data_file='data_144_1600_ts.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -70,9 +70,8 @@ my_out=np.asarray(my_out)
 xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3) 
 ttr1=my_out 
 
+model_test=load_model('./hyper_selected/case144/case_1/final_enc_cnn.hdf5')  
 
-
-model_test=load_model('./hyper_selected/case144/case_3/final_enc_cnn.hdf5')  
 out=model_test.predict([xtr1])
 out=out*0.18
 
@@ -100,7 +99,7 @@ plt.xlabel('True',fontsize=20)
 plt.ylabel('Prediction',fontsize=20)
 plt.xlim([-0.20,0.20])
 plt.ylim([-0.20,0.20])    
-plt.savefig('tr_spread.eps', format='eps', bbox_inches='tight',dpi=100)
+plt.savefig('ts_spread_144_cnn1.eps', format='eps', bbox_inches='tight',dpi=100)
 plt.show()          
 
 #error plot
@@ -108,9 +107,9 @@ plt.figure(figsize=(6,5),dpi=100)
 plt.hist(train_l2, 20,histtype='step', color='grey',stacked=True,fill=True,alpha=1,orientation ='vertical')
 plt.ylabel('Number of Samples',fontsize=20)
 plt.xlabel('$L_2$ relative error(%)',fontsize=20)
-plt.savefig('tr_error_144_cnn3.eps',format='eps', bbox_inches='tight',dpi=100)
+plt.xlim([-0.001,4.0])
+plt.savefig('ts_error_144_cnn1.eps',format='eps', bbox_inches='tight',dpi=100)
 plt.show()
-
 
 #get foil name with lease error
 num=np.asarray(range(len(train_l2)))
@@ -118,7 +117,7 @@ train_l2=np.asarray(train_l2)
 tmp=np.concatenate((train_l2[:,None],num[:,None]),axis=1)
 tmp = tmp[tmp[:,0].argsort()]
 
-#fp=open('tr_144_50.dat','w+')
+#fp=open('ts_144_50.dat','w+')
 #for i in range(50):
 #    fp.write('%d\n'%tmp[i,1])
 #fp.close()

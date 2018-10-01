@@ -61,53 +61,53 @@ fp= PdfPages('plots.pdf')
 
 for ii in [9]:
     print ii
-##for ii in [1,2,3,4,5,7,8,9,10]:
-#    data_file='data_re_aoa_fp_%d.pkl'%ii
-#    inp_up=[]
-#    inp_lr=[]
-#    out=[]
-#    reno=[]
-#    aoa=[]
-#    name=[]
-#    with open(path + data_file, 'rb') as infile:
-#        result = pickle.load(infile)
-#    print result[-1:]    
-#    
-#    inp_up.extend(result[0])
-#    inp_lr.extend(result[1])
-#    out.extend(result[2])
-#    reno.extend(result[3])
-#    aoa.extend(result[4])
-#    name.extend(result[6])
-#    
-#    inp_up=np.asarray(inp_up)
-#    inp_lr=np.asarray(inp_lr)
-#    out=np.asarray(out)
-#    xx=result[5]
-#    
-#    xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3) 
-#    ttr1=out 
-#    
-#    my_out=out.copy()
-#    
-#    del inp_up
-#    del inp_lr
-#    del out
-#    del result
-#    
-#    
-#    model_test=load_model('./selected_model/for_choosing_foil/model_enc_cnn_200_0.000321_0.000794.hdf5')  
-#           
-#    out=model_test.predict([xtr1])
-#    out=out*0.18
+    #for ii in [1,2,3,4,5,7,8,9,10]:
+    data_file='data_re_aoa_fp_%d.pkl'%ii
+    inp_up=[]
+    inp_lr=[]
+    out=[]
+    reno=[]
+    aoa=[]
+    name=[]
+    with open(path + data_file, 'rb') as infile:
+        result = pickle.load(infile)
+    print result[-1:]    
+    
+    inp_up.extend(result[0])
+    inp_lr.extend(result[1])
+    out.extend(result[2])
+    reno.extend(result[3])
+    aoa.extend(result[4])
+    name.extend(result[6])
+    
+    inp_up=np.asarray(inp_up)
+    inp_lr=np.asarray(inp_lr)
+    out=np.asarray(out)
+    xx=result[5]
+    
+    xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3) 
+    ttr1=out 
+    
+    my_out=out.copy()
+    
+    del inp_up
+    del inp_lr
+    del out
+    del result
+    
+    
+    model_test=load_model('./selected_model/for_choosing_foil/model_enc_cnn_200_0.000321_0.000794.hdf5')  
+           
+    out=model_test.predict([xtr1])
+    out=out*0.18
     
 
     for k in range(10):
         print k
        
-        fig = plt.figure(figsize=(12, 8))
+        fig = plt.figure(figsize=(16, 8))
         
-        ax1 = fig.add_subplot(2,2,1)
+        ax1 = fig.add_subplot(3,2,1)
         ax1.plot(xx,my_out[k][0:35],'ro',label='true')
         ax1.plot(xx,my_out[k][35:],'ro')
         ax1.plot(xx,out[k][0:35],'b',lw=2,label='prediction')
@@ -116,7 +116,7 @@ for ii in [9]:
         plt.ylim([-0.2,0.2])
         #plt.legend(fontsize=16)
      
-        ax2 = fig.add_subplot(2,2,2)
+        ax2 = fig.add_subplot(3,2,2)
         ax2.plot(xx,my_out[k][0:35],'ro',label='true')
         ax2.plot(xx,my_out[k][35:],'ro')
         ax2.plot(xx,out[k][0:35],'b',lw=2,label='prediction')
@@ -126,7 +126,7 @@ for ii in [9]:
        # plt.legend(fontsize=16)
         
         
-        ax3 = fig.add_subplot(2,2,3)
+        ax3 = fig.add_subplot(3,2,3)
         ax3.plot(xx,my_out[k][0:35],'ro',label='true')
         ax3.plot(xx,my_out[k][35:],'ro')
         ax3.plot(xx,out[k][0:35],'b',lw=2,label='prediction')
@@ -136,13 +136,34 @@ for ii in [9]:
         #plt.legend(fontsize=16)        
         
         
-        ax4 = fig.add_subplot(2,2,4)
+        ax4 = fig.add_subplot(3,2,4)
         ax4.plot(xx,my_out[k][0:35],'ro',label='true')
         ax4.plot(xx,my_out[k][35:],'ro')
         ax4.plot(xx,out[k][0:35],'b',lw=2,label='prediction')
         ax4.plot(xx,out[k][35:],'b',lw=2)
         plt.xlim([-0.05,1.05])
         plt.ylim([-0.2,0.2])
+        
+        
+        ax5 = fig.add_subplot(3,2,5)
+        ax5.plot(xx,my_out[k][0:35],'ro',label='true')
+        ax5.plot(xx,my_out[k][35:],'ro')
+        ax5.plot(xx,out[k][0:35],'b',lw=2,label='prediction')
+        ax5.plot(xx,out[k][35:],'b',lw=2)
+        plt.xlim([-0.05,1.05])
+        plt.ylim([-0.2,0.2])       
+        
+        
+        ax6 = fig.add_subplot(3,2,6)
+        ax6.plot(xx,my_out[k][0:35],'ro',label='true')
+        ax6.plot(xx,my_out[k][35:],'ro')
+        ax6.plot(xx,out[k][0:35],'b',lw=2,label='prediction')
+        ax6.plot(xx,out[k][35:],'b',lw=2)
+        plt.xlim([-0.05,1.05])
+        plt.ylim([-0.2,0.2])
+        
+        
+        
         plt.legend(fontsize=12)   
         fp.savefig(fig)
         plt.close()

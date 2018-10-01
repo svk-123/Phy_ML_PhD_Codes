@@ -57,7 +57,7 @@ for nn in range(len(fname)):
     pts=np.loadtxt('../cnn_airfoil_sf/airfoil_data/foil200_aoa/%s.dat'%fname[nn],skiprows=1)
     coord.append(pts)
  
-datafile='./data_file/param_216_64.pkl'
+datafile='./data_file/param_216_16.pkl'
 with open(datafile, 'rb') as infile:
     result = pickle.load(infile)
 para=result[0][0]    
@@ -227,7 +227,7 @@ info=['myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord
 
 data1 = [myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, info ]
 
-with open(filepath+'/foil_aoa_nn.pkl', 'wb') as outfile1:
+with open(filepath+'/foil_aoa_nn_p16.pkl', 'wb') as outfile1:
     pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
     

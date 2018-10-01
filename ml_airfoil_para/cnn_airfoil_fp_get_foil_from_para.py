@@ -56,36 +56,32 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./data_file/'
-data_file='foil_param.pkl'
-
+data_file='param_216_64.pkl'
 with open(path + data_file, 'rb') as infile:
-    result = pickle.load(infile)
-inp=result[0]
-out=result[1]
-xx=result[2]
-name=result[3]
+    result1 = pickle.load(infile)
+para=result1[0][0]
+name=result1[1]
+para=np.asarray(para)
 
-inp=np.asarray(inp)
-my_out=np.asarray(out)
+data_file='foil_param.pkl'
+with open(path + data_file, 'rb') as infile:
+    result2 = pickle.load(infile)
+foil_fp=result2[1]
+xx=result2[2]
 
-xtr1=inp
-ttr1=my_out 
+del result2
 
-xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
-model=load_model('./selected_model/p16/model_cnn_2950_0.000013_0.000176.hdf5')  
-
-del inp
-del result
+model=load_model('./selected_model/model_cnn_1000_0.000029_0.000125.hdf5')  
 
 # with a Sequential model
-get_out_1c= K.function([model.layers[0].input],
-                                  [model.layers[11].output])
-c1 = get_out_1c([xtr1])
+get_out_1c= K.function([model.layers[12].input],
+                                  [model.layers[15].output])
+c1 = get_out_1c([para[0:10,:]])[0][0,:]
 
-info='[c1,name]'    
-data2=[c1,name,info]
-with open(path+'param_216_16.pkl', 'wb') as outfile:
-    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
 
+plt.figure(figsize=(6,5),dpi=100)
+plt.plot(xx,c1[:35],'r',label='true')
+plt.plot(xx,c1[35:],'r',label='true')
+plt.show()
 
 

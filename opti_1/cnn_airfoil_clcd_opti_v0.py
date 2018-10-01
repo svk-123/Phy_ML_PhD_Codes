@@ -5,6 +5,7 @@ Created on Mon May  1 08:09:04 2017
 
 @author: vinoth
 """
+#based on coordinate without bounds
 
 import time
 start_time = time.time()
@@ -68,7 +69,7 @@ yy=tmp[:,1].copy()
 
 img_mat=[]
 global tar_cl
-tar_cl=0.6
+tar_cl=1.0
 
 def loss(co):
    
@@ -88,19 +89,19 @@ def loss(co):
     out=model_test.predict([val_inp])
     pred_cl=out[0,0]*1.6
 
-    return abs(tar_cl-pred_cl)
+    return (tar_cl-pred_cl)
    
     
 print('Starting loss = {}'.format(loss(yy)))
 
 res = minimize(loss, x0=yy, method = 'L-BFGS-B', bounds=None, \
                options={'disp': True, 'maxcor': 100, 'ftol': 1 * np.finfo(float).eps, \
-                                 'eps': 1e-3, 'maxfun': 50000, \
+                                 'eps': 5e-3, 'maxfun': 100, \
                                  'maxiter': 100, 'maxls': 100})
 print('Ending loss = {}'.format(loss(res.x)))
 
-
-
+#compare
+plt.plot(xx,yy,xx,res.x)
 
 
 

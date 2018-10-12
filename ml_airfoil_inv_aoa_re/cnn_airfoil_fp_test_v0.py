@@ -94,7 +94,7 @@ for ii in [9]:
     del result
     
     
-    model_test=load_model('./selected_model/for_choosing_foil/model_enc_cnn_200_0.000321_0.000794.hdf5')  
+    model_test=load_model('./selected_model/model_cnn_525_0.000003_0.000488.hdf5')  
            
     out=model_test.predict([xtr1])
     out=out*0.18

@@ -29,7 +29,7 @@ boundary not loaded: may be required?
 """
 
 # read data from below dir...
-path='../cnn_airfoil_sf/OF_results/cases_naca_aoa'
+path='../cnn_airfoil_sf/OF_results/cases_naca_aoa_test'
 
 indir = path
 
@@ -97,11 +97,10 @@ myout_v=[]
 
 myname=[]
 
-
-for ii in range(len(fname)):
+for ii in range(49):
     if ('naca23012' != fname[ii]):
         
-        print ii
+        print (ii)
         
         casedir= path +'/%s'%fname[ii]
                 
@@ -198,11 +197,11 @@ for ii in range(len(fname)):
             
         #plot(x,y,u,20,'name')    
         
-        myinp_x.extend(x)
-        myinp_y.extend(y)
-        myout_p.extend(p)
-        myout_u.extend(u)
-        myout_v.extend(v)
+        myinp_x.append(x)
+        myinp_y.append(y)
+        myout_p.append(p)
+        myout_u.append(u)
+        myout_v.append(v)
 
         paralist=[]
         for k in range(len(x)):
@@ -215,23 +214,23 @@ for ii in range(len(fname)):
         aoalist=np.asarray(aoalist)
 
         namelist=[]
-        for k in range(len(x)):
+        for k in range(1):
             namelist.append(nname[ii])
         namelist=np.asarray(namelist)
 
-        myinp_para.extend(paralist)
-        myinp_aoa.extend(aoalist)
-        myname.extend(namelist)
+        myinp_para.append(paralist)
+        myinp_aoa.append(aoalist)
+        myname.append(namelist)
         
 #save file
 filepath='./data_file'
       
 # ref:[x,y,z,ux,uy,uz,k,ep,nut]
-info=['myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord, mynae, fname, info']
+info=['myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, fname, info']
 
 data1 = [myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, fname, info ]
 
-with open(filepath+'/foil_aoa_nn_p16_train_NT.pkl', 'wb') as outfile1:
+with open(filepath+'/foil_aoa_nn_test_ts_p16_NT.pkl', 'wb') as outfile1:
     pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
     

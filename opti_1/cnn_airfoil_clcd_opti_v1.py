@@ -105,7 +105,10 @@ para_mm[:,1]=para_mm[:,1]/(para_max+1e-6)
 bnds=tuple(para_mm)
 
 global tar_cl
-tar_cl=0.5
+tar_cl=1.2
+
+global my_counter
+my_counter =0
 
 def loss(para):
     
@@ -137,18 +140,22 @@ def loss(para):
     out=model_clcd.predict([val_inp])
     pred_cl=out[0,0]*1.6
     print pred_cl
-    return max(0,abs(tar_cl-pred_cl))
- 
+    print my_counter
+    global my_counter
+    my_counter = my_counter +1
+    
+    return max(0, (tar_cl-pred_cl))
+     
 
-p1=mypara[30,:]
+p1=mypara[50,:]
 p1=p1/(para_max+1e-6)
     
 print('Starting loss = {}'.format(loss(p1)))
 
 res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=bnds, \
-               options={'disp': True, 'maxcor': 50, 'ftol': 1e-16, \
-                                 'eps': 1e-3, 'maxfun': 100, \
-                                 'maxiter': 1000, 'maxls': 50})
+               options={'disp': True, 'maxcor':1, 'ftol': 1e-16, \
+                                 'eps': 1e-4, 'maxfun': 1, \
+                                 'maxiter': 20, 'maxls': 1})
 print('Ending loss = {}'.format(loss(res.x)))
 
 
@@ -166,9 +173,11 @@ co_f2=np.concatenate((f2[:35][::-1][:,None],f2[35:,None]))
 
 #figure
 figure=plt.figure(figsize=(6,5))
-plt.plot(co_x,co_f1,'r')
-plt.plot(co_x,co_f2,'g')
+plt.plot(co_x,co_f1,'r',label='base')
+plt.plot(co_x,co_f2,'g',label='optimized')
 plt.xlim(-0.02,1.02)
 plt.ylim(-0.18,0.18) 
+plt.legend()
+plt.savefig('opti_1.eps',format='eps')
 plt.show()
 

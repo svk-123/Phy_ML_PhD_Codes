@@ -45,7 +45,7 @@ for the_file in os.listdir(folder):
         print(e)
 
 #load data
-with open('./data_file/foil_aoa_nn.pkl', 'rb') as infile:
+with open('./data_file/foil_aoa_nn_p64.pkl', 'rb') as infile:
     result = pickle.load(infile)
 inp_x=result[0]   
 inp_y=result[1]   

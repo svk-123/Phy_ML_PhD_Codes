@@ -124,11 +124,11 @@ hist = model.fit([xtr0], [ttr1], validation_split=0.1,\
 #save model
 model.save('./model/final_sf.hdf5') 
 
-print"\n"
+print("\n")
 print("loss = %f to %f"%(np.asarray(hist.history["loss"][:1]),np.asarray(hist.history["loss"][-1:])))
-print"\n"
+print("\n")
 print("val_loss = %f to %f"%(np.asarray(hist.history["val_loss"][:1]),np.asarray(hist.history["val_loss"][-1:])))
-print"\n"
+print("\n")
 print("--- %s seconds ---" % (time.time() - start_time))
 
 

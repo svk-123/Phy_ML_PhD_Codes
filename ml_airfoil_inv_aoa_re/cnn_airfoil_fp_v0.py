@@ -57,16 +57,15 @@ for the_file in os.listdir(folder):
 """------------------------------------"""
 
 # ref:[data,name]
-path='./foil_all_re_aoa/data_files/'
-data_file='data_re_aoa_fp_4.pkl'
-
+path='./foil_all_re_aoa/data_files_train_test_NT/'
+data_file='data_re_aoa_fp_NT_tr_9.pkl'
 
 inp_up=[]
 inp_lr=[]
 out=[]
 
-for ii in [1,2]:#,3,4,5,7,8,9,10
-    data_file='data_re_aoa_fp_%d.pkl'%ii
+for ii in [9]:#,3,4,5,7,8,9,10
+    data_file='data_re_aoa_fp_NT_ts_%d.pkl'%ii
 
     with open(path + data_file, 'rb') as infile:
         result = pickle.load(infile)
@@ -88,7 +87,6 @@ del result
 del inp_up
 del inp_lr
 del out
-
 
 # print dataset values
 print('xtr shape:', xtr1.shape)

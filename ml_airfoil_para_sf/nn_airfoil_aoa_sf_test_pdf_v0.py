@@ -44,29 +44,44 @@ import matplotlib.gridspec as gridspec
 matplotlib.rc('xtick', labelsize=16) 
 matplotlib.rc('ytick', labelsize=16) 
 
+#load data
+inp_x=[]
+inp_y=[]
+inp_reno=[]
+inp_aoa=[]
+inp_para=[]
+
+out_p=[]
+out_u=[]
+out_v=[]
 
 #load data
-with open('./data_file/foil_aoa_nn_test_ts_p16_NT_LNN.pkl', 'rb') as infile:
+with open('./data_file/foil_aoa_nn_p16_ph_1_ts_21xx.pkl', 'rb') as infile:
     result = pickle.load(infile)
-inp_x=result[0]   
-inp_y=result[1]   
-inp_para=result[2]   
-inp_aoa=result[3]   
-out_p=result[4]   
-out_u=result[5] 
-out_v=result[6] 
 
-co=result[7]
+inp_x.extend(result[0])   
+inp_y.extend(result[1])
+inp_para.extend(result[2])
+inp_reno.extend(result[3])
+inp_aoa.extend(result[4])
 
-name=result[8]
+out_p.extend(result[5])
+out_u.extend(result[6])
+out_v.extend(result[7])
+
+co=result[8]
+name=result[9]
 
 inp_x=np.asarray(inp_x)
 inp_y=np.asarray(inp_y)
-inp_para=np.asarray(inp_para)
+inp_reno=np.asarray(inp_reno)
 inp_aoa=np.asarray(inp_aoa)
+inp_para=np.asarray(inp_para)
+
 out_p=np.asarray(out_p)
 out_u=np.asarray(out_u)
 out_v=np.asarray(out_v)
+
 
 #open pdf file
 fp= PdfPages('plots.pdf')
@@ -74,20 +89,22 @@ fp= PdfPages('plots.pdf')
 #plot
 def con_plot(i):
     
-    fig = plt.figure(figsize=(10, 16),dpi=100)
+    fig = plt.figure(figsize=(10, 12),dpi=100)
         
     ax1 = fig.add_subplot(3,2,1)
     cp1 = ax1.tricontourf(val_inp[:,0],val_inp[:,1],val_out[:,0],20,cmap=cm.jet)
     ax1.tricontourf(co[i][:,0],co[i][:,1],np.zeros(len(co[i])),colors='w')
     ax1.set_title('p-cfd')
     ax1.set_xlabel('X',fontsize=16)
-    ax1.set_xlabel('Y',fontsize=16)
+    ax1.set_ylabel('Y',fontsize=16)
+    ax1.set_xlim([-0.5, 2])
+    ax1.set_ylim([-0.5, 0.5])
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar1=plt.colorbar(cp1, cax=cax, orientation='vertical');
     cbar1.ax.tick_params(labelsize=10)
     plt.subplots_adjust( wspace=0.2,hspace=0.3)
-    
+    ax1.set_aspect(1.1)
     
     ax2 = fig.add_subplot(3,2,2)
     cp2 = ax2.tricontourf(val_inp[:,0],val_inp[:,1],out[:,0],20,cmap=cm.jet)
@@ -95,11 +112,13 @@ def con_plot(i):
     ax2.set_title('p-NN')
     ax2.set_xlabel('X',fontsize=16)
     ax2.set_yticks([])
+    ax2.set_xlim([-0.5, 2])
+    ax2.set_ylim([-0.5, 0.5])
     divider = make_axes_locatable(ax2)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar2=plt.colorbar(cp2, cax=cax, orientation='vertical');
     cbar2.ax.tick_params(labelsize=10)
-
+    ax2.set_aspect(1.1)
     
     
     ax3 = fig.add_subplot(3,2,3)
@@ -107,12 +126,14 @@ def con_plot(i):
     ax3.tricontourf(co[i][:,0],co[i][:,1],np.zeros(len(co[i])),colors='w')
     ax3.set_title('u-cfd')
     ax3.set_xlabel('X',fontsize=16)
-    ax3.set_xlabel('Y',fontsize=16)
+    ax3.set_ylabel('Y',fontsize=16)
+    ax3.set_xlim([-0.5, 2])
+    ax3.set_ylim([-0.5, 0.5])
     divider = make_axes_locatable(ax3)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar3=plt.colorbar(cp3, cax=cax, orientation='vertical');
     cbar3.ax.tick_params(labelsize=10)
-
+    ax3.set_aspect(1.1)
     
     
     ax4 = fig.add_subplot(3,2,4)
@@ -121,11 +142,13 @@ def con_plot(i):
     ax4.set_title('u-NN')
     ax4.set_xlabel('X',fontsize=16)
     ax4.set_yticks([])
+    ax4.set_xlim([-0.5, 2])
+    ax4.set_ylim([-0.5, 0.5])
     divider = make_axes_locatable(ax4)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
     cbar4.ax.tick_params(labelsize=10)
-      
+    ax4.set_aspect(1.1)      
     
     
     ax5 = fig.add_subplot(3,2,5)
@@ -133,12 +156,14 @@ def con_plot(i):
     ax5.tricontourf(co[i][:,0],co[i][:,1],np.zeros(len(co[i])),colors='w')
     ax5.set_title('v-cfd')
     ax5.set_xlabel('X',fontsize=16)
-    ax5.set_xlabel('Y',fontsize=16)
+    ax5.set_ylabel('Y',fontsize=16)
+    ax5.set_xlim([-0.5, 2])
+    ax5.set_ylim([-0.5, 0.5])
     divider = make_axes_locatable(ax5)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar5=plt.colorbar(cp5, cax=cax, orientation='vertical');
     cbar5.ax.tick_params(labelsize=10)
-
+    ax5.set_aspect(1.1)
     
     
     ax6 = fig.add_subplot(3,2,6)
@@ -147,10 +172,13 @@ def con_plot(i):
     ax6.set_title('v-NN')
     ax6.set_xlabel('X',fontsize=16)
     ax6.set_yticks([])
+    ax6.set_xlim([-0.5, 2])
+    ax6.set_ylim([-0.5, 0.5])
     divider = make_axes_locatable(ax6)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar6=plt.colorbar(cp6, cax=cax, orientation='vertical');
     cbar6.ax.tick_params(labelsize=10)
+    ax6.set_aspect(1.1)
     
     fig.suptitle("Airfoil-%s-AoA=%s"%(name[i][0],int(inp_aoa[i][0]*12)), fontsize=24)
     
@@ -221,12 +249,16 @@ def line_plot(i):
 
 for i in range(10):
     
+    #normalize
+    inp_reno[i]=inp_reno[i]/1000.
     inp_aoa[i]=inp_aoa[i]/12.0
-    val_inp=np.concatenate((inp_x[i][:,None],inp_y[i][:,None],inp_aoa[i][:,None],inp_para[i][:,:]),axis=1)
+    
+
+    val_inp=np.concatenate((inp_x[i][:,None],inp_y[i][:,None],inp_reno[i][:,None],inp_aoa[i][:,None],inp_para[i][:,:]),axis=1)
     val_out=np.concatenate((out_p[i][:,None],out_u[i][:,None],out_v[i][:,None]),axis=1)
 
     #load_model
-    model_test=load_model('./selected_model/p16/model_sf_1000_0.000000_0.000001.hdf5') 
+    model_test=load_model('./selected_model/case_6/model_sf_400_0.00000676_0.00000742.hdf5') 
     out=model_test.predict([val_inp]) 
          
     con_plot(i)

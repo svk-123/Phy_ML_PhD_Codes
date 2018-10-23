@@ -267,7 +267,7 @@ for jj in range(3):
 
     data1 = [myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, info ]
 
-    with open(filepath+'/foil_aoa_nn_p16_ph_1_tr_2%s.pkl'%(jj+1), 'wb') as outfile1:
+    with open(filepath+'/foil_aoa_nn_p16_ph_1_tr_2%sxx.pkl'%(jj+1), 'wb') as outfile1:
         pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
     

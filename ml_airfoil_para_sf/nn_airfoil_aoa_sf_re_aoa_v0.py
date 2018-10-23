@@ -82,22 +82,22 @@ inp_para=np.asarray(inp_para)
 out_p=np.asarray(out_p)
 out_u=np.asarray(out_u)
 out_v=np.asarray(out_v)
-#
-## ---------ML PART:-----------#
-##shuffle data
-#N= len(inp_x)
-#print N
-#I = np.arange(N)
-#np.random.shuffle(I)
-#n=5000000
-#
-##normalize
-#inp_reno=inp_reno/1000.
-#inp_aoa=inp_aoa/12.0
-#
-#my_inp=np.concatenate((inp_x[:,None],inp_y[:,None],inp_reno[:,None],inp_aoa[:,None],inp_para[:,:]),axis=1)
-#my_out=np.concatenate((out_p[:,None],out_u[:,None],out_v[:,None]),axis=1)
-#
+
+# ---------ML PART:-----------#
+#shuffle data
+N= len(inp_x)
+print N
+I = np.arange(N)
+np.random.shuffle(I)
+n=5000000
+
+#normalize
+inp_reno=inp_reno/1000.
+inp_aoa=inp_aoa/12.0
+
+my_inp=np.concatenate((inp_x[:,None],inp_y[:,None],inp_reno[:,None],inp_aoa[:,None],inp_para[:,:]),axis=1)
+my_out=np.concatenate((out_p[:,None],out_u[:,None],out_v[:,None]),axis=1)
+
 ##del result
 ##del inp_x
 ##del inp_y

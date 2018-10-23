@@ -46,7 +46,7 @@ matplotlib.rc('ytick', labelsize=16)
 
 
 #load data
-with open('./data_file/foil_aoa_nn_test_ts_p16_NT.pkl', 'rb') as infile:
+with open('./data_file/foil_aoa_nn_test_ts_p16_NT_LNN.pkl', 'rb') as infile:
     result = pickle.load(infile)
 inp_x=result[0]   
 inp_y=result[1]   
@@ -219,14 +219,14 @@ def line_plot(i):
     plt.close()
 
 
-for i in range(49):
+for i in range(10):
     
     inp_aoa[i]=inp_aoa[i]/12.0
     val_inp=np.concatenate((inp_x[i][:,None],inp_y[i][:,None],inp_aoa[i][:,None],inp_para[i][:,:]),axis=1)
     val_out=np.concatenate((out_p[i][:,None],out_u[i][:,None],out_v[i][:,None]),axis=1)
 
     #load_model
-    model_test=load_model('./selected_model/p16/model_sf_1400_0.000009_0.000009.hdf5') 
+    model_test=load_model('./selected_model/p16/model_sf_1000_0.000000_0.000001.hdf5') 
     out=model_test.predict([val_inp]) 
          
     con_plot(i)

@@ -97,7 +97,7 @@ myout_v=[]
 
 myname=[]
 
-for ii in range(4):
+for ii in range(49):
     if ('naca23012' != fname[ii]):
         
         print (ii)
@@ -230,7 +230,7 @@ info=['myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord
 
 data1 = [myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, fname, info ]
 
-with open(filepath+'/foil_aoa_nn_test_ts_p16_NT_4.pkl', 'wb') as outfile1:
+with open(filepath+'/foil_aoa_nn_test_ts_p16_NT.pkl', 'wb') as outfile1:
     pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
     

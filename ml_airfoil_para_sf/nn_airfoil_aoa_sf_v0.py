@@ -45,7 +45,7 @@ for the_file in os.listdir(folder):
         print(e)
 
 #load data
-with open('./data_file/foil_aoa_nn_p64.pkl', 'rb') as infile:
+with open('./data_file/foil_aoa_nn_p16_ph_1_tr_21.pkl', 'rb') as infile:
     result = pickle.load(infile)
 inp_x=result[0]   
 inp_y=result[1]   
@@ -78,9 +78,21 @@ my_out=out_p
 xtr0= my_inp[I][:n]
 ttr1 = my_out[I][:n]
 
+
+del result
+del inp_x
+del inp_y
+del inp_para
+del inp_aoa
+del out_p
+
+
+
+
+
 # Multilayer Perceptron
 # create model
-aa=Input(shape=(67,))
+aa=Input(shape=(19,))
 xx =Dense(100,  kernel_initializer='random_normal', activation='relu')(aa)
 xx =Dense(100, activation='relu')(xx)
 xx =Dense(100, activation='relu')(xx)

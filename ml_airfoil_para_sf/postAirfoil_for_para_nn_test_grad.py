@@ -29,7 +29,7 @@ boundary not loaded: may be required?
 """
 
 # read data from below dir...
-path='../cnn_airfoil_sf/OF_results/cases_naca_aoa_test'
+path='../cnn_airfoil_sf/OF_results/case_grad'
 
 indir = path
 
@@ -97,7 +97,12 @@ myout_v=[]
 
 myname=[]
 
-for ii in range(4):
+Ux=[]
+Uy=[]
+Vx=[]
+Vy=[]
+
+for ii in range(1):
     if ('naca23012' != fname[ii]):
         
         print (ii)
@@ -158,6 +163,33 @@ for ii in range(4):
         w = np.array(map(float, w))
                
         
+        #load vel.grad
+        ux=[]
+        uy=[]
+        uz=[]
+        vx=[]
+        vy=[]
+        vz=[]
+        wx=[]
+        wy=[]
+        wz=[]        
+    
+        with open(casedir +'/500/grad(U)', 'r') as infile:
+            data0=infile.readlines()
+            npt=int(data0[20])
+            for line in data0[22:22+npt]:
+                line=line.replace("(","")
+                line=line.replace(")","")        
+                a, b, c,d,e,f,g,h,i = (item.strip() for item in line.split(' ', 9))
+                ux.append(a), uy.append(b), uz.append(c),vx.append(d), vy.append(e), vz.append(f),\
+                     wx.append(g), wy.append(h), wz.append(i)
+        ux = np.array(map(float, ux))
+        uy = np.array(map(float, uy))
+        vx = np.array(map(float, vx))
+        vy = np.array(map(float, vy))
+
+        
+        
         
         #filter within xlim,ylim
         I=[]
@@ -173,7 +205,10 @@ for ii in range(4):
         v=v[I]
         w=w[I]
         p=p[I]
-            
+        ux=ux[I]    
+        uy=uy[I]
+        vx=vx[I]
+        vy=vy[I]
         
         #plot
         def plot(xp,yp,zp,nc,name):
@@ -202,7 +237,11 @@ for ii in range(4):
         myout_p.append(p)
         myout_u.append(u)
         myout_v.append(v)
-
+        Ux.append(ux)
+        Uy.append(uy)        
+        Vx.append(vx)        
+        Vy.append(vy)
+        
         paralist=[]
         for k in range(len(x)):
             paralist.append(my_para[ii])
@@ -226,11 +265,11 @@ for ii in range(4):
 filepath='./data_file'
       
 # ref:[x,y,z,ux,uy,uz,k,ep,nut]
-info=['myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, fname, info']
+info=['myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, fname,Ux,Uy,Vx,Vy info']
 
-data1 = [myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, fname, info ]
+data1 = [myinp_x, myinp_y, myinp_para, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, fname,Ux,Uy,Vx,Vy, info ]
 
-with open(filepath+'/foil_aoa_nn_test_ts_p16_NT_4.pkl', 'wb') as outfile1:
+with open(filepath+'/foil_aoa_nn_test_ts_p16_grad.pkl', 'wb') as outfile1:
     pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
     

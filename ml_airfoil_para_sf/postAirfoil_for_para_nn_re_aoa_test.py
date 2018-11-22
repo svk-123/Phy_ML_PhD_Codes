@@ -29,7 +29,7 @@ boundary not loaded: may be required?
 """
 
 # read data from below dir...
-path='../cnn_airfoil_sf/OF_results/case_re_aoa_1'
+path='../cnn_airfoil_sf/OF_results/case_re_aoa_test_1'
 
 indir = path
 
@@ -95,10 +95,8 @@ for i in range(len(foil)):
     else:
         print('not in pname %s'%foil[i])
 
-
-
-st=[0,500,1000]
-end=[10,1000,len(foil)]
+st  = [0,200,1000]
+end = [200,len(foil)]
 fp=open('foil_error.dat','w+')
 
 for jj in range(1):
@@ -116,7 +114,8 @@ for jj in range(1):
 
     myname=[]
     myfname=[]
-
+    foamxy=[]
+    
     for ii in range(st[jj],end[jj]):
         print ii
         
@@ -177,9 +176,7 @@ for jj in range(1):
         u = np.array(map(float, u))
         v = np.array(map(float, v))
         w = np.array(map(float, w))
-               
-        
-        
+              
         #filter within xlim,ylim
         I=[]
         for i in range(len(x)):
@@ -198,8 +195,52 @@ for jj in range(1):
         if (p.max() > 2):
             print tmp[ii]
             fp.write('%s \n'%tmp[ii])
-        
-        
+            
+        xu=[]
+        xl=[]
+        with open(casedir +'/%s/Cx'%ymax, 'r') as infile:
+            data0=infile.readlines()
+            for k in range(len(data0)):
+                if 'foil_upper' in data0[k]:
+                    ind1=k
+                if 'foil_lower' in data0[k]:
+                    ind2=k       
+                    
+            n=int(data0[ind1+4]) 
+            st=ind1+6
+            for line in data0[st:st+n]:
+                xu.append(line)
+            xu = np.array(map(float, xu))
+       
+            n=int(data0[ind2+4]) 
+            st=ind2+6
+            for line in data0[st:st+n]:
+                xl.append(line)
+            xl = np.array(map(float, xl))        
+
+
+        yu=[]
+        yl=[]
+        with open(casedir +'/%s/Cy'%ymax, 'r') as infile:
+            data0=infile.readlines()
+            for k in range(len(data0)):
+                if 'foil_upper' in data0[k]:
+                    ind1=k
+                if 'foil_lower' in data0[k]:
+                    ind2=k       
+                    
+            n=int(data0[ind1+4]) 
+            st=ind1+6
+            for line in data0[st:st+n]:
+                yu.append(line)
+            yu = np.array(map(float, yu))
+       
+            n=int(data0[ind2+4]) 
+            st=ind2+6
+            for line in data0[st:st+n]:
+                yl.append(line)
+            yl = np.array(map(float, yl))          
+     
         #plot
         def plot(xp,yp,zp,nc,name):
             plt.figure(figsize=(3, 4))
@@ -227,6 +268,8 @@ for jj in range(1):
         myout_p.append(p)
         myout_u.append(u)
         myout_v.append(v)
+
+        foamxy.append([xu,xl,yu,yl])
 
         paralist=[]
         for k in range(len(x)):
@@ -263,11 +306,11 @@ for jj in range(1):
     filepath='./data_file'
       
     # ref:[x,y,z,ux,uy,uz,k,ep,nut]
-    info=['myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, coord, mynae, info']
+    info=['myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, coord,[xu,xl,yu,yl], mynae, info']
 
-    data1 = [myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, info ]
+    data1 = [myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, coord,foamxy,myname, info ]
 
-    with open(filepath+'/foil_aoa_nn_p16_ph_1_ts_2%sxx.pkl'%(jj+1), 'wb') as outfile1:
+    with open(filepath+'/foil_aoa_nn_p16_ph_1_ts_%s.pkl'%(jj+1), 'wb') as outfile1:
         pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
     

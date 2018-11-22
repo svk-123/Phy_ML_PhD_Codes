@@ -81,7 +81,7 @@ with open(path+'best_cp_fp_144_1100.pkl', 'wb') as outfile:
 
 # ref:[data,name]
 path='./data_file/'
-data_file='foil_param.pkl'
+data_file='foil_param_216.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -99,7 +99,7 @@ val3=np.asarray(val3)
 
 
 #np.random.seed(123)
-np.random.seed(154328)
+np.random.seed(1234633)
 N= len(val1)
 I = np.arange(N)
 np.random.shuffle(I)
@@ -118,13 +118,13 @@ ts_val3=val3[I][n:]
 
 
 
-'''data1=[tr_val1,tr_val2,xx,tr_val3,info]
-with open(path+'foil_param_tr.pkl', 'wb') as outfile:
+data1=[tr_val1,tr_val2,xx,tr_val3,info]
+with open(path+'foil_param_216_tr.pkl', 'wb') as outfile:
     pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
 data2=[ts_val1,ts_val2,xx,ts_val3,info]
-with open(path+'foil_param_ts.pkl', 'wb') as outfile:
-    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)'''
+with open(path+'foil_param_216_ts.pkl', 'wb') as outfile:
+    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
 
 
 

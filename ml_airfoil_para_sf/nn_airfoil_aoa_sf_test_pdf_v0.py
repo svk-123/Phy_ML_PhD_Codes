@@ -56,7 +56,8 @@ out_u=[]
 out_v=[]
 
 #load data
-with open('./data_file/foil_aoa_nn_p16_ph_1_ts_21xx.pkl', 'rb') as infile:
+#with open('./data_file/ph_1_test/foil_aoa_nn_p16_ph_1_ts_1.pkl', 'rb') as infile:
+with open('./data_file/foil_aoa_nn_naca_lam_ts_1.pkl', 'rb') as infile:
     result = pickle.load(infile)
 
 inp_x.extend(result[0])   
@@ -70,6 +71,7 @@ out_u.extend(result[6])
 out_v.extend(result[7])
 
 co=result[8]
+fxy=result[9]
 name=result[9]
 
 inp_x=np.asarray(inp_x)
@@ -84,7 +86,7 @@ out_v=np.asarray(out_v)
 
 
 #open pdf file
-fp= PdfPages('plots.pdf')
+fp= PdfPages('plots_lam_model1.pdf')
 
 #plot
 def con_plot(i):
@@ -180,7 +182,7 @@ def con_plot(i):
     cbar6.ax.tick_params(labelsize=10)
     ax6.set_aspect(1.1)
     
-    fig.suptitle("Airfoil-%s-AoA=%s"%(name[i][0],int(inp_aoa[i][0]*12)), fontsize=24)
+    fig.suptitle("Testing:Airfoil-%s Re=%s AoA=%s"%(name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)), fontsize=24)
     
     plt.subplots_adjust( wspace=0.2,hspace=0.25)       
     fp.savefig(fig)
@@ -195,9 +197,13 @@ def line_plot(i):
     fig = plt.figure(figsize=(10, 16))
     gs = gridspec.GridSpec(3,4)
     
+    mei=int(len(co[i])/30)
+    if (mei < 1):
+        mei=1
+           
     ax1 = plt.subplot(gs[0,1:3])
-    ax1.plot(xu[10:],pu1[10:],'og',linewidth=3,markevery=5,label='CFD-upper')
-    ax1.plot(xl[:-10],pl1[:-10],'ob',linewidth=3,markevery=5,label='CFD-lower') 
+    ax1.plot(xu,pu1,'og',linewidth=3,markevery=mei,label='CFD-upper')
+    ax1.plot(xl,pl1,'ob',linewidth=3,markevery=mei,label='CFD-lower') 
     ax1.plot(xu,pu2,'r',linewidth=3,label='NN-upper')
     ax1.plot(xl,pl2,'k',linewidth=3,label='NN-lower')     
     ax1.set_title('Pressure',fontsize=20)
@@ -222,7 +228,7 @@ def line_plot(i):
     ax5 = plt.subplot(gs[2,0:1])    
     ax5.plot(v1a,ya,'-og',linewidth=3,label='CFD')
     ax5.plot(v2a,ya,'r',linewidth=3,label='NN')
-    ax5.set_xlim([-0.1,0.5])
+    ax5.set_xlim([-0.1,0.8])
         
     ax6 = plt.subplot(gs[2,1:2]) 
     ax6.plot(v1b,yb,'-og',linewidth=3)
@@ -240,37 +246,55 @@ def line_plot(i):
     ax8.plot(v2d,yd,'r',linewidth=3)    
     ax8.set_xlim([-0.1,0.2])
      
-    fig.suptitle("Airfoil-%s-AoA=%s"%(name[i][0],int(inp_aoa[i][0]*12)), fontsize=24)
+    fig.suptitle("Testing:Airfoil-%s Re=%s AoA=%s"%(name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)), fontsize=24)
     
     plt.subplots_adjust( wspace=0.2,hspace=0.5)       
     fp.savefig(fig)
     plt.close()
 
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+np.random.seed(1234534)
+mylist=np.random.randint(0,420,50)
 
-for i in range(10):
-    
+for i in mylist:
+    print i
     #normalize
-    inp_reno[i]=inp_reno[i]/1000.
-    inp_aoa[i]=inp_aoa[i]/12.0
+    inp_reno[i]=inp_reno[i]/2000.
+    inp_aoa[i]=inp_aoa[i]/14.0
     
-
     val_inp=np.concatenate((inp_x[i][:,None],inp_y[i][:,None],inp_reno[i][:,None],inp_aoa[i][:,None],inp_para[i][:,:]),axis=1)
     val_out=np.concatenate((out_p[i][:,None],out_u[i][:,None],out_v[i][:,None]),axis=1)
 
     #load_model
-    model_test=load_model('./selected_model/case_6/model_sf_400_0.00000676_0.00000742.hdf5') 
+    model_test=load_model('./selected_model/case_8_naca_lam_1/model_sf_40_0.00000278_0.00000315.hdf5') 
     out=model_test.predict([val_inp]) 
          
     con_plot(i)
 
-#LinearNDinterpolator
+    #LinearNDinterpolator
     pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
 
-    xu=co[i][:100,0]
-    yu=co[i][:100,1]
 
-    xl=co[i][99:,0]
-    yl=co[i][99:,1]
+    a0=find_nearest(co[i][:,0],0)
+    
+    xu=co[i][:a0+1,0]
+    yu=co[i][:a0+1,1]
+    if(yu[0] <=0.001):
+        yu[0]=0.001
+        
+    xl=co[i][a0:,0]
+    yl=co[i][a0:,1]
+    if(yl[-1:] >=-0.001):
+        yl[-1:]=-0.001    
+    
+    
+#    xu=fxy[i][0]
+#    xl=fxy[i][1]
+#    yu=fxy[i][2]
+#    yl=fxy[i][3]    
     
     #for -p
     print 'interpolation-1...'      
@@ -292,16 +316,23 @@ for i in range(10):
     pl2=np.zeros(len(xl))
     for j in range(len(xl)):
        pl2[j]=f2p(xl[j],yl[j])
+    
 
+    
     #plot -u,v
-    xa=np.linspace(co[i][99,0],co[i][99,0],50)
-    ya=np.linspace(co[i][99,1],0.99,50)
+    dl=int(len(co[i][:,0])/2)
+    
+    a0=find_nearest(co[i][:dl+2,0],0)
+    a5=find_nearest(co[i][:dl+2,0],0.5)
+    
+    xa=np.linspace(co[i][a0,0],co[i][a0,0],50)
+    ya=np.linspace(co[i][a0,1],0.5,50)
 
-    xb=np.linspace(co[i][49,0],co[i][49,0],50)
-    yb=np.linspace(co[i][49,1],0.99,50)
+    xb=np.linspace(co[i][a5,0],co[i][a5,0],50)
+    yb=np.linspace(co[i][a5,1],0.5,50)
 
     xc=np.linspace(co[i][0,0],co[i][0,0],50)
-    yc=np.linspace(co[i][0,1],0.99,50)
+    yc=np.linspace(co[i][0,1],0.5,50)
 
     xd=np.linspace(1.5,1.5,50)
     yd=np.linspace(co[i][0,1],0.99,50)
@@ -364,3 +395,6 @@ for i in range(10):
     
     
 fp.close()    
+
+
+

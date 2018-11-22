@@ -89,7 +89,7 @@ N= len(inp_x)
 print N
 I = np.arange(N)
 np.random.shuffle(I)
-n=5000000
+n=50000
 
 #normalize
 inp_reno=inp_reno/1000.

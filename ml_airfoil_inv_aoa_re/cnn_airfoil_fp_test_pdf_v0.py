@@ -57,9 +57,10 @@ path='./foil_all_re_aoa/data_files_train_test_NT/'
 data_file='data_re_aoa_fp_4.pkl'
 
 #open pdf file
-fp= PdfPages('plots.pdf')
+fp= PdfPages('least_accurate.pdf')
 
 for ii in [1,2,3,4,5,7,8,9,10]:
+#for ii in [1]:
     print ii
     #for ii in [1,2,3,4,5,7,8,9,10]:
     data_file='data_re_aoa_fp_NT_ts_%d.pkl'%ii
@@ -83,6 +84,10 @@ for ii in [1,2,3,4,5,7,8,9,10]:
     inp_up=np.asarray(inp_up)
     inp_lr=np.asarray(inp_lr)
     my_out=np.asarray(my_out)
+    name=np.asarray(name)
+    reno=np.asarray(reno)
+    aoa=np.asarray(aoa)
+    
     xx=result[5]
     
     xtr1=np.concatenate((inp_up[:,:,:,None],inp_lr[:,:,:,None]),axis=3) 
@@ -109,6 +114,39 @@ for ii in [1,2,3,4,5,7,8,9,10]:
            
     out=model_test.predict([xtr1])
     out=out*0.18
+
+    #calculate error norm
+    train_l2=[]
+    train_l1=[]
+    for k in range(len(out)):    
+        
+        tmp=my_out[k]-out[k]
+        train_l2.append( (LA.norm(tmp)/LA.norm(out))*100 )
+        tmp2=tmp/out[k]
+        train_l1.append(sum(abs(tmp2))/len(out))    
+
+
+    train_l2=np.asarray(train_l2)
+    idx=range(0,len(out))
+    idx=np.asarray(idx)
+    train_l2=np.concatenate((train_l2[:,None],idx[:,None]),axis=1)
+    train_l2=train_l2[train_l2[:,0].argsort()]
+    II=train_l2[:,1].astype(int)
+    
+    def find_nearest(array, value):
+        array = np.asarray(array)
+        idx1 = (np.abs(array - value)).argmin()
+        return idx1
+    
+    idx1=find_nearest(train_l2[:,0], 0.4)
+    II=II[idx1:]
+    
+    my_out=my_out[II]
+    out=out[II]
+    name=name[II]
+    reno=reno[II]
+    aoa=aoa[II]
+        
     
     batch=int( len(out) /6.)
     

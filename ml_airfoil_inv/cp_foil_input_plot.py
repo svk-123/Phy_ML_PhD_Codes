@@ -59,25 +59,21 @@ foil=result[2]
 xx=result[3]
 name=result[4]
 
-'''
-data_file='data_cp_fp_1600.pkl'
+
+data_file='data_cp_fp_144_1600.pkl'
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
 name1=result[4]
 for i in range(len(name)):
     if (name[i]!=name1[i]):
         print 'Not match'
-'''
 
-'''l=10
+
+l=25
 plt.figure(figsize=(6,5),dpi=100)
-for k in range(100):
-   
-    plt.plot(xx,foil[k][0:35],'-k',lw=0.4)
-    plt.plot(xx,foil[k][35:],'-k',lw=0.4)  
     
 plt.plot(xx,foil[l][0:35],'g',lw=5,label='true')
-plt.plot(xx,foil[l][35:],'r',lw=5)
+plt.plot(xx,foil[l][35:],'g',lw=5)
 
 plt.xlim([-0.05,1.05])
 plt.ylim([-0.1,0.1])
@@ -90,8 +86,9 @@ plt.yticks([])
 plt.grid()
 plt.tight_layout()
 plt.savefig('foil1.png',bbox_inches='tight',dpi=100)
-plt.show()'''
+plt.show()
 
+'''
 l=9
 plt.figure(figsize=(6,5),dpi=100)
 for k in range(1277,1278):
@@ -125,9 +122,7 @@ fu = scipy.interpolate.interp1d(x,y)
 u_yy = fu(x)
 
 
-plt.plot(x,y,x+0.1,u_yy)
-
-
+plt.plot(x,y,x+0.1,u_yy)'''
 
 
 

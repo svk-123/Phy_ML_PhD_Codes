@@ -42,24 +42,41 @@ matplotlib.rc('ytick', labelsize=18)
 
 
 #load data
-with open('./data_file/foil_aoa_nn_test_ts_p16_NT.pkl', 'rb') as infile:
+inp_x=[]
+inp_y=[]
+inp_reno=[]
+inp_aoa=[]
+inp_para=[]
+
+out_p=[]
+out_u=[]
+out_v=[]
+
+#load data
+#with open('./data_file/ph_1_test/foil_aoa_nn_p16_ph_1_ts_1.pkl', 'rb') as infile:
+with open('./data_file/foil_aoa_nn_naca_lam_ts_1.pkl', 'rb') as infile:
     result = pickle.load(infile)
-inp_x=result[0]   
-inp_y=result[1]   
-inp_para=result[2]   
-inp_aoa=result[3]   
-out_p=result[4]   
-out_u=result[5] 
-out_v=result[6] 
 
-co=result[7]
+inp_x.extend(result[0])   
+inp_y.extend(result[1])
+inp_para.extend(result[2])
+inp_reno.extend(result[3])
+inp_aoa.extend(result[4])
 
-name=result[8]
+out_p.extend(result[5])
+out_u.extend(result[6])
+out_v.extend(result[7])
+
+co=result[8]
+fxy=result[9]
+name=result[9]
 
 inp_x=np.asarray(inp_x)
 inp_y=np.asarray(inp_y)
-inp_para=np.asarray(inp_para)
+inp_reno=np.asarray(inp_reno)
 inp_aoa=np.asarray(inp_aoa)
+inp_para=np.asarray(inp_para)
+
 out_p=np.asarray(out_p)
 out_u=np.asarray(out_u)
 out_v=np.asarray(out_v)
@@ -80,14 +97,20 @@ def con_plot(xp,yp,zp,nc,i,pname):
     #plt.title('%s  '%flist[ii]+name)
     plt.xlabel('X ',fontsize=20)
     plt.ylabel('Y ',fontsize=20)
-    plt.savefig('./plot_c_ts/%s_%s_%s_aoa_%s.eps'%(i,name[i][0],pname,val_inp[2,0]), format='eps',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot_ts/%s_Re=%s_AoA=%s_%s.png'%(pname,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)),format='png',dpi=100)
     plt.show()
     plt.close()
 
 def line_plot3(i):
+    
+    
+    mei=int(len(co[i])/30)
+    if (mei < 1):
+        mei=1
+        
     plt.figure(figsize=(6, 5), dpi=100)
-    plt0, =plt.plot(xu[10:],pu1[10:],'og',linewidth=3,markevery=5,label='CFD-upper')
-    plt0, =plt.plot(xl[:-10],pl1[:-10],'ob',linewidth=3,markevery=5,label='CFD-lower') 
+    plt0, =plt.plot(xu,pu1,'og',linewidth=3,markevery=mei,label='CFD-upper')
+    plt0, =plt.plot(xl,pl1,'ob',linewidth=3,markevery=mei,label='CFD-lower') 
             
     plt0, =plt.plot(xu,pu2,'r',linewidth=3,label='NN-upper')
     plt0, =plt.plot(xl,pl2,'k',linewidth=3,label='NN-lower')     
@@ -173,18 +196,27 @@ def line_plotv_sub(i):
     
     
     plt.subplots_adjust(top = 1, bottom = 0.13, right = 1, left = 0.12, hspace = 0, wspace = 0)
-    plt.savefig(fig)
+    plt.savefig('./plot_ts/%s_%s_aoa_%s-v.png'%(i,name[i][0],val_inp[2,0]), format='png', dpi=100)
     plt.show() 
     plt.close()
 
-for i in range(49):
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+
+for i in range(110):
     
-    inp_aoa[i]=inp_aoa[i]/12.0
-    val_inp=np.concatenate((inp_x[i][:,None],inp_y[i][:,None],inp_aoa[i][:,None],inp_para[i][:,:]),axis=1)
+    #normalize
+    inp_reno[i]=inp_reno[i]/2000.
+    inp_aoa[i]=inp_aoa[i]/14.0
+    
+    val_inp=np.concatenate((inp_x[i][:,None],inp_y[i][:,None],inp_reno[i][:,None],inp_aoa[i][:,None],inp_para[i][:,:]),axis=1)
     val_out=np.concatenate((out_p[i][:,None],out_u[i][:,None],out_v[i][:,None]),axis=1)
 
+
     #load_model
-    model_test=load_model('./selected_model/p16/model_sf_1400_0.000009_0.000009.hdf5') 
+    model_test=load_model('./selected_model/case_8_naca_lam_2/model_sf_140_0.00000278_0.00000300.hdf5') 
     out=model_test.predict([val_inp]) 
          
     con_plot(val_inp[:,0],val_inp[:,1],val_out[:,0],20,i,'p-cfd')
@@ -200,11 +232,17 @@ for i in range(49):
     #LinearNDinterpolator
     pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
 
-    xu=co[i][:100,0]
-    yu=co[i][:100,1]
-
-    xl=co[i][99:,0]
-    yl=co[i][99:,1]
+    a0=find_nearest(co[i][:,0],0)
+    
+    xu=co[i][:a0+1,0]
+    yu=co[i][:a0+1,1]
+    if(yu[0] <=0.001):
+        yu[0]=0.001
+        
+    xl=co[i][a0:,0]
+    yl=co[i][a0:,1]
+    if(yl[-1:] >=-0.001):
+        yl[-1:]=-0.001  
     
     #for -p
     print 'interpolation-1...'      
@@ -228,17 +266,23 @@ for i in range(49):
        pl2[j]=f2p(xl[j],yl[j])
 
     #plot -u,v
-    xa=np.linspace(co[i][99,0],co[i][99,0],50)
-    ya=np.linspace(co[i][99,1],0.99,50)
+    dl=int(len(co[i][:,0])/2)
+    
+    a0=find_nearest(co[i][:dl+2,0],0)
+    a5=find_nearest(co[i][:dl+2,0],0.5)
+    
+    xa=np.linspace(co[i][a0,0],co[i][a0,0],50)
+    ya=np.linspace(co[i][a0,1],0.5,50)
 
-    xb=np.linspace(co[i][49,0],co[i][49,0],50)
-    yb=np.linspace(co[i][49,1],0.99,50)
+    xb=np.linspace(co[i][a5,0],co[i][a5,0],50)
+    yb=np.linspace(co[i][a5,1],0.5,50)
 
     xc=np.linspace(co[i][0,0],co[i][0,0],50)
-    yc=np.linspace(co[i][0,1],0.99,50)
+    yc=np.linspace(co[i][0,1],0.5,50)
 
     xd=np.linspace(1.5,1.5,50)
     yd=np.linspace(co[i][0,1],0.99,50)
+        
         
     # for u    
     print 'interpolation-1...'      
@@ -296,6 +340,6 @@ for i in range(49):
 
     #plot
     line_plot3(i)
-    #line_plotu_sub(i)
-    #line_plotv_sub(i)
+    line_plotu_sub(i)
+    line_plotv_sub(i)
 

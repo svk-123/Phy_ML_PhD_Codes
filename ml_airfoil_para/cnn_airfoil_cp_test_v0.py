@@ -53,7 +53,7 @@ matplotlib.rc('ytick', labelsize=18)
 
 # ref:[data,name]
 path='./data_file/'
-data_file='foil_param.pkl'
+data_file='foil_param_216_ts.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -69,13 +69,13 @@ xtr1=inp
 ttr1=my_out 
 
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
-model_test=load_model('./selected_model/model_cnn_1000_0.000029_0.000125.hdf5')  
+model_test=load_model('./selected_model/case_5_b/model_cnn_3400_0.000012_0.000170.hdf5')  
        
 out=model_test.predict([xtr1])
 out=out*0.25
 
 for k in range(len(name)):
-
+    print k
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(xx,my_out[k][0:35],'ro',markersize=8,label='true')
     plt.plot(xx,my_out[k][35:],'ro',markersize=8)
@@ -88,7 +88,7 @@ for k in range(len(name)):
     plt.ylabel('$C_p$',fontsize=20)  
     #plt.axis('off')
     plt.tight_layout()
-    plt.savefig('./plot/tr_%s_%s.png'%(k,name[k]), bbox_inches='tight',dpi=100)
+    plt.savefig('./plot/ts_%s_%s.png'%(k,name[k]), bbox_inches='tight',dpi=100)
     plt.show()
     
     

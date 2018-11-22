@@ -29,7 +29,7 @@ boundary not loaded: may be required?
 """
 
 # read data from below dir...
-path='../cnn_airfoil_sf/OF_results/case_re_aoa_2'
+path='../cnn_airfoil_sf/OF_results/case_n0012'
 
 indir = path
 
@@ -98,10 +98,10 @@ for i in range(len(foil)):
 
 
 st=[0,500,1000]
-end=[500,1000,len(foil)]
+end=[len(foil)]
 fp=open('foil_error.dat','w+')
 
-for jj in range(3):
+for jj in range(1):
 
 
     myinp_x=[]
@@ -130,7 +130,7 @@ for jj in range(3):
         ymax=int(yname.max())
         
         x=[]
-        with open(casedir +'/%s/Cx'%ymax, 'r') as infile:
+        with open(casedir +'/%s/ccx'%ymax, 'r') as infile:
             data0=infile.readlines()
             npt=int(data0[20])
             for line in data0[22:22+npt]:
@@ -138,7 +138,7 @@ for jj in range(3):
         x = np.array(map(float, x))
        
         y=[]
-        with open(casedir +'/%s/Cy'%ymax, 'r') as infile:
+        with open(casedir +'/%s/ccy'%ymax, 'r') as infile:
             data0=infile.readlines()
             npt=int(data0[20])
             for line in data0[22:22+npt]:
@@ -146,7 +146,7 @@ for jj in range(3):
         y = np.array(map(float, y))
         
         z=[]
-        with open(casedir +'/%s/Cz'%ymax, 'r') as infile:
+        with open(casedir +'/%s/ccz'%ymax, 'r') as infile:
             data0=infile.readlines()
             npt=int(data0[20])
             for line in data0[22:22+npt]:
@@ -267,7 +267,7 @@ for jj in range(3):
 
     data1 = [myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, coord, myname, info ]
 
-    with open(filepath+'/foil_aoa_nn_p16_ph_1_tr_2%sxx.pkl'%(jj+1), 'wb') as outfile1:
+    with open(filepath+'/foil_naca_fsi_%s.pkl'%(jj+1), 'wb') as outfile1:
         pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
     

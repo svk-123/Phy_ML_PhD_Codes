@@ -39,7 +39,7 @@ from numpy import linalg as LA
 import matplotlib
 matplotlib.rc('xtick', labelsize=18) 
 matplotlib.rc('ytick', labelsize=18) 
-
+plt.rc('font', family='serif')
 
 #load data
 inp_x=[]
@@ -84,7 +84,7 @@ out_v=np.asarray(out_v)
 #plot
 def con_plot(xp,yp,zp,nc,i,pname):
 
-    plt.figure(figsize=(6, 5), dpi=100)
+    plt.figure(figsize=(8, 4), dpi=100)
     #cp = pyplot.tricontour(ys, zs, pp,nc)
     cp = plt.tricontourf(xp,yp,zp,nc,cmap=cm.jet)
     plt.tricontourf(co[i][:,0],co[i][:,1],np.zeros(len(co[i])),colors='w')
@@ -94,10 +94,13 @@ def con_plot(xp,yp,zp,nc,i,pname):
     #cp = pyplot.scatter(ys, zs, pp)
     #pyplot.clabel(cp, inline=False,fontsize=8)
     plt.colorbar(cp)
-    #plt.title('%s  '%flist[ii]+name)
+    plt.xlim(-0.5,2)
+    plt.ylim(-0.5,0.5)
+    
     plt.xlabel('X ',fontsize=20)
     plt.ylabel('Y ',fontsize=20)
-    plt.savefig('./plot_ts/%s_Re=%s_AoA=%s_%s.png'%(pname,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)),format='png',dpi=100)
+    plt.subplots_adjust(top = 0.95, bottom = 0.15, right = 0.98, left = 0.14, hspace = 0, wspace = 0)
+    plt.savefig('./plot_ts/%s_%s_Re=%s_AoA=%s.pdf'%(pname,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)),format='pdf',dpi=200)
     plt.show()
     plt.close()
 
@@ -108,95 +111,89 @@ def line_plot3(i):
     if (mei < 1):
         mei=1
         
-    plt.figure(figsize=(6, 5), dpi=100)
-    plt0, =plt.plot(xu,pu1,'og',linewidth=3,markevery=mei,label='CFD-upper')
-    plt0, =plt.plot(xl,pl1,'ob',linewidth=3,markevery=mei,label='CFD-lower') 
+    plt.figure(figsize=(6, 4), dpi=100)
+    plt0, =plt.plot(xu,pu1*2,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt0, =plt.plot(xl,pl1*2,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei) 
             
-    plt0, =plt.plot(xu,pu2,'r',linewidth=3,label='NN-upper')
-    plt0, =plt.plot(xl,pl2,'k',linewidth=3,label='NN-lower')     
+    plt0, =plt.plot(xu,pu2*2,'r',linewidth=3,label='NN')
+    plt0, =plt.plot(xl,pl2*2,'r',linewidth=3)     
     
     plt.legend(fontsize=20)
-    plt.xlabel('X',fontsize=20)
-    plt.ylabel('$p/P_o$' ,fontsize=20)
+    plt.xlabel('X/c',fontsize=20)
+    plt.ylabel('$C_p$' ,fontsize=20)
     #plt.title('%s-AoA-%s-p'%(flist[ii],AoA[jj]),fontsize=16)
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
     #plt.xlim(-0.1,1.2)
-    #plt.ylim(-0.01,1.4)    
-    plt.savefig('./plot_ts/%s_%s_aoa_%s-p.eps'%(i,name[i][0],val_inp[2,0]), format='eps',bbox_inches='tight', dpi=100)
+    #plt.ylim(-0.01,1.4) 
+    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
+    plt.savefig('./plot_ts/%s_%s_aoa_%s-p.pdf'%(i,name[i][0],val_inp[2,0]), format='pdf',bbox_inches='tight', dpi=200)
     plt.show()    
     plt.close()
 
 #plot
 def line_plotu_sub(i):
     
-    plt.figure(figsize=(8, 5), dpi=100)
+    mei=2
+    
+    plt.figure(figsize=(8, 4), dpi=100)
     
     plt.subplot(1,4,1)
-    plt.plot(u1a,ya,'-og',linewidth=3,label='CFD')
+    plt.plot(u1a,ya,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
     plt.plot(u2a,ya,'r',linewidth=3,label='NN')
     plt.legend()
-    plt.xlabel('                   u-velocity',fontsize=20)
     plt.ylabel('Y',fontsize=20)
-    plt.xlim(0,1.2)
+    plt.xlim(-0.1,1.2)
     
     plt.subplot(1,4,2)
-    plt.plot(u1b,yb,'-og',linewidth=3)
+    plt.plot(u1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
     plt.plot(u2b,yb,'r',linewidth=3)
+    plt.xlabel('u-velocity',fontsize=20)
     plt.yticks([])
-    plt.xlim(0,1.2)
+    plt.xlim(-0.1,1.2)
+    
     
     plt.subplot(1,4,3)
-    plt.plot(u1c,yc,'-og',linewidth=3)
-    plt.plot(u2c,yc,'r',linewidth=3)
-    plt.yticks([])
-    plt.xlim(0,1.2)
-    
-    plt.subplot(1,4,4)
-    plt.plot(u1d,yd,'-og',linewidth=3)
+    plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
     plt.plot(u2d,yd,'r',linewidth=3)
     plt.yticks([])    
-    plt.xlim(0,1.2)
+    plt.xlim(-0.1,1.2)
     
-    plt.subplots_adjust(top = 1, bottom = 0.13, right = 1, left = 0.12, hspace = 0, wspace = 0)
-    plt.savefig('./plot_ts/%s_%s_aoa_%s-u.eps'%(i,name[i][0],val_inp[2,0]), format='eps', dpi=100)
+    plt.subplots_adjust(top = 1, bottom = 0.13, right = 1, left = 0.12, hspace = 0.0, wspace = 0.1)
+    plt.savefig('./plot_ts/%s_%s_aoa_%s-u.pdf'%(i,name[i][0],val_inp[2,0]), format='pdf', dpi=200)
     plt.show()   
     plt.close()
     
 #plot
 def line_plotv_sub(i):
     
-    fig=plt.figure(figsize=(8, 5), dpi=100)
+    mei=2
+    
+    plt.figure(figsize=(8, 4), dpi=100)
     
     plt.subplot(1,4,1)
-    plt.plot(v1a,ya,'-og',linewidth=3,label='CFD')
+    plt.plot(v1a,ya,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
     plt.plot(v2a,ya,'r',linewidth=3,label='NN')
     plt.legend()
-    plt.xlabel(' v-velocity',fontsize=20)
     plt.ylabel('Y',fontsize=20)
-    plt.xlim(-0.1,0.5)
+    plt.xlim(-0.1,1.0)
     
     plt.subplot(1,4,2)
-    plt.plot(v1b,yb,'-og',linewidth=3)
+    plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
     plt.plot(v2b,yb,'r',linewidth=3)
+    plt.xlabel('v-velocity',fontsize=20)
     plt.yticks([])
-    plt.xlim(-0.1,0.25)
-
-    plt.subplot(1,4,3)
-    plt.plot(v1c,yc,'-og',linewidth=3)
-    plt.plot(v2c,yc,'r',linewidth=3)
-    plt.yticks([])
-    plt.xlim(-0.1,0.2)
+    plt.xlim(-0.1,0.5)
     
-    plt.subplot(1,4,4)
-    plt.plot(v1d,yd,'-og',linewidth=3)
+    
+    plt.subplot(1,4,3)
+    plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
     plt.plot(v2d,yd,'r',linewidth=3)
     plt.yticks([])    
-    plt.xlim(-0.1,0.2)
+    plt.xlim(-0.1,0.5)
        
-    
-    
-    plt.subplots_adjust(top = 1, bottom = 0.13, right = 1, left = 0.12, hspace = 0, wspace = 0)
-    plt.savefig('./plot_ts/%s_%s_aoa_%s-v.png'%(i,name[i][0],val_inp[2,0]), format='png', dpi=100)
+        
+    plt.subplots_adjust(top = 1, bottom = 0.13, right = 1, left = 0.12, hspace = 0, wspace = 0.1)
+    plt.savefig('./plot_ts/%s_%s_aoa_%s-v.pdf'%(i,name[i][0],val_inp[2,0]), format='pdf', dpi=200)
     plt.show() 
     plt.close()
 
@@ -205,7 +202,7 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-for i in range(110):
+for i in range(175,176):
     
     #normalize
     inp_reno[i]=inp_reno[i]/2000.

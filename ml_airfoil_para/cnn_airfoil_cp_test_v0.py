@@ -41,6 +41,7 @@ import os, shutil
 import matplotlib
 matplotlib.rc('xtick', labelsize=18) 
 matplotlib.rc('ytick', labelsize=18) 
+plt.rc('font', family='serif')
 
 """----------Sample--------------------"""
 """ >>>with open('./datafile/to_ml/ml_allData_r0_l1.pkl', 'rb') as infile:
@@ -53,7 +54,7 @@ matplotlib.rc('ytick', labelsize=18)
 
 # ref:[data,name]
 path='./data_file/'
-data_file='foil_param_216_ts.pkl'
+data_file='foil_param_216_tr.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -69,27 +70,52 @@ xtr1=inp
 ttr1=my_out 
 
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
-model_test=load_model('./selected_model/case_5_b/model_cnn_3400_0.000012_0.000170.hdf5')  
+model_test=load_model('./selected_model/case_5_c/model_cnn_2450_0.000021_0.000032.hdf5')  
        
 out=model_test.predict([xtr1])
 out=out*0.25
 
-for k in range(len(name)):
+xxx=xx[::-1].copy()
+xxxx=np.concatenate((xx[:,None],xxx[1:,None]))
+
+for k in [0,9]:
     print k
-    plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(xx,my_out[k][0:35],'ro',markersize=8,label='true')
-    plt.plot(xx,my_out[k][35:],'ro',markersize=8)
-    plt.plot(xx,out[k][0:35],'b',lw=3,label='CNN')
-    plt.plot(xx,out[k][35:],'b',lw=3)
+    yy1=my_out[k][0:35]
+    yy2=my_out[k][35:]
+    yy2=yy2[::-1]
+    yy=np.concatenate((yy1[:,None],yy2[1:,None]))
+    
+    plt.figure(figsize=(6,5))
+    plt.plot(xx,my_out[k][0:35],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=1,label='True')
+    plt.plot(xx,my_out[k][35:],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=1)
+    
+    plt.plot(xxxx,yy,'r',lw=3,label='CNN')
+
     plt.xlim([-0.05,1.05])
     plt.ylim([-0.2,0.25])
     plt.legend(fontsize=20)
-    plt.xlabel('X',fontsize=20)
-    plt.ylabel('$C_p$',fontsize=20)  
+    plt.xlabel('X/c',fontsize=20)
+    plt.ylabel('Y',fontsize=20)  
     #plt.axis('off')
     plt.tight_layout()
-    plt.savefig('./plot/ts_%s_%s.png'%(k,name[k]), bbox_inches='tight',dpi=100)
+    plt.savefig('./plot/ts_%s_%s.png'%(k,name[k]), bbox_inches='tight',dpi=200)
     plt.show()
+    
+for k in range(1):
+    
+    plt.figure(figsize=(6, 5))
+    xp, yp = np.meshgrid(range(inp[0].shape[0]), range(inp[0].shape[1]))
+    
+    cp=plt.imshow(inp[k])
+    #plt.axis('off')
+    plt.xlabel('X-pixel',fontsize=20)
+    plt.ylabel('Y-pixel',fontsize=20)
+    plt.colorbar(cp)   
+    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0.00, wspace = 0)
+    plt.savefig('./plot/%s.png'%(name[k]), format='png', bbox_inches='tight', dpi=200)
+    plt.show()    
+    
+    
     
     
 '''fig = plt.figure(figsize=(8, 4),dpi=100)
@@ -128,7 +154,7 @@ for k in range(len(name)):
 #calculate error norm
 train_l2=[]
 train_l1=[]
-for k in range(len(name)):    
+for k in range(100):    
     
     tmp=my_out[k]-out[k]
     
@@ -149,7 +175,7 @@ plt.xlabel('True',fontsize=20)
 plt.ylabel('Prediction',fontsize=20)
 #lt.xlim([-1.5,1.5])
 #plt.ylim([-1.5,1.5])    
-plt.savefig('train_spread.png', bbox_inches='tight',dpi=100)
+plt.savefig('trainn_spread.png', bbox_inches='tight',dpi=100)
 plt.show()          
 
 #error plot
@@ -157,7 +183,7 @@ plt.figure(figsize=(6,5),dpi=100)
 plt.hist(train_l2, 20,histtype='bar', stacked=True)
 plt.xlabel('L2 relative error(%)',fontsize=20)
 plt.ylabel('number of Samples',fontsize=20)
-plt.savefig('train_error.png', bbox_inches='tight',dpi=100)
+plt.savefig('trainn_error.png', bbox_inches='tight',dpi=100)
 plt.show()
 
 

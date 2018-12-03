@@ -32,6 +32,10 @@ data st line: 23 i.e array[22]
 only internal points
 boundary not loaded: may be required?
 """
+import matplotlib
+matplotlib.rc('xtick', labelsize=16) 
+matplotlib.rc('ytick', labelsize=16) 
+
 
 # read data from below dir...
 path='./foam_case'
@@ -112,7 +116,7 @@ for i in range(len(foil)):
 #no use loop
 for jj in range(1):
 
-    for ii in range(2):
+    for ii in range(5):
         print ii
         
         casedir= path +'/%s/%s'%(foil[ii],tmp[ii])
@@ -273,14 +277,23 @@ for jj in range(1):
         tl2p = np.array(map(float, tl2p))    
         tl3p=np.sqrt(tl1p**2 + tl2p**2)
 
-
         #figure
-        plt.figure(figsize=(6, 4))
-        a0=plt.plot(xu,tu3,label='true')
-        a1=plt.plot(xu,tu3p,label='nn')
-        plt.xlim([0,1])
-        plt.legend()
-        plt.show()
+        plt.figure(figsize=(6, 4), dpi=100)
+        plt0, =plt.plot(xu,tu3,'-b',lw=3,label='CFD')
+        plt0, =plt.plot(xu,tu3p,'-r',lw=3,label='NN') 
+            
+    
+        plt.legend(fontsize=20)
+        plt.xlabel('X/c',fontsize=20)
+        plt.ylabel('Wall Shear Stress' ,fontsize=20)
+        #plt.title('%s-AoA-%s-p'%(flist[ii],AoA[jj]),fontsize=16)
+        #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
+        plt.xlim(0,1)
+        #plt.ylim(-0.01,1.4) 
+        plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
+        plt.savefig('./plot_ts/%s_%s_ws.png'%(ii,tmp[ii]), format='png',bbox_inches='tight', dpi=200)
+        plt.show()    
+        plt.close()
         
         
         

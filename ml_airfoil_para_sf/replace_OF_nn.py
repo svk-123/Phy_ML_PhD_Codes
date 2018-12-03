@@ -112,7 +112,7 @@ for i in range(len(foil)):
 #no use loop
 for jj in range(1):
 
-    for ii in range(2):
+    for ii in range(5):
         print ii
         
         casedir= path +'/%s/%s'%(foil[ii],tmp[ii])
@@ -179,7 +179,7 @@ for jj in range(1):
         val_inp=np.concatenate((xl[:,None],yl[:,None],relist[:,None],aoalist[:,None],paralist[:,:]),axis=1)
         
  
-        model_test=load_model('./selected_model/case_8_naca_lam_2/model_sf_140_0.00000278_0.00000300.hdf5') 
+        model_test=load_model('./selected_model/case_9_naca_lam_1/model_sf_65_0.00000317_0.00000323.hdf5') 
         out=model_test.predict([val_inp])
         
         # p- write

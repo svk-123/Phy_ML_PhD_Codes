@@ -57,7 +57,7 @@ out_v=[]
 
 #load data
 #with open('./data_file/ph_1_test/foil_aoa_nn_p16_ph_1_ts_1.pkl', 'rb') as infile:
-with open('./data_file/foil_aoa_nn_naca_lam_ts_1.pkl', 'rb') as infile:
+with open('./data_file/report.pkl', 'rb') as infile:
     result = pickle.load(infile)
 
 inp_x.extend(result[0])   
@@ -72,7 +72,7 @@ out_v.extend(result[7])
 
 co=result[8]
 fxy=result[9]
-name=result[9]
+name=result[10]
 
 inp_x=np.asarray(inp_x)
 inp_y=np.asarray(inp_y)
@@ -86,7 +86,7 @@ out_v=np.asarray(out_v)
 
 
 #open pdf file
-fp= PdfPages('plots_lam_model1.pdf')
+fp= PdfPages('plots_lam_ts.pdf')
 
 #plot
 def con_plot(i):
@@ -257,9 +257,9 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 np.random.seed(1234534)
-mylist=np.random.randint(0,420,50)
+mylist=np.random.randint(0,100,5)
 
-for i in mylist:
+for i in range(5):
     print i
     #normalize
     inp_reno[i]=inp_reno[i]/2000.
@@ -269,7 +269,7 @@ for i in mylist:
     val_out=np.concatenate((out_p[i][:,None],out_u[i][:,None],out_v[i][:,None]),axis=1)
 
     #load_model
-    model_test=load_model('./selected_model/case_8_naca_lam_1/model_sf_40_0.00000278_0.00000315.hdf5') 
+    model_test=load_model('./selected_model/case_9_naca_lam_1/model_sf_65_0.00000317_0.00000323.hdf5') 
     out=model_test.predict([val_inp]) 
          
     con_plot(i)
@@ -324,6 +324,8 @@ for i in mylist:
     
     a0=find_nearest(co[i][:dl+2,0],0)
     a5=find_nearest(co[i][:dl+2,0],0.5)
+    a8=find_nearest(co[i][:dl+2,0],0.8)    
+    
     
     xa=np.linspace(co[i][a0,0],co[i][a0,0],50)
     ya=np.linspace(co[i][a0,1],0.5,50)
@@ -331,8 +333,8 @@ for i in mylist:
     xb=np.linspace(co[i][a5,0],co[i][a5,0],50)
     yb=np.linspace(co[i][a5,1],0.5,50)
 
-    xc=np.linspace(co[i][0,0],co[i][0,0],50)
-    yc=np.linspace(co[i][0,1],0.5,50)
+    xc=np.linspace(co[i][a8,0],co[i][a8,0],50)
+    yc=np.linspace(co[i][a8,1],0.5,50)
 
     xd=np.linspace(1.5,1.5,50)
     yd=np.linspace(co[i][0,1],0.99,50)

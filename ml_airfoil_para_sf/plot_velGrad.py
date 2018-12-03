@@ -152,14 +152,7 @@ for jj in range(1):
                 z.append(line)
         z = np.array(map(float, z))
         
-        p=[]
-        with open(casedir +'/%s/p'%ymax, 'r') as infile:
-            data0=infile.readlines()
-            npt=int(data0[20])
-            for line in data0[22:22+npt]:
-                p.append(line)
-        p = np.array(map(float, p))
-        
+
         
         # load velocity
         u=[]
@@ -177,6 +170,33 @@ for jj in range(1):
         v = np.array(map(float, v))
         w = np.array(map(float, w))
               
+        
+        #load vel.grad
+        ux=[]
+        uy=[]
+        uz=[]
+        vx=[]
+        vy=[]
+        vz=[]
+
+        with open(casedir +'/%s/grad(U)'%ymax, 'r') as infile:
+            data0=infile.readlines()
+            npt=int(data0[20])
+            for line in data0[22:22+npt]:
+                line=line.replace("(","")
+                line=line.replace(")","")        
+                a, b, c,d,e,f,g,h,i = (item.strip() for item in line.split(' ', 9))
+                ux.append(a), uy.append(b), uz.append(c),vx.append(d), vy.append(e), vz.append(f)
+        ux = np.array(map(float, ux))
+        uy = np.array(map(float, uy))
+        uz = np.array(map(float, uz))
+        vx = np.array(map(float, vx))
+        vy = np.array(map(float, vy))
+        vz = np.array(map(float, vz))
+    
+             
+        
+        
         #filter within xlim,ylim
         I=[]
         for i in range(len(x)):
@@ -186,132 +206,36 @@ for jj in range(1):
                 
         x=x[I]
         y=y[I]
-        z=z[I]
-        u=u[I]
-        v=v[I]
-        w=w[I]
-        p=p[I]
-        
-        if (p.max() > 2):
-            print tmp[ii]
-            fp.write('%s \n'%tmp[ii])
-            
-        xu=[]
-        xl=[]
-        with open(casedir +'/%s/Cx'%ymax, 'r') as infile:
-            data0=infile.readlines()
-            for k in range(len(data0)):
-                if 'foil_upper' in data0[k]:
-                    ind1=k
-                if 'foil_lower' in data0[k]:
-                    ind2=k       
-                    
-            n=int(data0[ind1+4]) 
-            st=ind1+6
-            for line in data0[st:st+n]:
-                xu.append(line)
-            xu = np.array(map(float, xu))
-       
-            n=int(data0[ind2+4]) 
-            st=ind2+6
-            for line in data0[st:st+n]:
-                xl.append(line)
-            xl = np.array(map(float, xl))        
-
-
-        yu=[]
-        yl=[]
-        with open(casedir +'/%s/Cy'%ymax, 'r') as infile:
-            data0=infile.readlines()
-            for k in range(len(data0)):
-                if 'foil_upper' in data0[k]:
-                    ind1=k
-                if 'foil_lower' in data0[k]:
-                    ind2=k       
-                    
-            n=int(data0[ind1+4]) 
-            st=ind1+6
-            for line in data0[st:st+n]:
-                yu.append(line)
-            yu = np.array(map(float, yu))
-       
-            n=int(data0[ind2+4]) 
-            st=ind2+6
-            for line in data0[st:st+n]:
-                yl.append(line)
-            yl = np.array(map(float, yl))          
+        ux=ux[I]
+        uy=uy[I]
+        uz=uz[I]
+        vx=vx[I]
+        vy=vy[I]
+        vz=vz[I]
+                 
      
         #plot
         def plot(xp,yp,zp,nc,name):
-            plt.figure(figsize=(3, 4))
+            plt.figure(figsize=(6, 5))
             #cp = pyplot.tricontour(ys, zs, pp,nc)
             cp = plt.tricontourf(xp,yp,zp,nc,cmap=cm.jet)
+            plt.tricontourf(coord[ii][:,0],coord[ii][:,1],np.zeros(len(coord[ii])),colors='w')
             #cp=pyplot.tricontourf(x1,y1,z1)
             #cp=pyplot.tricontourf(x2,y2,z2)   
             
             #cp = pyplot.tripcolor(xp, yp, zp)
             #cp = pyplot.scatter(ys, zs, pp)
             #pyplot.clabel(cp, inline=False,fontsize=8)
-            plt.xlim(-1,2)
-            plt.ylim(-1,1)    
-            plt.axis('off')
+            plt.xlim(-0.5,2)
+            plt.ylim(-0.15,0.15)
+            plt.colorbar(cp)
+            #plt.axis('off')
             #plt.grid(True)
             #patch.set_facecolor('black')
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-            #plt.savefig('./plotc/%s.eps'%(nname[ii]), format='eps')
+            plt.savefig('./plot_ts/%s.png'%(ii), format='png',bbox_inches='tight',dpi=200)
+            plt.show()
             plt.close()
             
-        #plot(x,y,u,20,'name')    
-        
-        myinp_x.append(x)
-        myinp_y.append(y)
-        myout_p.append(p)
-        myout_u.append(u)
-        myout_v.append(v)
-
-        foamxy.append([xu,xl,yu,yl])
-
-        paralist=[]
-        for k in range(len(x)):
-            paralist.append(my_para[ii])
-        paralist=np.asarray(paralist)
-    
-        aoalist=[]
-        for k in range(len(x)):
-            aoalist.append(aoa[ii])
-        aoalist=np.asarray(aoalist)
-        
-        relist=[]
-        for k in range(len(x)):
-            relist.append(reno[ii])
-        relist=np.asarray(relist)
-        
-        namelist=[]
-        for k in range(len(x)):
-            namelist.append(foil[ii])
-        namelist=np.asarray(namelist)
-
-        #fnamelist=[]
-        #for k in range(len(x)):
-        #    fnamelist.append(tmp[ii])
-        #fnamelist=np.asarray(fnamelist)
-
-        myinp_para.append(paralist)
-        myinp_aoa.append(aoalist)
-        myinp_re.append(relist)
-        myname.append(namelist)
-        #myfname.extend(fnamelist)       
-        
-    #save file
-    filepath='./data_file'
-      
-    # ref:[x,y,z,ux,uy,uz,k,ep,nut]
-    info=['myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, coord,[xu,xl,yu,yl], mynae, info']
-
-    data1 = [myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, coord,foamxy,myname, info ]
-
-    with open(filepath+'/report.pkl', 'wb') as outfile1:
-        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
-
-    
-fp.close()        
+        plot(x,y,ux,20,'name')    
+   

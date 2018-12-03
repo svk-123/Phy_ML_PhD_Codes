@@ -173,7 +173,9 @@ model_test=load_model('./selected_model/model_af_cnn_1000_0.003_0.003.hdf5')
 #plt.figure(figsize=(6, 5), dpi=100) 
 #plt0, =plt.plot([-0.5,1.6],[-0.5,1.6],'k',lw=3) 
 
-for i in range(len(name)):
+
+
+for i in range(71,72):
     
     #Re, d1, d2, d3, alp, cl, cd
     data2=data1[i]
@@ -189,20 +191,26 @@ for i in range(len(name)):
     val_inp1=np.reshape(val_inp1,(len(val_inp1),216,216,1))    
     #test-val
     out=model_test.predict([val_inp1,val_inp2])
-        
+    out=np.asarray(out) 
+    out=out[:,0]
     #plot
-    '''plt.figure(figsize=(6, 5), dpi=100)
-    plt0, =plt.plot(val_inp2[:,1]*10,val_out,'-og',linewidth=3,label='true')
+    plt.figure(figsize=(6, 5), dpi=100)
+    plt0, =plt.plot(val_inp2[:,1]*10,val_out,'o',mfc='None',mew=1.5,mec='blue',ms=10,lw=3,label='true')
+    
+    
+
+    
     plt1, =plt.plot(val_inp2[:,1]*10,out,'-or',linewidth=3,label='CNN')  
     plt.legend(fontsize=20)
+    plt.xticks([0,2,4,6,8,10,12])
     plt.xlabel('AoA',fontsize=20)
     plt.ylabel('$C_l$',fontsize=20)
     #plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
-    #plt.xlim(-0.1,1.2)
+    plt.xlim(-0.2,12.2)
     #plt.ylim(-0.01,1.4)   
-    plt.savefig('./plot_out/NACA%sRe=%se6'%(name[i],rey_no[i]), format='png', bbox_inches='tight',dpi=100)
-    plt.show()'''
+    plt.savefig('./train/%s_NACA%sRe=%se6'%(i,name[i],rey_no[i]), format='png', bbox_inches='tight',dpi=100)
+    plt.show()
     
     
     #spread

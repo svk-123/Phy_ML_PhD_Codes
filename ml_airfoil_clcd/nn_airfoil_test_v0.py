@@ -103,7 +103,7 @@ model_test=load_model('./selected_model/naca4_nn/final.hdf5')
 plt.figure(figsize=(6, 5), dpi=100) 
 plt0, =plt.plot([-0.05,1.6],[-0.05,1.6],'k',lw=3) 
 
-for i in range(len(data1)):
+for i in range(277):
 #for i in range(1):    
     #Re, d1, d2, d3, alp, cl, cd
     data2=data1[i]
@@ -119,7 +119,7 @@ for i in range(len(data1)):
 
     
     #plot
-    '''plt.figure(figsize=(6, 5), dpi=100)
+    plt.figure(figsize=(6, 5), dpi=100)
     plt0, =plt.plot(val_inp[:,4],val_out,'-og',linewidth=3,label='true')
     plt1, =plt.plot(val_inp[:,4],out,'-or',linewidth=3,label='NN')  
     plt.legend(fontsize=20)
@@ -130,8 +130,8 @@ for i in range(len(data1)):
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.01,1.4) 
 
-    plt.savefig('./train/NACA%sRe=%se6'%(name[i],rey_no[i]), format='png',bbox_inches='tight', dpi=100)
-    plt.show() '''
+    plt.savefig('./train/%s_NACA%sRe=%se6'%(i,name[i],rey_no[i]), format='png',bbox_inches='tight', dpi=100)
+    plt.show() 
     
     
     #spread

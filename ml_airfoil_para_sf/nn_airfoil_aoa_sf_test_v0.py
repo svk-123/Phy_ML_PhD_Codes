@@ -54,7 +54,7 @@ out_v=[]
 
 #load data
 #with open('./data_file/ph_1_test/foil_aoa_nn_p16_ph_1_ts_1.pkl', 'rb') as infile:
-with open('./data_file/foil_aoa_nn_naca_lam_ts_1.pkl', 'rb') as infile:
+with open('./data_file/foil_aoa_nn_nacan_lam_trts_1.pkl', 'rb') as infile:
     result = pickle.load(infile)
 
 inp_x.extend(result[0])   
@@ -100,7 +100,7 @@ def con_plot(xp,yp,zp,nc,i,pname):
     plt.xlabel('X ',fontsize=20)
     plt.ylabel('Y ',fontsize=20)
     plt.subplots_adjust(top = 0.95, bottom = 0.15, right = 0.98, left = 0.14, hspace = 0, wspace = 0)
-    plt.savefig('./plot_ts/%s_%s_Re=%s_AoA=%s.pdf'%(pname,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)),format='pdf',dpi=200)
+    plt.savefig('./plot_ts/%s_%s_Re=%s_AoA=%s.png'%(pname,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)),format='png',dpi=200)
     plt.show()
     plt.close()
 
@@ -126,7 +126,7 @@ def line_plot3(i):
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.01,1.4) 
     plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-    plt.savefig('./plot_ts/%s_%s_aoa_%s-p.pdf'%(i,name[i][0],val_inp[2,0]), format='pdf',bbox_inches='tight', dpi=200)
+    plt.savefig('./plot_ts/%s_%s_Re=%s_AoA=%s-p.png'%(i,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)), format='png',bbox_inches='tight', dpi=200)
     plt.show()    
     plt.close()
 
@@ -135,16 +135,16 @@ def line_plotu_sub(i):
     
     mei=2
     
-    plt.figure(figsize=(8, 4), dpi=100)
+    plt.figure(figsize=(6, 4), dpi=100)
     
-    plt.subplot(1,4,1)
+    plt.subplot(1,3,1)
     plt.plot(u1a,ya,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
     plt.plot(u2a,ya,'r',linewidth=3,label='NN')
     plt.legend()
     plt.ylabel('Y',fontsize=20)
     plt.xlim(-0.1,1.2)
     
-    plt.subplot(1,4,2)
+    plt.subplot(1,3,2)
     plt.plot(u1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
     plt.plot(u2b,yb,'r',linewidth=3)
     plt.xlabel('u-velocity',fontsize=20)
@@ -152,14 +152,14 @@ def line_plotu_sub(i):
     plt.xlim(-0.1,1.2)
     
     
-    plt.subplot(1,4,3)
+    plt.subplot(1,3,3)
     plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
     plt.plot(u2d,yd,'r',linewidth=3)
     plt.yticks([])    
     plt.xlim(-0.1,1.2)
     
-    plt.subplots_adjust(top = 1, bottom = 0.13, right = 1, left = 0.12, hspace = 0.0, wspace = 0.1)
-    plt.savefig('./plot_ts/%s_%s_aoa_%s-u.pdf'%(i,name[i][0],val_inp[2,0]), format='pdf', dpi=200)
+    plt.subplots_adjust(top = 0.95, bottom = 0.2, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
+    plt.savefig('./plot_ts/%s_%s_Re=%s_AoA=%s-u.png'%(i,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)), format='png', bbox_inches='tight',dpi=200)
     plt.show()   
     plt.close()
     
@@ -168,16 +168,16 @@ def line_plotv_sub(i):
     
     mei=2
     
-    plt.figure(figsize=(8, 4), dpi=100)
+    plt.figure(figsize=(6, 4), dpi=100)
     
-    plt.subplot(1,4,1)
+    plt.subplot(1,3,1)
     plt.plot(v1a,ya,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
     plt.plot(v2a,ya,'r',linewidth=3,label='NN')
     plt.legend()
     plt.ylabel('Y',fontsize=20)
     plt.xlim(-0.1,1.0)
     
-    plt.subplot(1,4,2)
+    plt.subplot(1,3,2)
     plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
     plt.plot(v2b,yb,'r',linewidth=3)
     plt.xlabel('v-velocity',fontsize=20)
@@ -185,15 +185,15 @@ def line_plotv_sub(i):
     plt.xlim(-0.1,0.5)
     
     
-    plt.subplot(1,4,3)
+    plt.subplot(1,3,3)
     plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
     plt.plot(v2d,yd,'r',linewidth=3)
     plt.yticks([])    
     plt.xlim(-0.1,0.5)
        
         
-    plt.subplots_adjust(top = 1, bottom = 0.13, right = 1, left = 0.12, hspace = 0, wspace = 0.1)
-    plt.savefig('./plot_ts/%s_%s_aoa_%s-v.pdf'%(i,name[i][0],val_inp[2,0]), format='pdf', dpi=200)
+    plt.subplots_adjust(top = 0.95, bottom = 0.2, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
+    plt.savefig('./plot_ts/%s_%s_Re=%s_AoA=%s-v.png'%(i,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)), format='png',bbox_inches='tight', dpi=200)
     plt.show() 
     plt.close()
 
@@ -202,7 +202,7 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
-for i in range(175,176):
+for i in range(2,3):
     
     #normalize
     inp_reno[i]=inp_reno[i]/2000.
@@ -213,18 +213,18 @@ for i in range(175,176):
 
 
     #load_model
-    model_test=load_model('./selected_model/case_8_naca_lam_2/model_sf_140_0.00000278_0.00000300.hdf5') 
+    model_test=load_model('./selected_model/case_9_naca_lam_1/model_sf_65_0.00000317_0.00000323.hdf5') 
     out=model_test.predict([val_inp]) 
          
     con_plot(val_inp[:,0],val_inp[:,1],val_out[:,0],20,i,'p-cfd')
     con_plot(val_inp[:,0],val_inp[:,1],out[:,0],20,i,'p-nn')
-    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,0]-val_out[:,0]),20,i,'p-error')
+    #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,0]-val_out[:,0]),20,i,'p-error')
     con_plot(val_inp[:,0],val_inp[:,1],val_out[:,1],20,i,'u-cfd')
     con_plot(val_inp[:,0],val_inp[:,1],out[:,1],20,i,'u-nn')
-    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,1]-val_out[:,1]),20,i,'u-error')
+    #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,1]-val_out[:,1]),20,i,'u-error')
     con_plot(val_inp[:,0],val_inp[:,1],val_out[:,2],20,i,'v-cfd')
     con_plot(val_inp[:,0],val_inp[:,1],out[:,2],20,i,'v-nn')
-    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,2]-val_out[:,2]),20,i,'v-error')
+    #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,2]-val_out[:,2]),20,i,'v-error')
     
     #LinearNDinterpolator
     pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()

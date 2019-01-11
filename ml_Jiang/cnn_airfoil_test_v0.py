@@ -3,6 +3,7 @@
 """
 Created on Mon May  1 08:09:04 2017
 
+@author: vinoth
 """
 
 import time
@@ -12,7 +13,6 @@ start_time = time.time()
 # Python 3.5
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
 from os import listdir
 from os.path import isfile, join
 import sys
@@ -21,7 +21,7 @@ import keras
 from keras.models import Sequential, Model
 from keras.layers.core import Dense, Activation
 from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
-from keras.layers import merge, Input, dot, add, concatenate
+from keras.layers import merge, Input, dot
 from sklearn.metrics import mean_squared_error
 import random
 
@@ -33,17 +33,17 @@ from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 from keras.callbacks import TensorBoard
 import cPickle as pickle
 
-from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, Dense, Dropout, Flatten,UpSampling2D
+from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, Dense, Dropout, Flatten
 from keras.layers.convolutional import ZeroPadding2D
 from keras import backend as K
+
 from numpy import linalg as LA
 import os, shutil
-from scipy.interpolate import interp1d
- 
+
 import matplotlib
-matplotlib.rc('xtick', labelsize=20) 
-matplotlib.rc('ytick', labelsize=20) 
-plt.rc('font', family='serif')
+matplotlib.rc('xtick', labelsize=18) 
+matplotlib.rc('ytick', labelsize=18) 
+
 
 """----------Sample--------------------"""
 """ >>>with open('./datafile/to_ml/ml_allData_r0_l1.pkl', 'rb') as infile:
@@ -55,32 +55,43 @@ plt.rc('font', family='serif')
 """------------------------------------"""
 
 # ref:[data,name]
-path='./data_file/'
-data_file='param_216_16.pkl'
+# ref:[data,name]
+path='./'
+data_file='ml_input_output.pkl'
+
 with open(path + data_file, 'rb') as infile:
-    result1 = pickle.load(infile)
-para=result1[0][0]
-name=result1[1]
-para=np.asarray(para)
+    result = pickle.load(infile)
+my_inp=result[0]
+my_out1=result[1]
+my_out2=result[2]
+my_out3=result[3]
 
-data_file='foil_param.pkl'
-with open(path + data_file, 'rb') as infile:
-    result2 = pickle.load(infile)
-foil_fp=result2[1]
-xx=result2[2]
+my_out1=np.asarray(my_out1)
+my_out2=np.asarray(my_out2)
+my_out3=np.asarray(my_out3)
 
-del result2
 
-model=load_model('./selected_model/p16/model_cnn_2950_0.000013_0.000176.hdf5')  
+reno=result[4]
+aoa=result[5]
+name=result[6]
 
-# with a Sequential model
-get_out_1c= K.function([model.layers[12].input],
-                                  [model.layers[15].output])
-c1 = get_out_1c([para[0:10,:]])[0][3,:]
+#CNN-ML
+# ---------ML PART:-----------#
 
-plt.figure(figsize=(6,5),dpi=100)
-plt.plot(xx,c1[:35],'r',label='true')
-plt.plot(xx,c1[35:],'r',label='true')
-plt.show()
+
+## Training sets
+xtr1 = my_inp
+xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
+
+my_out=np.concatenate((my_out1[:,None],my_out2[:,None],my_out3[:,None]),axis=1)
+my_out=my_out[:,:,0]
+
+
+my_error=[]    
+#load_model
+model_test=load_model('./selected_model/final_cnn.hdf5')  
+pred_out=model_test.predict(xtr1)
+
+
 
 

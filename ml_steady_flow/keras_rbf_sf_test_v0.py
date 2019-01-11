@@ -77,11 +77,9 @@ ttr1 = val_out
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(3,))
-x1=RBFLayer(50, initializer=InitCentersKmeans(xtr0), betas=0.3, input_shape=(3,))(aa)
-get_x1 = K.function(inputs=[aa], outputs=[x1])
-
-x2=RBFLayer(50, initializer=InitCentersKmeans(get_x1([xtr0])[0]),betas=0.3)(x1)
-g =Dense(2, activation='linear')(x2)
+aa=Input(shape=(3,))
+x1=RBFLayer(100, initializer=InitCentersKmeans(xtr0), betas=1.0, input_shape=(3,))(aa)
+g =Dense(3, activation='linear')(x1)
 
 #model = Model(inputs=a, outputs=g)
 model = Model(inputs=[aa], outputs=[g])

@@ -57,12 +57,12 @@ class RBFLayer(Layer):
         self.centers = self.add_weight(name='centers', 
                                        shape=(self.output_dim, input_shape[1]),
                                        initializer=self.initializer,
-                                       trainable=True)
+                                       trainable=False)
         self.betas = self.add_weight(name='betas',
                                      shape=(self.output_dim,),
                                      initializer=Constant(value=self.init_betas),
                                      #initializer='ones',
-                                     trainable=True)
+                                     trainable=False)
             
         super(RBFLayer, self).build(input_shape)  
 

@@ -20,7 +20,7 @@ import keras
 from keras.models import Sequential, Model
 from keras.layers.core import Dense, Activation
 from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
-from keras.layers import merge, Input, dot
+from keras.layers import merge, Input, dot, concatenate
 from sklearn.metrics import mean_squared_error
 import random
 
@@ -54,7 +54,7 @@ ptmp=[]
 flist=['Re100','Re200','Re400','Re600','Re1000','Re2000','Re3000','Re4000','Re5000','Re7000','Re8000','Re9000']
 for ii in range(len(flist)):
     #x,y,Re,u,v
-    with open('./data/cavity_%s_part.pkl'%flist[ii], 'rb') as infile:
+    with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
         result = pickle.load(infile)
     xtmp.extend(result[0])
     ytmp.extend(result[1])
@@ -83,6 +83,7 @@ reytmp=reytmp/10000.
 my_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
 my_out=np.concatenate((utmp[:,None],vtmp[:,None],ptmp[:,None]),axis=1)
 
+
 ## Training sets
 xtr0= my_inp[I][:n]
 ttr1 = my_out[I][:n]
@@ -90,16 +91,19 @@ ttr1 = my_out[I][:n]
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(3,))
-xx =Dense(50,  kernel_initializer='random_normal', activation='relu')(aa)
-xx =Dense(50, activation='relu')(xx)
-xx =Dense(50, activation='relu')(xx)
-xx =Dense(50, activation='relu')(xx)
+xx =Dense(30,  kernel_initializer='random_normal', activation='relu')(aa)
+xx =Dense(30, activation='relu')(xx)
+xx =Dense(30, activation='relu')(xx)
+xx1 =Dense(30, activation='relu')(xx)
+
+xx =Dense(30, activation='relu')(concatenate([xx1, xx]))
+xx =Dense(30, activation='relu')(xx)
 g =Dense(3, activation='linear')(xx)
 
 #model = Model(inputs=a, outputs=g)
 model = Model(inputs=[aa], outputs=[g])
 #callbacks
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,patience=50, min_lr=1.0e-8)
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,patience=30, min_lr=1.0e-8)
 
 e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-8, patience=100, verbose=1, mode='auto')
 
@@ -114,7 +118,7 @@ opt = Adam(lr=5.0e-4,decay=1.0e-12)
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 hist = model.fit([xtr0], [ttr1], validation_split=0.2,\
-                 epochs=5000, batch_size=32,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
+                 epochs=5000, batch_size=256,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
 
 #save model
 model.save('./model/final_sf.hdf5') 

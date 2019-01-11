@@ -156,9 +156,7 @@ def line_plot2():
     plt0, =plt.plot(r4[6],r4[7],'c',linewidth=2,label='rbf-sp=0.6') 
     plt0, =plt.plot(r5[6],r5[7],'y',linewidth=2,label='rbf-sp=0.8') 
     plt0, =plt.plot(r6[6],r5[7],'r',linewidth=2,label='rbf-sp=1.0') 
-    
-    
-    
+           
     #plt.legend(fontsize=16)
     plt.xlabel('x ',fontsize=16)
     plt.ylabel('v' ,fontsize=16)
@@ -168,8 +166,6 @@ def line_plot2():
     plt.ylim(-0.6,0.6)    
     plt.savefig('./plot/%s-v_com'%(flist[0]), format='png', dpi=100)
     plt.show() 
-
-
 
 line_plot1()
 line_plot2()

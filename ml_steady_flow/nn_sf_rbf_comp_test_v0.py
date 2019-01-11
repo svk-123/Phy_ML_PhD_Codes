@@ -52,7 +52,7 @@ ptmp=[]
 flist=['Re10000']
 for ii in range(len(flist)):
     #x,y,Re,u,v
-    with open('./data/cavity_%s_part.pkl'%flist[ii], 'rb') as infile:
+    with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
         result = pickle.load(infile)
     xtmp.extend(result[0])
     ytmp.extend(result[1])
@@ -74,30 +74,34 @@ val_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
 val_out=np.concatenate((utmp[:,None],vtmp[:,None],ptmp[:,None]),axis=1)    
 
 #load_model
-model_test=load_model('./selected_model/4x50_local/final_sf.hdf5') 
-out=model_test.predict([val_inp])    
+model_test=load_model('./selected_model/6x100/final_sf.hdf5') 
+mlp_out=model_test.predict([val_inp])  
   
+with open('./selected_rbf_model/case_4_4000/pred/%s.pkl'%flist[ii], 'rb') as infile:
+    result = pickle.load(infile)  
+rbf_out=result[0]
+
 #plot
 def line_plot1():
     plt.figure(figsize=(6, 5), dpi=100)
-    plt0, =plt.plot(u1a,ya,'g',marker='o',mew=1.5, mfc='None',lw=3,ms=12,markevery=1,label='CFD')
-    plt0, =plt.plot(u2a,ya,'r',linewidth=3,label='MLP-local')
-    plt0, =plt.plot(u2a1,ya,'b',linewidth=3,label='MLP')
+    plt0, =plt.plot(u1a,ya_cfd,'g',marker='o',mew=1.5, mfc='None',lw=2,ms=12,markevery=1,label='CFD')
+    plt0, =plt.plot(u2a_mlp,ya,'r',linewidth=3,label='MLP')
+    plt0, =plt.plot(u2a_rbf,ya,'--b',linewidth=3,label='RBF')
     plt.legend(fontsize=20)
     plt.xlabel('u-velocity',fontsize=20)
     plt.ylabel('Y',fontsize=20)
     #plt.title('%s-u'%(flist[ii]),fontsiuze=16)
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
-    #plt.xlim(-0.5,0)
-    #plt.ylim(-0.01,0.5)    
-    plt.savefig('%s-u_part.png'%(flist[ii]), format='png',bbox_inches='tight', dpi=200)
+    #plt.xlim(-0.1,1.2)
+    #plt.ylim(-0.01,1.4)    
+    plt.savefig('./comp/%s-u.png'%(flist[ii]), format='png',bbox_inches='tight', dpi=200)
     plt.show() 
     
 def line_plot2():
     plt.figure(figsize=(6, 5), dpi=100)
-    plt0, =plt.plot(xb,v1a,'g',marker='o',mew=1.5, mfc='None',lw=3,ms=12,markevery=1,label='CFD')
-    plt0, =plt.plot(xb,v2a,'r',linewidth=3,label='MLP-local')   
-    plt0, =plt.plot(xb,v2a1,'b',linewidth=3,label='MLP')  
+    plt0, =plt.plot(xb_cfd,v1a,'g',marker='o',mew=1.5, mfc='None',lw=2,ms=12,markevery=1,label='CFD')
+    plt0, =plt.plot(xb,v2a_mlp,'r',linewidth=3,label='MLP')    
+    plt0, =plt.plot(xb,v2a_rbf,'--b',linewidth=3,label='RBF')  
     plt.legend(fontsize=20)
     plt.xlabel('X ',fontsize=20)
     plt.ylabel('v-velocity' ,fontsize=20)
@@ -105,7 +109,7 @@ def line_plot2():
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.01,1.4)    
-    plt.savefig('%s-v_part.png'%(flist[ii]), format='png',bbox_inches='tight', dpi=200)
+    plt.savefig('./comp/%s-v.png'%(flist[ii]), format='png',bbox_inches='tight', dpi=200)
     plt.show()     
     
 #plot
@@ -123,103 +127,80 @@ def plot(xp,yp,zp,nc,name):
     #plt.title('%s  '%flist[ii]+name)
     plt.xlabel('X ',fontsize=20)
     plt.ylabel('Y ',fontsize=20)
-    plt.savefig('%s'%flist[ii]+name, format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./comp/%s.png'%(flist[ii]+'_'+name), format='png',bbox_inches='tight', dpi=200)
     plt.show()
           
-'''plot(xtmp,ytmp,val_out[:,0],20,'u-cfd')
-plot(xtmp,ytmp,out[:,0],20,'u-nn')
-plot(xtmp,ytmp,abs(out[:,0]-val_out[:,0]),20,'u-error')
+plot(xtmp,ytmp,val_out[:,0],20,'u-cfd')
+plot(xtmp,ytmp,mlp_out[:,0],20,'u-mlp')
+plot(xtmp,ytmp,rbf_out[:,0],20,'u-rbf')
+plot(xtmp,ytmp,abs(mlp_out[:,0]-val_out[:,0]),20,'u-mlp_error')
+plot(xtmp,ytmp,abs(rbf_out[:,0]-val_out[:,0]),20,'u-rbf_error')
     
 plot(xtmp,ytmp,val_out[:,1],20,'v-cfd')
-plot(xtmp,ytmp,out[:,1],20,'v-nn')
-plot(xtmp,ytmp,abs(out[:,1]-val_out[:,1]),20,'v-error')'''
-
-
+plot(xtmp,ytmp,mlp_out[:,1],20,'v-mlp')
+plot(xtmp,ytmp,abs(mlp_out[:,1]-val_out[:,1]),20,'v-mlp_error')
+plot(xtmp,ytmp,rbf_out[:,1],20,'v-mlp')
+plot(xtmp,ytmp,abs(rbf_out[:,1]-val_out[:,1]),20,'v-rbf_error')
 
 #LinearNDinterpolator
 pD=np.asarray([xtmp,ytmp]).transpose()
-
-
-xa=np.linspace(0.5,0.5,50)
-ya=np.linspace(0.01,0.4,50)
-xb=ya
-yb=xa
     
 print 'interpolation-1...'      
 f1u=interpolate.LinearNDInterpolator(pD,val_out[:,0])
+xa=np.linspace(0.5,0.5,50)
+ya=np.linspace(0.01,0.99,50)
+xb=ya
+yb=xa
 
-u1a=np.zeros((len(ya)))
-u1b=np.zeros((len(ya)))
-for i in range(len(ya)):
-    u1a[i]=f1u(xa[i],ya[i])
-    u1b[i]=f1u(xb[i],yb[i])
-
-print 'interpolation-2...'      
-f2u=interpolate.LinearNDInterpolator(pD,out[:,0])
-
-u2a=np.zeros((len(ya)))
-u2b=np.zeros((len(ya)))
-for i in range(len(ya)):
-    u2a[i]=f2u(xa[i],ya[i])
-    u2b[i]=f2u(xb[i],yb[i])
-
-model_test1=load_model('./selected_model/6x100/final_sf.hdf5') 
-out1=model_test1.predict([val_inp])  
-
+xa_cfd=np.linspace(0.5,0.5,25)
+ya_cfd=np.linspace(0.01,0.99,25)
+xb_cfd=ya_cfd
+yb_cfd=xa_cfd
+u1a=np.zeros((len(ya_cfd)))
+for i in range(len(ya_cfd)):
+    u1a[i]=f1u(xa[i],ya_cfd[i])
 
 print 'interpolation-2...'      
-f2u1=interpolate.LinearNDInterpolator(pD,out1[:,0])
-
-u2a1=np.zeros((len(ya)))
-u2b1=np.zeros((len(ya)))
+f2u_mlp=interpolate.LinearNDInterpolator(pD,mlp_out[:,0])
+u2a_mlp=np.zeros((len(ya)))
 for i in range(len(ya)):
-    u2a1[i]=f2u1(xa[i],ya[i])
-    u2b1[i]=f2u1(xb[i],yb[i])
+    u2a_mlp[i]=f2u_mlp(xa[i],ya[i])
 
+print 'interpolation-2...'      
+f2u_rbf=interpolate.LinearNDInterpolator(pD,rbf_out[:,0])
+u2a_rbf=np.zeros((len(ya)))
+for i in range(len(ya)):
+    u2a_rbf[i]=f2u_rbf(xa[i],ya[i])
 
 print 'interpolation-3...'      
 f1v=interpolate.LinearNDInterpolator(pD,val_out[:,1])
-
-v1a=np.zeros((len(ya)))
-v1b=np.zeros((len(ya)))
-for i in range(len(ya)):
-    v1a[i]=f1v(xb[i],yb[i])
-    v1b[i]=f1v(xa[i],ya[i])
+v1a=np.zeros((len(ya_cfd)))
+for i in range(len(ya_cfd)):
+    v1a[i]=f1v(xb_cfd[i],yb_cfd[i])
 
 print 'interpolation-4...'      
-f2v=interpolate.LinearNDInterpolator(pD,out[:,1])
-
-v2a=np.zeros((len(ya)))
-v2b=np.zeros((len(ya)))
+f2v_mlp=interpolate.LinearNDInterpolator(pD,mlp_out[:,1])
+v2a_mlp=np.zeros((len(ya)))
 for i in range(len(ya)):
-    v2a[i]=f2v(xb[i],yb[i])
-    v2b[i]=f2v(xa[i],ya[i])
-
-model_test1=load_model('./selected_model/6x100/final_sf.hdf5') 
-out1=model_test1.predict([val_inp]) 
+    v2a_mlp[i]=f2v_mlp(xb[i],yb[i])
 
 print 'interpolation-4...'      
-f2v1=interpolate.LinearNDInterpolator(pD,out1[:,1])
-
-v2a1=np.zeros((len(ya)))
-v2b1=np.zeros((len(ya)))
+f2v_rbf=interpolate.LinearNDInterpolator(pD,rbf_out[:,1])
+v2a_rbf=np.zeros((len(ya)))
 for i in range(len(ya)):
-    v2a1[i]=f2v1(xb[i],yb[i])
-    v2b1[i]=f2v1(xa[i],ya[i])
-
-
-
-
-
-
-
+    v2a_rbf[i]=f2v_rbf(xb[i],yb[i])
 
 
 line_plot1()
 line_plot2()
 
 
+tmp=val_out[:,0]-mlp_out[:,0]
+mlp_l2_u=(LA.norm(tmp)/LA.norm(val_out[:,0]))*100 
+tmp=val_out[:,0]-rbf_out[:,0]
+rbf_l2_u=(LA.norm(tmp)/LA.norm(val_out[:,0]))*100 
 
-
-
-
+tmp=val_out[:,1]-mlp_out[:,1]
+mlp_l2_v=(LA.norm(tmp)/LA.norm(val_out[:,1]))*100 
+tmp=val_out[:,1]-rbf_out[:,1]
+rbf_l2_v=(LA.norm(tmp)/LA.norm(val_out[:,1]))*100 

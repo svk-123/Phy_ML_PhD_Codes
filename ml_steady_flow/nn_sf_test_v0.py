@@ -48,7 +48,7 @@ utmp=[]
 vtmp=[]
 ptmp=[]
 
-flist=['Re1500']
+flist=['Re100']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -68,14 +68,14 @@ vtmp=np.asarray(vtmp)
 ptmp=np.asarray(ptmp) 
 
 #normalize
-reytmp=reytmp/1000.
+reytmp=reytmp/10000.
 val_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
 val_out=np.concatenate((utmp[:,None],vtmp[:,None],ptmp[:,None]),axis=1)    
 
 #load_model
-model_test=load_model('./selected_model/Re100-1000/final_sf.hdf5') 
+model_test=load_model('./selected_model/6x100/final_sf.hdf5') 
 out=model_test.predict([val_inp])    
-  
+
 #plot
 def line_plot1():
     plt.figure(figsize=(6, 5), dpi=100)
@@ -132,7 +132,6 @@ plot(xtmp,ytmp,out[:,1],20,'v-nn')
 plot(xtmp,ytmp,abs(out[:,1]-val_out[:,1]),20,'v-error')
 
 
-
 #LinearNDinterpolator
 pD=np.asarray([xtmp,ytmp]).transpose()
     
@@ -158,7 +157,7 @@ for i in range(len(ya)):
     u2b[i]=f2u(xb[i],yb[i])
 
 print 'interpolation-3...'      
-f1v=interpolate.LinearNDInterpolator(pD,val_out[:,1])
+f1v=interpolate.LinearNDInterpolator(pD,out[:,1])
 
 v1a=np.zeros((len(ya)))
 v1b=np.zeros((len(ya)))
@@ -179,10 +178,7 @@ for i in range(len(ya)):
 line_plot1()
 line_plot2()
 
-func_name='nn'
-data_rbf=[u1a,ya,u2a,ya,xb,v1a,xb,v2a]
-with open('./plot/cavity_%s_%s.pkl'%(func_name,flist[0]), 'wb') as outfile:
-    pickle.dump(data_rbf, outfile, pickle.HIGHEST_PROTOCOL)
+
 
 
 

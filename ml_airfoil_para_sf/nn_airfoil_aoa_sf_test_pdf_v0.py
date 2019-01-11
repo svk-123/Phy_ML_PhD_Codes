@@ -57,7 +57,7 @@ out_v=[]
 
 #load data
 #with open('./data_file/ph_1_test/foil_aoa_nn_p16_ph_1_ts_1.pkl', 'rb') as infile:
-with open('./data_file/report.pkl', 'rb') as infile:
+with open('./data_file/foil_aoa_nn_nacan_turb_ts_1.pkl', 'rb') as infile:
     result = pickle.load(infile)
 
 inp_x.extend(result[0])   
@@ -71,8 +71,8 @@ out_u.extend(result[6])
 out_v.extend(result[7])
 
 co=result[8]
-fxy=result[9]
-name=result[10]
+#fxy=result[9]
+name=result[9]
 
 inp_x=np.asarray(inp_x)
 inp_y=np.asarray(inp_y)
@@ -86,7 +86,7 @@ out_v=np.asarray(out_v)
 
 
 #open pdf file
-fp= PdfPages('plots_lam_ts.pdf')
+fp= PdfPages('plots_turb_ts_1.pdf')
 
 #plot
 def con_plot(i):
@@ -182,7 +182,7 @@ def con_plot(i):
     cbar6.ax.tick_params(labelsize=10)
     ax6.set_aspect(1.1)
     
-    fig.suptitle("Testing:Airfoil-%s Re=%s AoA=%s"%(name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)), fontsize=24)
+    fig.suptitle("Testing:Airfoil-%s Re=%se4 AoA=%s"%(name[i][0],int(inp_reno[i][0]*10),int(inp_aoa[i][0]*14)), fontsize=24)
     
     plt.subplots_adjust( wspace=0.2,hspace=0.25)       
     fp.savefig(fig)
@@ -246,7 +246,7 @@ def line_plot(i):
     ax8.plot(v2d,yd,'r',linewidth=3)    
     ax8.set_xlim([-0.1,0.2])
      
-    fig.suptitle("Testing:Airfoil-%s Re=%s AoA=%s"%(name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)), fontsize=24)
+    fig.suptitle("Testing:Airfoil-%s Re=%se4 AoA=%s"%(name[i][0],int(inp_reno[i][0]*10),int(inp_aoa[i][0]*14)), fontsize=24)
     
     plt.subplots_adjust( wspace=0.2,hspace=0.5)       
     fp.savefig(fig)
@@ -257,19 +257,19 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 np.random.seed(1234534)
-mylist=np.random.randint(0,100,5)
+mylist=np.random.randint(0,200,10)
 
-for i in range(5):
+for i in mylist:
     print i
     #normalize
-    inp_reno[i]=inp_reno[i]/2000.
+    inp_reno[i]=inp_reno[i]/100000.
     inp_aoa[i]=inp_aoa[i]/14.0
     
     val_inp=np.concatenate((inp_x[i][:,None],inp_y[i][:,None],inp_reno[i][:,None],inp_aoa[i][:,None],inp_para[i][:,:]),axis=1)
     val_out=np.concatenate((out_p[i][:,None],out_u[i][:,None],out_v[i][:,None]),axis=1)
 
     #load_model
-    model_test=load_model('./selected_model/case_9_naca_lam_1/model_sf_65_0.00000317_0.00000323.hdf5') 
+    model_test=load_model('./selected_model/case_10_turb_1/model_sf_180_0.00003977_0.00004288.hdf5') 
     out=model_test.predict([val_inp]) 
          
     con_plot(i)

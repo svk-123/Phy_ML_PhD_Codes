@@ -154,12 +154,12 @@ class RBFLayertmp(Layer):
         self.centers = self.add_weight(name='centers', 
                                        shape=(self.output_dim, input_shape[1]),
                                        initializer=self.initializer,
-                                       trainable=False)
+                                       trainable=True)
         self.betas = self.add_weight(name='betas',
                                      shape=(self.output_dim,),
                                      initializer=Constant(value=self.init_betas),
                                      #initializer='ones',
-                                     trainable=False)
+                                     trainable=True)
             
         super(RBFLayer, self).build(input_shape)  
 

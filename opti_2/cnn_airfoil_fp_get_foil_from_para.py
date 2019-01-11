@@ -63,20 +63,17 @@ para=result1[0][0]
 name=result1[1]
 para=np.asarray(para)
 
-data_file='foil_param.pkl'
+data_file='foil_param_216.pkl'
 with open(path + data_file, 'rb') as infile:
     result2 = pickle.load(infile)
 foil_fp=result2[1]
 xx=result2[2]
 
-del result2
-
 model=load_model('./selected_model/p16/model_cnn_2950_0.000013_0.000176.hdf5')  
 
 # with a Sequential model
-get_out_1c= K.function([model.layers[12].input],
-                                  [model.layers[15].output])
-c1 = get_out_1c([para[0:10,:]])[0][3,:]
+get_out_1c= K.function([model.layers[12].input],[model.layers[15].output])
+c1 = get_out_1c([para[0:1,:]])[0][0,:]
 
 plt.figure(figsize=(6,5),dpi=100)
 plt.plot(xx,c1[:35],'r',label='true')

@@ -52,7 +52,9 @@ ytmp=[]
 reytmp=[]
 utmp=[]
 vtmp=[]
-flist=['Re100','Re200','Re500','Re800','Re1000']
+ptmp=[]
+flist=['Re100','Re200','Re400','Re600','Re1000','Re2000','Re3000','Re4000','Re5000','Re7000','Re8000','Re9000']
+#flist=['Re100']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -62,26 +64,27 @@ for ii in range(len(flist)):
     reytmp.extend(result[2])
     utmp.extend(result[3])
     vtmp.extend(result[4])
+    ptmp.extend(result[5])   
     
 xtmp=np.asarray(xtmp)
 ytmp=np.asarray(ytmp)
 reytmp=np.asarray(reytmp)
 utmp=np.asarray(utmp)
 vtmp=np.asarray(vtmp)
-
+ptmp=np.asarray(ptmp) 
 
 # ---------ML PART:-----------#
 #shuffle data
 N= len(utmp)
 I = np.arange(N)
 np.random.shuffle(I)
-n=20000
+n=120000
 
 #normalize
-reytmp=reytmp/1000.
+reytmp=reytmp/10000.
 
 my_inp=np.concatenate((xtmp[:,None],ytmp[:,None],reytmp[:,None]),axis=1)
-my_out=np.concatenate((utmp[:,None],vtmp[:,None]),axis=1)
+my_out=np.concatenate((utmp[:,None],vtmp[:,None],ptmp[:,None]),axis=1)
 
 
 ## Training sets
@@ -91,33 +94,31 @@ ttr1 = my_out[I][:n]
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(3,))
-x1=RBFLayer(50, initializer=InitCentersKmeans(xtr0), betas=0.3, input_shape=(3,))(aa)
-get_x1 = K.function(inputs=[aa], outputs=[x1])
-x2=RBFLayer(50, initializer=InitCentersKmeans(get_x1([xtr0])[0]),betas=0.3)(x1)
-g =Dense(2, activation='linear')(x2)
+x1=RBFLayer(1000, initializer=InitCentersRandom(xtr0), betas=50.0, input_shape=(3,))(aa)
+g =Dense(3, activation='linear')(x1)
 
 #model = Model(inputs=a, outputs=g)
 model = Model(inputs=[aa], outputs=[g])
 #callbacks
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1, mode='min',verbose=1 ,patience=300, min_lr=1.0e-8)
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,patience=100, min_lr=1.0e-8)
 
-e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-8, patience=500, verbose=1, mode='auto')
+e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-8, patience=200, verbose=1, mode='auto')
 
-filepath="./model/model_sf_{epoch:02d}_{loss:.6f}_{val_loss:.6f}.hdf5"
+filepath="./model/model_rbf_{epoch:02d}_{loss:.6f}_{val_loss:.6f}.hdf5"
 
 chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
                                 save_best_only=False, save_weights_only=False, mode='auto', period=100)
 
 # Compile model
-opt = Adam(lr=2.5e-3,decay=1.0e-12)
+opt = Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
 
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
 hist = model.fit([xtr0], [ttr1], validation_split=0.1,\
-                 epochs=5000, batch_size=512,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
+                 epochs=2000, batch_size=32,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
 
 #save model
-model.save('./model/final_sf.hdf5') 
+model.save('./model/final_rbf.hdf5') 
 
 print"\n"
 print("loss = %f to %f"%(np.asarray(hist.history["loss"][:1]),np.asarray(hist.history["loss"][-1:])))
@@ -126,7 +127,9 @@ print("val_loss = %f to %f"%(np.asarray(hist.history["val_loss"][:1]),np.asarray
 print"\n"
 print("--- %s seconds ---" % (time.time() - start_time))
 
-
+data1=[hist.history]
+with open('./model/hist.pkl', 'wb') as outfile:
+    pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
 
 

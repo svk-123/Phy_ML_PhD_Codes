@@ -54,11 +54,9 @@ name=result1[1]
 para=np.asarray(para)
 name=np.asarray(name)
 
-idx=np.argwhere(name=='naca0024')
+idx=np.argwhere(name=='naca0024')[0][0]
 my_para=para[1155:1156,:]
 tmp_para=para[1155,:]
-
-
 
 #get airfoil coord from parameters
 model_para=load_model('./selected_model/p16/model_cnn_2950_0.000013_0.000176.hdf5')  
@@ -66,15 +64,15 @@ get_out_1c= K.function([model_para.layers[12].input],[model_para.layers[15].outp
 # requires input shape (1,16)
 c1 = get_out_1c([my_para])[0][0,:]
 xx=tmp=np.loadtxt('./data_file/xx.txt')
-co=np.zeros((70,2))
+co=np.zeros((69,2))
 co[0:35,0]=xx[::-1]
 co[0:35,1]=c1[:35][::-1]
-co[36:70,0]=xx[1:]
-co[36:70,1]=c1[36:]
+co[35:69,0]=xx[1:]
+co[35:69,1]=c1[36:]
 
-plt.figure(figsize=(6,5),dpi=100)
-plt.plot(co[:,0],co[:,1],'r',label='true')
-plt.show()
+#plt.figure(figsize=(6,5),dpi=100)
+#plt.plot(co[:,0],co[:,1],'r',label='true')
+#plt.show()
 
 
 #predict flow and calcyulate cl
@@ -83,8 +81,8 @@ model_flow=load_model('./selected_model/case_9_naca_lam_1/model_sf_65_0.00000317
 inp_x=co[:,0]
 inp_y=co[:,1]
 
-reno=200
-aoa=8.0
+reno=600
+aoa=12.0
     
 inp_reno=np.repeat(reno/2000., len(inp_x))
 inp_aoa=np.repeat(aoa/14., len(inp_x))   
@@ -94,15 +92,19 @@ val_inp=np.concatenate((inp_x[:,None],inp_y[:,None],inp_reno[:,None],inp_aoa[:,N
 out=model_flow.predict([val_inp]) 
          
 #a0=find_nearest(co[:,0],0)
-a0=35
-xu=co[:a0,0]
-yu=co[:a0,1]
+a0=34
+xu=co[:a0+1,0]
+yu=co[:a0+1,1]
 xl=co[a0:,0]
 yl=co[a0:,1]
     
 #pressure
-pu2=out[:a0,0]
+pu2=out[:a0+1,0]
 pl2=out[a0:,0]
+
+plt.figure(figsize=(6,5),dpi=100)
+plt.plot(co[:,0],out[:,0],'r',label='true')
+plt.show()
           
 #cl calculation        
 xc=[]
@@ -137,7 +139,7 @@ dF=[]
 for j in range(len(xc)):
     dF.append(-0.5*cp[j]*dy[j])
             
-cl=sum(lF)/(0.5)
+cl=sum(lF)*np.cos(np.radians(aoa))/(0.5)
 cd=sum(dF)/(0.5)
     
 

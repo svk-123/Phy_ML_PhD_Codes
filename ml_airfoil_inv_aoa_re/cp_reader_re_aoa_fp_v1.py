@@ -35,7 +35,7 @@ aoamax=12
 
 #path='./'
 
-for p in range(7,9):
+for p in range(6,7):
     
     fn='/Cp_Graph_%d.xlsx'%p
     sn='Cp_Graph_%d'%p

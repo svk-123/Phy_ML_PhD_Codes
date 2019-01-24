@@ -63,7 +63,7 @@ for ii in [1,2,3,4,5,7,8,9,10]:
 #for ii in [1]:
     print ii
     #for ii in [1,2,3,4,5,7,8,9,10]:
-    data_file='data_re_aoa_fp_NT_ts_%d.pkl'%ii
+    data_file='data_re_aoa_fp_NT_E_ts_%d.pkl'%ii
     inp_up=[]
     inp_lr=[]
     my_out=[]

@@ -49,7 +49,7 @@ utmp=[]
 vtmp=[]
 ptmp=[]
 
-flist=['Re10000']
+flist=['Re1000']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s.pkl'%flist[ii], 'rb') as infile:
@@ -139,7 +139,7 @@ plot(xtmp,ytmp,abs(rbf_out[:,0]-val_out[:,0]),20,'u-rbf_error')
 plot(xtmp,ytmp,val_out[:,1],20,'v-cfd')
 plot(xtmp,ytmp,mlp_out[:,1],20,'v-mlp')
 plot(xtmp,ytmp,abs(mlp_out[:,1]-val_out[:,1]),20,'v-mlp_error')
-plot(xtmp,ytmp,rbf_out[:,1],20,'v-mlp')
+plot(xtmp,ytmp,rbf_out[:,1],20,'v-rbf')
 plot(xtmp,ytmp,abs(rbf_out[:,1]-val_out[:,1]),20,'v-rbf_error')
 
 #LinearNDinterpolator

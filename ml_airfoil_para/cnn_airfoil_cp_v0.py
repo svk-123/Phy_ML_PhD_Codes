@@ -57,8 +57,8 @@ for the_file in os.listdir(folder):
 """------------------------------------"""
 
 # ref:[data,name]
-path='./data_file/'
-data_file='foil_param_288.pkl'
+path='./'
+data_file='foil_param_aug_1.pkl'
 
 inp=[]
 out=[]
@@ -74,17 +74,21 @@ xx.extend(result[2])
 name.extend(result[3])
 
 
-data_file='foil_param_288_rot.pkl'
-with open(path + data_file, 'rb') as infile:
-    result = pickle.load(infile)
-inp.extend(result[0])
-out.extend(result[1])
-xx.extend(result[2])
-name.extend(result[3])
+#data_file='foil_param_288_rot.pkl'
+#with open(path + data_file, 'rb') as infile:
+#    result = pickle.load(infile)
+#inp.extend(result[0])
+#out.extend(result[1])
+#xx.extend(result[2])
+#name.extend(result[3])
 
 inp=np.asarray(inp)
 out=np.asarray(out)
 out=out/0.25
+
+I=range(len(inp))
+I=np.asarray(I)
+np.random.shuffle(I)
 
 xtr1=inp
 ttr1=out
@@ -94,17 +98,17 @@ del inp
 del out
 del name
 
-xtr1=np.reshape(xtr1,(len(xtr1),288,288,1))  
+xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
 
 
 # print dataset values
 print('xtr shape:', xtr1.shape)
 print('ttr shape:', ttr1.shape)
-
+'''
 # Multilayer Perceptron
 # create model
 # construct model
-aa = Input([288,288,1])
+aa = Input([216,216,1])
 
 # 2 3x3 convolutions followed by a max pool
 conv1 = Conv2D(32, (12, 12), activation='relu', padding='same')(aa)
@@ -197,7 +201,7 @@ data1=[hist.history]
 with open('./model_cnn/hist.pkl', 'wb') as outfile:
     pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
-
+'''
 
 
 

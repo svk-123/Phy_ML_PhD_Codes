@@ -86,8 +86,9 @@ def con_plot(xp,yp,zp,nc,i,pname):
 
     plt.figure(figsize=(8, 4), dpi=100)
     #cp = pyplot.tricontour(ys, zs, pp,nc)
-    cp = plt.tricontourf(xp,yp,zp,nc,cmap=cm.jet)
-    plt.tricontourf(co[i][:,0],co[i][:,1],np.zeros(len(co[i])),colors='w')
+    cp = plt.tricontour(xp,yp,zp,nc,cmap=cm.jet)
+    cp1=plt.tricontour(co[i][:,0],co[i][:,1],np.zeros(len(co[i])),colors='k')
+
     #v= np.linspace(0, 0.05, 15, endpoint=True)
     #cp = plt.tricontourf(xp,yp,zp,v,cmap=cm.jet,extend='both')
     #cp = pyplot.tripcolor(ys, zs, pp)
@@ -202,6 +203,8 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
+#tr: 2: naca65209, Reno: 400, aoa: 14
+    
 for i in range(2,3):
     
     #normalize
@@ -240,7 +243,8 @@ for i in range(2,3):
     yl=co[i][a0:,1]
     if(yl[-1:] >=-0.001):
         yl[-1:]=-0.001  
-    
+        
+'''    
     #for -p
     print 'interpolation-1...'      
     f1p=interpolate.LinearNDInterpolator(pD,val_out[:,0])
@@ -339,4 +343,4 @@ for i in range(2,3):
     line_plot3(i)
     line_plotu_sub(i)
     line_plotv_sub(i)
-
+'''

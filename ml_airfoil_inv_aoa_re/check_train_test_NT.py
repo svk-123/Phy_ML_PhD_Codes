@@ -1,6 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
+Created on Wed Jan 23 16:53:31 2019
+
+@author: vino
+"""
+
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
 Created on Mon May  1 08:09:04 2017
 
 """
@@ -12,7 +20,6 @@ start_time = time.time()
 # Python 3.5
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
 from os import listdir
 from os.path import isfile, join
 import sys
@@ -36,14 +43,8 @@ import cPickle as pickle
 from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, Dense, Dropout, Flatten,UpSampling2D
 from keras.layers.convolutional import ZeroPadding2D
 from keras import backend as K
-from numpy import linalg as LA
+import random
 import os, shutil
-from scipy.interpolate import interp1d
- 
-import matplotlib
-matplotlib.rc('xtick', labelsize=20) 
-matplotlib.rc('ytick', labelsize=20) 
-plt.rc('font', family='serif')
 
 """----------Sample--------------------"""
 """ >>>with open('./datafile/to_ml/ml_allData_r0_l1.pkl', 'rb') as infile:
@@ -54,38 +55,45 @@ plt.rc('font', family='serif')
     >>>data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I]"""
 """------------------------------------"""
 
-# ref:[data,name]
-path='./data_file/'
-data_file='foil_param_216.pkl'
+# check whether training and testing has no overlap
+train_foil=[]
+for ii in [1,2,3,4,5,6,7,8,9,10]:
+    print ii
+#for ii in [9]:         
+    # ref:[data,name]
+    path='./foil_all_re_aoa/data_files_train_test_NT/'
+    data_file='data_re_aoa_fp_NT_tr_%s.pkl'%ii
+    
+    with open(path + data_file, 'rb') as infile:
+        result = pickle.load(infile)
+    val6=result[6]
+    val6=np.asarray(val6)    
+            
+    unique, counts = np.unique(val6, return_counts=True)
+    train_foil.extend(unique)
 
-with open(path + data_file, 'rb') as infile:
-    result = pickle.load(infile)
-inp=result[0]
-out=result[1]
-xx=result[2]
-name=result[3]
+test_foil=[]
+for ii in [1,2,3,4,5,6,7,8,9,10]:
+    print ii
+#for ii in [9]:         
+    # ref:[data,name]
+    path='./foil_all_re_aoa/data_files_train_test_NT/'
+    data_file='data_re_aoa_fp_NT_ts_%s.pkl'%ii
+    
+    with open(path + data_file, 'rb') as infile:
+        result = pickle.load(infile)
+    val6=result[6]
+    val6=np.asarray(val6)    
+            
+    unique, counts = np.unique(val6, return_counts=True)
+    test_foil.extend(unique)        
+    
+train_foil=np.asarray(train_foil)
+test_foil=np.asarray(test_foil)
 
-inp=np.asarray(inp)
-my_out=np.asarray(out)
-
-xtr1=inp
-ttr1=my_out 
-
-xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
-model=load_model('./selected_model/case_5c_12/model_cnn_2450_0.000028_0.000057.hdf5')  
-
-del inp
-del result
-
-# with a Sequential model
-get_out_1c= K.function([model.layers[0].input],
-                                  [model.layers[15].output])
-c1 = get_out_1c([xtr1[0:100,:,:,:]])
-
-#info='[c1,name]'    
-#data2=[c1,name,info]
-#with open(path+'param_216_5c.pkl', 'wb') as outfile:
-#    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
+tmp=[]
+for i in range(len(test_foil)):
+    tmp.append(np.argwhere(test_foil[i]==train_foil))
 
 
 

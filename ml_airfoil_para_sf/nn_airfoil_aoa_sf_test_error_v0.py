@@ -133,9 +133,10 @@ plt.rc('font', family='serif')
 #data1 = [train_l2_p,train_l2_u, train_l2_v, info ]
 #
 #with open('test_l2_2.pkl', 'wb') as outfile1:
-#    pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)    
+#    pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)  
+  
 
-#plot
+#plot -test error
 p=[]
 u=[]
 v=[]
@@ -167,6 +168,59 @@ plt.xlabel('$L_2$ relative error(%)',fontsize=20)
 #plt.xlim([-0.001,4.0])
 plt.savefig('ts_tot.png',format='png', bbox_inches='tight',dpi=200)
 plt.show()    
+
+
+
+
+'''
+#plot -train error
+p=[]
+u=[]
+v=[]
+for i in range(1):
+    with open('./error/train_l2.pkl', 'rb') as infile:
+        result = pickle.load(infile)
+    
+    p.extend(result[0])   
+    u.extend(result[1])
+    v.extend(result[2])
+
+p_avg=sum(p)/len(p)
+u_avg=sum(u)/len(u)
+v_avg=sum(v)/len(v)
+
+p=np.asarray(p)
+u=np.asarray(u)
+v=np.asarray(v)
+
+tot=(p+u+v)/3.0
+
+tot_avg=sum(tot)/len(tot)    
+
+#error plot
+plt.figure(figsize=(6,5),dpi=100)
+plt.hist(tot, 20,histtype='step', color='grey',stacked=True,fill=True,alpha=1,orientation ='vertical')
+plt.ylabel('Number of Samples',fontsize=20)
+plt.xlabel('$L_2$ relative error(%)',fontsize=20)
+#plt.xlim([-0.001,4.0])
+plt.savefig('tr_tot.png',format='png', bbox_inches='tight',dpi=200)
+plt.show()
+'''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 ##error plot
 #plt.figure(figsize=(6,5),dpi=100)

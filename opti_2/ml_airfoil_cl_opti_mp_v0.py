@@ -42,7 +42,7 @@ from numpy import linalg as LA
 import os, shutil
 from skimage import io, viewer,util 
 from scipy.optimize import minimize
-
+from sklearn.metrics import mean_squared_error as skmse
 import matplotlib
 matplotlib.rc('xtick', labelsize=18) 
 matplotlib.rc('ytick', labelsize=18) 
@@ -86,34 +86,29 @@ reno=np.asarray([600,800,1000,1200])
 reno=reno/2000.
 aoa=6/14.
 
+plt.figure(figsize=(6,5),dpi=200)
+plt.plot(reno*200,tar_cl,'-o')
+plt.xlabel('Re',fontsize=20)
+plt.ylabel('Cl',fontsize=20)
+#plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
+plt.tight_layout()
+plt.savefig('./opt_plot/re_cl.png',format='png')
+plt.close()
+ 
+
+'''
+   
+pred_cl=np.zeros((len(tar_cl)))
+
 global my_counter
 my_counter =0
 
-def loss(para):
-    global my_counter    
-    my_para=np.reshape(para,(1,16))
-    tmp_para=para
-    #get coord from para 
-    # requires input shape (1,16)
-    get_coord= K.function([model_para.layers[12].input],[model_para.layers[15].output])
-    c1 = get_coord([my_para])[0][0,:]
-    co=np.zeros((69,2))
-    co[0:35,0]=xx[::-1]
-    co[0:35,1]=c1[:35][::-1]
-    co[35:69,0]=xx[1:]
-    co[35:69,1]=c1[36:]
-    
-    plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(co[:,0],co[:,1],'r',label='true')
-    plt.ylim([-0.5,0.5])
-    plt.savefig('./opt_plot/%s.png'%my_counter,format='png')
-    plt.close()
-    
+
+def get_cl(tmp_para,j):
     #get flow field 
     inp_x=co[:,0]
     inp_y=co[:,1]
-   
-    inp_reno=np.repeat(reno, len(inp_x))
+    inp_reno=np.repeat(reno[j], len(inp_x))
     inp_aoa=np.repeat(aoa, len(inp_x))   
     inp_para=np.repeat(tmp_para[:,None],len(inp_x),axis=1).transpose()   
     #reqires shape others-(70,1) & para-(70,16) & val_inp (70,20)    
@@ -123,10 +118,8 @@ def loss(para):
     #a0=find_nearest(co[:,0],0)
     a0=34
     xu=co[:a0+1,0]
-    yu=co[:a0+1,1]
     xl=co[a0:,0]
-    yl=co[a0:,1]
-        
+       
     #pressure
     pu2=out[:a0+1,0]
     pl2=out[a0:,0]
@@ -161,15 +154,41 @@ def loss(para):
         else:                
             lF.append(0.5*cp[j]*abs(dx[j]))
                 
-    pred_cl=sum(lF)*np.cos(np.radians(aoa))/(0.5)
+    mycl=sum(lF)*np.cos(np.radians(aoa))/(0.5)
+    return mycl
+
+def loss(para):
+    global my_counter    
+    my_para=np.reshape(para,(1,16))
+    tmp_para=para
+    #get coord from para 
+    # requires input shape (1,16)
+    get_coord= K.function([model_para.layers[12].input],[model_para.layers[15].output])
+    c1 = get_coord([my_para])[0][0,:]
+    co=np.zeros((69,2))
+    co[0:35,0]=xx[::-1]
+    co[0:35,1]=c1[:35][::-1]
+    co[35:69,0]=xx[1:]
+    co[35:69,1]=c1[36:]
+    
+    plt.figure(figsize=(6,5),dpi=100)
+    plt.plot(co[:,0],co[:,1],'r',label='true')
+    plt.ylim([-0.5,0.5])
+    plt.savefig('./opt_plot/%s.png'%my_counter,format='png')
+    plt.close()
+    
+    for j in range(len(tar_cl)):
+        pred_cl[j]=get_cl(tmp_para,j)
+
     
     print ('Pred_cl:', pred_cl)
     
     
     my_counter = my_counter +1
     print ('Iter:', my_counter)
-    
-    return  abs(tar_cl-pred_cl)
+    e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
+    print ('mse:', e)
+    return  e
      
 
 idx=np.argwhere(name=='n0012')[0][0]
@@ -179,7 +198,7 @@ print('Starting loss = {}'.format(loss(p1)))
 
 res = minimize(loss, x0=p1, method = 'L-BFGS-B', \
                options={'disp': True, 'maxcor':10, 'ftol': 1e-16, \
-                                 'eps': 1e-2, 'maxfun': 10, \
+                                 'eps': 1e-3, 'maxfun': 10, \
                                  'maxiter': 20, 'maxls': 10})
 print('Ending loss = {}'.format(loss(res.x)))
 
@@ -194,4 +213,4 @@ co[35:69,0]=xx[1:]
 co[35:69,1]=c1[36:]
 plt.figure(figsize=(6,5),dpi=100)
 plt.plot(co[:,0],co[:,1],'r',label='true')
-plt.show()
+plt.show()'''

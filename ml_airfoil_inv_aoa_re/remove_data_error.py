@@ -1,6 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
+Created on Wed Jan 23 16:53:31 2019
+
+@author: vino
+"""
+
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
 Created on Mon May  1 08:09:04 2017
 
 """
@@ -47,11 +55,16 @@ import os, shutil
     >>>data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I]"""
 """------------------------------------"""
 
-#for ii in [1,2,3,4,5,7,8,9,10]:
-for ii in [6]:         
+# Remove airfoils in the test databse which has worst predictions:
+#AG36, DGA 1182, GOE09K, FX79W660A, EIFFFEL371
+
+Efoil=['ag36','dga1182','goe09k','fx79w660a','eiffel371']
+
+for ii in [10]:
+#for ii in [9]:         
     # ref:[data,name]
-    path='./foil_all_re_aoa/data_files/'
-    data_file='data_re_aoa_fp_%s.pkl'%ii
+    path='./foil_all_re_aoa/data_files_train_test_NT/'
+    data_file='data_re_aoa_fp_NT_ts_%s.pkl'%ii
     
     with open(path + data_file, 'rb') as infile:
         result = pickle.load(infile)
@@ -78,64 +91,39 @@ for ii in [6]:
     val8=np.asarray(val8)    
     
     
-    unique, counts = np.unique(val6, return_counts=True)
+    #total index
+    I = np.arange(len(val0))
     
-    np.random.seed(154328)
-    
-    N= len(unique)
-    kk = np.arange(N)
-    np.random.shuffle(kk)
-    
-    #training
+    #to be removed
     tmp=[]
-    for j in kk[:-10]:
-        tmp.extend(np.argwhere(val6==unique[j]))
-    tmp=np.asarray(tmp)
-
-    I = tmp[:,0].copy()
-    
-    np.random.shuffle(I)
-    n=len(I)
-    
-    #training
-    tr_val0=val0[I][:n]
-    tr_val1=val1[I][:n]
-    tr_val2=val2[I][:n]
-    tr_val3=val3[I][:n]
-    tr_val4=val4[I][:n]
-    tr_val5=val5
-    tr_val6=val6[I][:n]
-    tr_val7=val7[I][:n]
-    tr_val8=val8[I][:n]
- 
-    #testing
-    tmp=[]
-    for j in kk[-10:]:
-        tmp.extend(np.argwhere(val6==unique[j]))
+    for j in range(len(Efoil)):
+        tmp.extend(np.argwhere(val6==Efoil[j]))
     tmp=np.asarray(tmp)
     J = tmp[:,0].copy()
-    np.random.shuffle(J)
-    n=len(J)    
     
-    #testing
-    ts_val0=val0[J][:n]
-    ts_val1=val1[J][:n]
-    ts_val2=val2[J][:n]
-    ts_val3=val3[J][:n]
-    ts_val4=val4[J][:n]
-    ts_val5=val5
-    ts_val6=val6[J][:n]
-    ts_val7=val7[J][:n]
-    ts_val8=val8[J][:n]
-        
+    
+    K=[]
+    for i in range(len(I)):
+        if I[i] not in J:
+            K.append(I[i])
+    n=len(K)
+    
+    #training
+    tr_val0=val0[K][:n]
+    tr_val1=val1[K][:n]
+    tr_val2=val2[K][:n]
+    tr_val3=val3[K][:n]
+    tr_val4=val4[K][:n]
+    tr_val5=val5
+    tr_val6=val6[K][:n]
+    tr_val7=val7[K][:n]
+    tr_val8=val8[K][:n]
+         
     outpath='./foil_all_re_aoa/data_files_train_test_NT/'
     
-    data1=[tr_val0, tr_val1, tr_val2, tr_val3, tr_val4, tr_val5, tr_val6, tr_val7, tr_val8, val9]
-    with open(outpath+'data_re_aoa_fp_NT_tr_%s.pkl'%ii, 'wb') as outfile:
-        pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
-    
-    data2=[ts_val0, ts_val1, ts_val2, ts_val3, ts_val4, ts_val5, ts_val6, ts_val7, ts_val8, val9]
-    with open(outpath+'data_re_aoa_fp_NT_ts_%s.pkl'%ii, 'wb') as outfile:
+   
+    data2=[tr_val0, tr_val1, tr_val2, tr_val3, tr_val4, tr_val5, tr_val6, tr_val7, tr_val8, val9]
+    with open(outpath+'data_re_aoa_fp_NT_E_ts_%s.pkl'%ii, 'wb') as outfile:
         pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
         
     print ('Done %s\n'%ii)

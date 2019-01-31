@@ -81,7 +81,7 @@ with open(path+'best_cp_fp_144_1100.pkl', 'wb') as outfile:
 
 # ref:[data,name]
 path='./data_file/'
-data_file='foil_param_216.pkl'
+data_file='foil_param_216_no_aug.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -119,11 +119,11 @@ ts_val3=val3[I][n:]
 
 
 data1=[tr_val1,tr_val2,xx,tr_val3,info]
-with open(path+'foil_param_216_tr.pkl', 'wb') as outfile:
+with open(path+'foil_param_216_no_aug_tr.pkl', 'wb') as outfile:
     pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
 data2=[ts_val1,ts_val2,xx,ts_val3,info]
-with open(path+'foil_param_216_ts.pkl', 'wb') as outfile:
+with open(path+'foil_param_216_no_aug_ts.pkl', 'wb') as outfile:
     pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
 
 

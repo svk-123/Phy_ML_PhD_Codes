@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon May  1 08:09:04 2017
-
 """
-
 import time
 start_time = time.time()
 
@@ -56,7 +54,7 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./data_file/'
-data_file='foil_param_216.pkl'
+data_file='foil_param_216_no_aug.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -72,7 +70,7 @@ xtr1=inp
 ttr1=my_out 
 
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
-model=load_model('./selected_model/case_5c_12/model_cnn_2450_0.000028_0.000057.hdf5')  
+model=load_model('./selected_model/case_16_tanh_v1/model_cnn_2050_0.000007_0.000056.hdf5') 
 
 del inp
 del result
@@ -80,12 +78,26 @@ del result
 # with a Sequential model
 get_out_1c= K.function([model.layers[0].input],
                                   [model.layers[15].output])
-c1 = get_out_1c([xtr1[0:100,:,:,:]])
+c1 = get_out_1c([xtr1])[0]
 
-#info='[c1,name]'    
-#data2=[c1,name,info]
-#with open(path+'param_216_5c.pkl', 'wb') as outfile:
-#    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
+mm=[]
+for i in range(16):
+    mm.append([c1[:,i].max(),c1[:,i].min()])
+mm=np.asarray(mm)
+    
+mm_scale=[]    
+for i in range(16):    
+    mm_scale.append(max(abs(mm[i])))
+mm_scale=np.asarray(mm_scale)
+
+c1_scaled=c1.copy()
+for i in range(16): 
+    c1_scaled[:,i]=c1_scaled[:,i]/mm_scale[i]
+    
+info='[para_scaled,name,para(unscaled),mm_scaler,info]'    
+data2=[c1_scaled,name,c1,mm_scale,info]
+with open(path+'param_216_tanh_16_v1.pkl', 'wb') as outfile:
+    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
 
 
 

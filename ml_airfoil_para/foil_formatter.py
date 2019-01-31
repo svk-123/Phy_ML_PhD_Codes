@@ -69,6 +69,7 @@ for iiii in range(1):
         
         fu = interpolate.interp1d(up_x, up_y)
         u_yy = fu(xx)
+        u_yy=u_yy[::-1] 
         
         fl = interpolate.interp1d(lr_x, lr_y)
         l_yy = fl(xx)   
@@ -104,7 +105,7 @@ for iiii in range(1):
         print i
         #plot
         figure=plt.figure(figsize=(3,3))
-        plt0, =plt.plot(coord[i][:,0],coord[i][:,1],'k',linewidth=0.1,label='true')
+        plt0, =plt.plot(coord[i][:,0],coord[i][:,1],'k',linewidth=0.5,label='true')
         #plt1, =plt.plot(val_inp[:,4],out,'-or',linewidth=2,label='nn')  
         #plt.legend(fontsize=16)
         #plt.xlabel('alpha',fontsize=16)
@@ -112,7 +113,7 @@ for iiii in range(1):
         #plt.title('NACA%sRe=%se6'%(name[i],rey_no[i]),fontsize=16)
         #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
         plt.xlim(-0.05,1.05)
-        plt.ylim(-0.20,0.20)    
+        plt.ylim(-0.25,0.25)    
         plt.axis('off')
         #plt.grid(True)
         #patch.set_facecolor('black')
@@ -125,9 +126,10 @@ for iiii in range(1):
         foil_mat.append(img)
         print 'image matrix size: ', img.shape      # print the size of image
 
-info='[foil_mat,foil_fp,xx,nname,info,[x:-.05,1.05,y:-.2,.2]'    
+#now all points atart at: TE and c.c.w direction
+info='[foil_mat,foil_fp,xx,nname,info,[x:-.05,1.05,y:-.25,.25:lw=0.5]'    
 data2=[foil_mat,foil_fp,xx,nname,info]
-with open(path+'foil_param_216.pkl', 'wb') as outfile:
+with open(path+'foil_param_216_no_aug.pkl', 'wb') as outfile:
     pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
     
     

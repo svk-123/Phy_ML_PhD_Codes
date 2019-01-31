@@ -164,21 +164,19 @@ def get_cl(tmp_para,j):
 
 
 
-def get_para_16(p1):
-    x,y=naca4(p1,100)
+def get_para_16(p2):
+    x,y=naca4(p2,100)
     img=get_foil_mat(x,y)
     xtr1=np.reshape(img,(1,216,216,1)) 
     get_para= K.function([model_para.layers[0].input],[model_para.layers[11].output])
     para_16=get_para([xtr1])[0]
-
     #retun shape (1,16)
     return para_16
 
-
-def loss(p1):
+def loss(p2):
     global my_counter
     #shape (1,16)    
-    my_para=get_para_16(p1)
+    my_para=get_para_16(p2)
     #shape (16,)
     tmp_para=my_para[0]
     #get coord from para 
@@ -199,26 +197,22 @@ def loss(p1):
     
     for j in range(len(tar_cl)):
         pred_cl[j]=get_cl(tmp_para,j)
-
     
     print ('Pred_cl:', pred_cl)
-    
     
     my_counter = my_counter +1
     print ('Iter:', my_counter)
     e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
     print ('mse:', e)
     return  e
-     
 
 p1=[0,0,12]
-
     
 print('Starting loss = {}'.format(loss(p1)))
 
 res = minimize(loss, x0=p1, method = 'L-BFGS-B', \
                options={'disp': True, 'maxcor':10, 'ftol': 1e-16, \
-                                 'eps': 1e-3, 'maxfun': 10, \
+                                 'eps': 5e-1, 'maxfun': 10, \
                                  'maxiter': 20, 'maxls': 10})
 print('Ending loss = {}'.format(loss(res.x)))
 

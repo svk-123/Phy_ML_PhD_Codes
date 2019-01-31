@@ -56,14 +56,14 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./data_file/'
-data_file='param_216_5c.pkl'
+data_file='param_216_tanh_16_v1.pkl'
 with open(path + data_file, 'rb') as infile:
     result1 = pickle.load(infile)
-para=result1[0][0]
+para=result1[2]
 name=result1[1]
 para=np.asarray(para)
 
-data_file='foil_param_216.pkl'
+data_file='foil_param_216_no_aug.pkl'
 with open(path + data_file, 'rb') as infile:
     result2 = pickle.load(infile)
 foil_fp=result2[1]
@@ -71,16 +71,27 @@ xx=result2[2]
 
 del result2
 
-model=load_model('./selected_model/case_5_c/model_cnn_2450_0.000021_0.000032.hdf5') 
+#model=load_model('./selected_model/case_5c/model_cnn_2450_0.000021_0.000032.hdf5') 
+model=load_model('./selected_model/case_16_tanh_v1/model_cnn_2050_0.000007_0.000056.hdf5') 
 
 # with a Sequential model
-get_out_1c= K.function([model.layers[17].input],
-                                  [model.layers[21].output])
-c1 = get_out_1c([para[1:2,:]])[0][0,:]
+print model.layers[16].input
+print model.layers[19].output
 
-plt.figure(figsize=(6,5),dpi=100)
-plt.plot(xx,c1[:35],'r',label='true')
-plt.plot(xx,c1[35:],'r',label='true')
-plt.show()
+get_out_1c= K.function([model.layers[16].input],
+                                  [model.layers[19].output])
+c1 = get_out_1c([para[0:500,:]])[0]
+
+
+for i in range(300):
+
+    plt.figure(figsize=(6,5),dpi=100)
+    plt.plot(xx[::-1],c1[i,:35]*0.25,'r',label='true')
+    plt.plot(xx,c1[i,35:]*0.25,'r',label='true')
+    plt.plot(xx[::-1],foil_fp[i][:35],'o',label='true')
+    plt.plot(xx,foil_fp[i][35:],'o',label='true')
+    plt.xlim([-0.05,1.05])
+    plt.ylim([-0.25,0.25])
+    plt.show()
 
 

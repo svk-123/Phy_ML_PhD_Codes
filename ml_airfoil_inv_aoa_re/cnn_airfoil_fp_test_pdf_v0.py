@@ -59,7 +59,7 @@ data_file='data_re_aoa_fp_4.pkl'
 #open pdf file
 fp= PdfPages('least_accurate.pdf')
 
-for ii in [1,2,3,4,5,7,8,9,10]:
+for ii in [1,2,3,4,5,6,7,8,9,10]:
 #for ii in [1]:
     print ii
     #for ii in [1,2,3,4,5,7,8,9,10]:

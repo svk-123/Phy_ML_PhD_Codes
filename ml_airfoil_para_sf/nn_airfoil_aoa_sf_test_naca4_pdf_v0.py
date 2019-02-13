@@ -57,7 +57,7 @@ out_v=[]
 
 #load data
 #with open('./data_file/ph_1_test/foil_aoa_nn_p16_ph_1_ts_1.pkl', 'rb') as infile:
-with open('./data_file/foil_aoa_nn_nacan_lam_np_ts_1.pkl', 'rb') as infile:
+with open('./data_file/foil_naca4_lam_trts_1.pkl', 'rb') as infile:
     result = pickle.load(infile)
 
 inp_x.extend(result[0])   
@@ -86,7 +86,7 @@ out_v=np.asarray(out_v)
 
 
 #open pdf file
-fp= PdfPages('plots_lam_ts_1.pdf')
+fp= PdfPages('plots_lam_naca4_ts_1.pdf')
 
 #plot
 def con_plot(i):
@@ -257,7 +257,7 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 np.random.seed(1234534)
-mylist=np.random.randint(0,150,10)
+mylist=np.random.randint(0,143,5)
 
 for i in mylist:
     print i
@@ -269,7 +269,7 @@ for i in mylist:
     val_out=np.concatenate((out_p[i][:,None],out_u[i][:,None],out_v[i][:,None]),axis=1)
 
     #load_model
-    model_test=load_model('./selected_model/case_11_naca_lam_np/model_sf_190_0.00001441_0.00001467.hdf5') 
+    model_test=load_model('./selected_model/case_1_naca_1/model_sf_150_0.00002427_0.00002472.hdf5') 
     out=model_test.predict([val_inp]) 
          
     con_plot(i)

@@ -12,6 +12,7 @@ start_time = time.time()
 # Python 3.5
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.tri as tri
 from matplotlib import cm
 import pandas
 from os import listdir
@@ -86,15 +87,28 @@ def con_plot(xp,yp,zp,nc,i,pname):
 
     plt.figure(figsize=(8, 4), dpi=100)
     #cp = pyplot.tricontour(ys, zs, pp,nc)
-    cp = plt.tricontour(xp,yp,zp,nc,cmap=cm.jet)
-    cp1=plt.tricontour(co[i][:,0],co[i][:,1],np.zeros(len(co[i])),colors='k')
+    
+    xx=co[i][:,0]
+    yy=co[i][:,1]
+    zz=np.zeros(len(xx))
+        
+    #cp = plt.tricontour(xp,yp,zp,25,linewidths=1,colors='k')
+    cp = plt.tricontourf(xp,yp,zp,25,cmap=cm.jet)
+    cp1=plt.tricontourf(xx,yy,zz,colors='white') 
+    
+    #cp = plt.tricontour(xp,yp,zp,nc,cmap=cm.jet)
+
+    #cp1=plt.tricontourf(xx,yy,zz,colors='k') 
+    #cp1=plt.tricontourf(xx,yy,zz,colors='k')
 
     #v= np.linspace(0, 0.05, 15, endpoint=True)
     #cp = plt.tricontourf(xp,yp,zp,v,cmap=cm.jet,extend='both')
     #cp = pyplot.tripcolor(ys, zs, pp)
     #cp = pyplot.scatter(ys, zs, pp)
-    #pyplot.clabel(cp, inline=False,fontsize=8)
+    #plt.clabel(cp, inline=True,fontsize=8)
+    
     plt.colorbar(cp)
+    
     plt.xlim(-0.5,2)
     plt.ylim(-0.5,0.5)
     
@@ -220,13 +234,13 @@ for i in range(2,3):
     out=model_test.predict([val_inp]) 
          
     con_plot(val_inp[:,0],val_inp[:,1],val_out[:,0],20,i,'p-cfd')
-    con_plot(val_inp[:,0],val_inp[:,1],out[:,0],20,i,'p-nn')
+    #con_plot(val_inp[:,0],val_inp[:,1],out[:,0],20,i,'p-nn')
     #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,0]-val_out[:,0]),20,i,'p-error')
-    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,1],20,i,'u-cfd')
-    con_plot(val_inp[:,0],val_inp[:,1],out[:,1],20,i,'u-nn')
+    #con_plot(val_inp[:,0],val_inp[:,1],val_out[:,1],20,i,'u-cfd')
+    #con_plot(val_inp[:,0],val_inp[:,1],out[:,1],20,i,'u-nn')
     #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,1]-val_out[:,1]),20,i,'u-error')
-    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,2],20,i,'v-cfd')
-    con_plot(val_inp[:,0],val_inp[:,1],out[:,2],20,i,'v-nn')
+    #con_plot(val_inp[:,0],val_inp[:,1],val_out[:,2],20,i,'v-cfd')
+    #con_plot(val_inp[:,0],val_inp[:,1],out[:,2],20,i,'v-nn')
     #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,2]-val_out[:,2]),20,i,'v-error')
     
     #LinearNDinterpolator
@@ -243,6 +257,9 @@ for i in range(2,3):
     yl=co[i][a0:,1]
     if(yl[-1:] >=-0.001):
         yl[-1:]=-0.001  
+        
+
+           
         
 '''    
     #for -p

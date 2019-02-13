@@ -59,7 +59,7 @@ plt.rc('font', family='serif')
     >>>data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I]"""
 """------------------------------------"""
 
-
+'''
 # simple conv plot
 
 path='./selected_model/case_9_naca_lam_1/'
@@ -95,22 +95,31 @@ for i in range(len(tmp)-1):
     print i
     val_loss.append(tmp[i].split('val_loss:')[1].strip())            
     loss.append(tmp[i].split('- val_loss:')[0].split('loss:')[1].strip())        
-            
-loss=np.asarray(loss)
-val_loss=np.asarray(val_loss)
-loss=np.array(map(float, loss))            
-val_loss=np.array(map(float, val_loss))             
-            
+'''
 
+
+
+
+
+
+
+
+            
+path='./selected_model/case_11_naca_lam_np_lr1em4/'
+data_file='hist.pkl'
+with open(path + data_file, 'rb') as infile:
+    result = pickle.load(infile)
+h=result[0]
+#hist
 plt.figure(figsize=(6,5))
-plt.plot(range(len(loss)),loss,'r',lw=3,label='training_error')
-plt.plot(range(len(val_loss)),val_loss,'b',lw=3,label='validation_error')
+plt.plot(range(len(h['loss'])),h['loss'],'r',marker='o', mfc='None',mew=1.5,ms=12,markevery=15,lw=3,label='training_error')
+plt.plot(range(len(h['val_loss'])),h['val_loss'],'b',marker='s', mfc='None',mew=1.5,ms=12,markevery=15,lw=3,label='validation_error')
 plt.legend(fontsize=20)
 plt.xlabel('Training Epochs',fontsize=20)
 plt.ylabel('MSE',fontsize=20)
 plt.yscale('log')
-#plt.xlim([100,170])
+#plt.xlim([-0.05,1000])
 #plt.ylim([-0.2,0.2])    
-plt.savefig('conv_mlp.png', bbox_inches='tight',dpi=200)
+plt.savefig('./plot_ts/conv_mlp.png', bbox_inches='tight',dpi=200)
 plt.show()
             

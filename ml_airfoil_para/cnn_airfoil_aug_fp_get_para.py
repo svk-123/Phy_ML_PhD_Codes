@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon May  1 08:09:04 2017
-
 """
-
 import time
 start_time = time.time()
 
@@ -12,6 +10,7 @@ start_time = time.time()
 # Python 3.5
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from os import listdir
 from os.path import isfile, join
 import sys
@@ -37,18 +36,12 @@ from keras.layers.convolutional import ZeroPadding2D
 from keras import backend as K
 from numpy import linalg as LA
 import os, shutil
-
-plt.rc('xtick', labelsize=16) 
-plt.rc('ytick', labelsize=16) 
-#plt.rc('text', usetex=True)
-#plt.rcParams['text.latex.preamble'] = [r'\usepackage{lmodern}']
+from scipy.interpolate import interp1d
+ 
+import matplotlib
+matplotlib.rc('xtick', labelsize=20) 
+matplotlib.rc('ytick', labelsize=20) 
 plt.rc('font', family='serif')
-
-#matplotlib.rcParams["font.family"] = "Times"
-#matplotlib.rc('font',**{'family':'serif','serif':['Times']})
-#matplotlib.rc('text', usetex=True)
-# u'LMRoman10'
-
 
 """----------Sample--------------------"""
 """ >>>with open('./datafile/to_ml/ml_allData_r0_l1.pkl', 'rb') as infile:
@@ -59,25 +52,49 @@ plt.rc('font', family='serif')
     >>>data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I]"""
 """------------------------------------"""
 
+# ref:[data,name]
+path='./data_file/'
+data_file='foil_param_216_no_aug.pkl'
 
-# simple conv plot
-
-path='./selected_model/case_16_tanh_v1/'
-data_file='hist.pkl'
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
-h=result[0]
-#hist
-plt.figure(figsize=(6,5))
-plt.plot(range(len(h['loss'])),h['loss'],'r',marker='o', mfc='None',mew=1.5,ms=12,markevery=150,lw=3,label='training_error')
-plt.plot(range(len(h['val_loss'])),h['val_loss'],'b',marker='s', mfc='None',mew=1.5,ms=12,markevery=150,lw=3,label='validation_error')
-plt.legend(fontsize=20)
-plt.xlabel('Training Epochs',fontsize=20)
-plt.ylabel('MSE',fontsize=20)
-plt.yscale('log')
-#plt.xlim([-0.05,1000])
-#plt.ylim([-0.2,0.2])    
-plt.savefig('./plot/convergence.tiff', format='tiff',bbox_inches='tight',dpi=300)
-plt.show()
+inp=result[0]
+out=result[1]
+xx=result[2]
+name=result[3]
 
+inp=np.asarray(inp)
+my_out=np.asarray(out)
+
+xtr1=inp
+ttr1=my_out 
+
+xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
+model=load_model('./selected_model/case_aug_tanh_6/model_cnn_2100_0.000030_0.000043.hdf5') 
+
+del inp
+del result
+
+# with a Sequential model
+get_out_1c= K.function([model.layers[0].input], [model.layers[16].output])
+c1 = get_out_1c([xtr1])[0]
+
+mm=[]
+for i in range(6):
+    mm.append([c1[:,i].max(),c1[:,i].min()])
+mm=np.asarray(mm)
+    
+mm_scale=[]    
+for i in range(6):    
+    mm_scale.append(max(abs(mm[i])))
+mm_scale=np.asarray(mm_scale)
+
+c1_scaled=c1.copy()
+for i in range(6): 
+    c1_scaled[:,i]=c1_scaled[:,i]/mm_scale[i]
+    
+info='[para_scaled,name,para(unscaled),mm_scaler,info]'    
+data2=[c1_scaled,name,c1,mm_scale,info]
+with open(path+'param_aug_216_tanh_6_v1.pkl', 'wb') as outfile:
+    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
 

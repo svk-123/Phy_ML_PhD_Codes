@@ -120,6 +120,6 @@ plt.ylabel('MSE',fontsize=20)
 plt.yscale('log')
 #plt.xlim([-0.05,1000])
 #plt.ylim([-0.2,0.2])    
-plt.savefig('./plot_ts/conv_mlp.png', bbox_inches='tight',dpi=200)
+plt.savefig('./plot_ts/conv_mlp.tiff', format='tiff',bbox_inches='tight',dpi=300)
 plt.show()
             

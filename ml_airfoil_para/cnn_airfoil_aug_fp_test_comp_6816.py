@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon May  1 08:09:04 2017
-
 """
-
 import time
 start_time = time.time()
 
@@ -56,42 +54,60 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./data_file/'
-data_file='param_216_tanh_16_v1.pkl'
+data_file='foil_param_216_no_aug_ts.pkl'
+
 with open(path + data_file, 'rb') as infile:
-    result1 = pickle.load(infile)
-para=result1[2]
-name=result1[1]
-para=np.asarray(para)
+    result = pickle.load(infile)
+inp=result[0]
+out=result[1]
+xx=result[2]
+name=result[3]
 
-data_file='foil_param_216_no_aug.pkl'
-with open(path + data_file, 'rb') as infile:
-    result2 = pickle.load(infile)
-foil_fp=result2[1]
-xx=result2[2]
+inp=np.asarray(inp)
+my_out=np.asarray(out)
 
-del result2
+xtr1=inp
+ttr1=my_out 
 
-#model=load_model('./selected_model/case_5c/model_cnn_2450_0.000021_0.000032.hdf5') 
-model=load_model('./selected_model/case_16_tanh_v1/model_cnn_2050_0.000007_0.000056.hdf5') 
+xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
+
+np.random.seed(1234534)
+I=np.random.randint(0,329,100)
+
+xtr1=xtr1[I]
+ttr1=ttr1[I]
+
+model_6=load_model('./selected_model/case_aug_tanh_6/model_cnn_2100_0.000030_0.000043.hdf5') 
+model_8=load_model('./selected_model/case_aug_tanh_8/model_cnn_1500_0.000016_0.000026.hdf5') 
+model_16=load_model('./selected_model/case_aug_tanh_16/model_cnn_1125_0.000004_0.000009.hdf5') 
+
+del inp
+del result
 
 # with a Sequential model
-print model.layers[16].input
-print model.layers[19].output
+c6 = model_6.predict([xtr1])
+c8 = model_8.predict([xtr1])
+c16 = model_16.predict([xtr1])
 
-get_out_1c= K.function([model.layers[16].input],
-                                  [model.layers[19].output])
-c1 = get_out_1c([para[0:1,:]])[0]
-
-
-for i in range(len(c1)):
-
+for i in range(len(c6)):
+    print i
     plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(xx[::-1],c1[i,:35]*0.25,'r',label='true')
-    plt.plot(xx,c1[i,35:]*0.25,'r',label='true')
-    plt.plot(xx[::-1],foil_fp[i][:35],'o',label='true')
-    plt.plot(xx,foil_fp[i][35:],'o',label='true')
+    plt.plot(xx[::-1],c6[i,:35]*0.25,'r',lw=2,label='p-6')
+    plt.plot(xx,c6[i,35:]*0.25,'r',lw=2)
+    
+    plt.plot(xx[::-1],c8[i,:35]*0.25,'g',lw=2,label='p-8')
+    plt.plot(xx,c8[i,35:]*0.25,'g',lw=2)    
+    
+    plt.plot(xx[::-1],c16[i,:35]*0.25,'b',lw=2,label='p-16')
+    plt.plot(xx,c16[i,35:]*0.25,'b',lw=2)
+    
+    plt.plot(xx[::-1],ttr1[i,:35],'gray',marker='o', mfc='None',mew=1.0,ms=8,lw=0,label='true')
+    plt.plot(xx,ttr1[i,35:],'gray',marker='o', mfc='None',mew=1.0,ms=8,lw=0)
+    
+    plt.legend()
+    
     plt.xlim([-0.05,1.05])
     plt.ylim([-0.25,0.25])
-    plt.show()
-
-
+    
+    plt.savefig('./plot/ts_%04d.png'%(i), bbox_inches='tight',dpi=100)
+    plt.close()

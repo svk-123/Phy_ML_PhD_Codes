@@ -166,13 +166,13 @@ plt.hist(tot, 20,histtype='step', color='grey',stacked=True,fill=True,alpha=1,or
 plt.ylabel('Number of Samples',fontsize=20)
 plt.xlabel('$L_2$ relative error(%)',fontsize=20)
 #plt.xlim([-0.001,4.0])
-plt.savefig('ts_tot.png',format='png', bbox_inches='tight',dpi=200)
+plt.savefig('ts_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()    
 
 
 
 
-'''
+
 #plot -train error
 p=[]
 u=[]
@@ -203,9 +203,9 @@ plt.hist(tot, 20,histtype='step', color='grey',stacked=True,fill=True,alpha=1,or
 plt.ylabel('Number of Samples',fontsize=20)
 plt.xlabel('$L_2$ relative error(%)',fontsize=20)
 #plt.xlim([-0.001,4.0])
-plt.savefig('tr_tot.png',format='png', bbox_inches='tight',dpi=200)
+plt.savefig('tr_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
-'''
+
 
 
 

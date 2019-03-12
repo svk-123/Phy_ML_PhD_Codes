@@ -56,11 +56,12 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./data_file/'
-data_file='param_216_tanh_16_v1.pkl'
+data_file='param_aug_216_tanh_16_v1.pkl'
 with open(path + data_file, 'rb') as infile:
     result1 = pickle.load(infile)
 para=result1[2]
 name=result1[1]
+mm_scaler=result1[3]
 para=np.asarray(para)
 
 data_file='foil_param_216_no_aug.pkl'
@@ -72,26 +73,42 @@ xx=result2[2]
 del result2
 
 #model=load_model('./selected_model/case_5c/model_cnn_2450_0.000021_0.000032.hdf5') 
-model=load_model('./selected_model/case_16_tanh_v1/model_cnn_2050_0.000007_0.000056.hdf5') 
+model=load_model('./selected_model/case_aug_tanh_16/model_cnn_1125_0.000004_0.000009.hdf5') 
 
 # with a Sequential model
-print model.layers[16].input
-print model.layers[19].output
+print model.layers[17].input
+print model.layers[21].output
 
-get_out_1c= K.function([model.layers[16].input],
-                                  [model.layers[19].output])
-c1 = get_out_1c([para[0:1,:]])[0]
+mm=[]
+for i in range(16):
+    mm.append([para[:,i].min(),para[:,i].max()])
 
+mm=np.asarray(mm)
+
+np.random.seed(124254)
+
+#random generated parameters to check whetrer airfoil is smooth:
+new_para=np.zeros((10,16))
+for j in range(10):
+    for i in range(16):
+        new_para[j,i]=random.uniform(mm[i,0],mm[i,1])
+
+
+get_out_1c= K.function([model.layers[17].input],
+                                  [model.layers[21].output])
+c1 = get_out_1c([new_para])[0]
 
 for i in range(len(c1)):
-
+    print i
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(xx[::-1],c1[i,:35]*0.25,'r',label='true')
     plt.plot(xx,c1[i,35:]*0.25,'r',label='true')
-    plt.plot(xx[::-1],foil_fp[i][:35],'o',label='true')
-    plt.plot(xx,foil_fp[i][35:],'o',label='true')
+    #plt.plot(xx[::-1],foil_fp[i][:35],'b',label='true')
+    #plt.plot(xx,foil_fp[i][35:],'b',label='true')
     plt.xlim([-0.05,1.05])
     plt.ylim([-0.25,0.25])
-    plt.show()
+    plt.savefig('./plot/ts_%04d.png'%(i), bbox_inches='tight',dpi=100)
+    plt.close()
+    #plt.show()
 
 

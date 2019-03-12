@@ -76,12 +76,11 @@ name=result1[3]
 para=np.asarray(para)
 name=np.asarray(name)
 
-'''
 #load model para: airfoil coord from parameters
-model_para=load_model('./selected_model/p16/model_cnn_2950_0.000013_0.000176.hdf5')  
+#model_para=load_model('./selected_model/xx.hdf5')  
 
 #load model: predict flow and calcyulate cl
-model_flow=load_model('./selected_model/case_9_naca_lam_1/model_sf_65_0.00000317_0.00000323.hdf5') 
+model_flow=load_model('./selected_model/case_1_naca_1/model_sf_150_0.00002427_0.00002472.hdf5') 
 
 #load coordnate xx
 global xx
@@ -91,8 +90,8 @@ global tar_cl
 global reno
 global aoa
 
-tar_cl=np.asarray([0.3])
-reno=np.asarray([1200])
+tar_cl=np.asarray([0.6])
+reno=np.asarray([2000])
 reno=reno/2000.
 aoa=6/14.
 
@@ -104,28 +103,41 @@ aoa=6/14.
 #plt.tight_layout()
 #plt.savefig('./opt_plot/re_cl.png',format='png')
 #plt.close()
-   
+
 pred_cl=np.zeros((len(tar_cl)))
-co=np.zeros((69,2))
+#co=np.zeros((69,2))
 
 global my_counter
 my_counter =0
 
-def get_cl(tmp_para,j):
-    #get flow field 
-    inp_x=co[:,0]
-    inp_y=co[:,1]
-    inp_reno=np.repeat(reno[j], len(inp_x))
+
+def get_coord(p2):
+    x,y=naca4(p2*scaler,100)
+    return (x,y)
+
+def loss(p2):
+    global my_counter
+    #shape (1,16)    
+    x,y=get_coord(p2)
+    tmp_para=p2
+    tmp_para=np.asarray(tmp_para)    
+    
+    inp_x=x
+    inp_y=y
+    inp_reno=np.repeat(reno, len(inp_x))
     inp_aoa=np.repeat(aoa, len(inp_x))   
     inp_para=np.repeat(tmp_para[:,None],len(inp_x),axis=1).transpose()   
+        
+    inp_x=np.asarray(inp_x)
+    inp_y=np.asarray(inp_y)
+                        
     #reqires shape others-(70,1) & para-(70,16) & val_inp (70,20)    
     val_inp=np.concatenate((inp_x[:,None],inp_y[:,None],inp_reno[:,None],inp_aoa[:,None],inp_para[:,:]),axis=1)
     out=model_flow.predict([val_inp]) 
                 
-    #a0=find_nearest(co[:,0],0)
-    a0=34
-    xu=co[:a0+1,0]
-    xl=co[a0:,0]
+    a0=100
+    xu=x[:a0+1]
+    xl=y[a0:]
        
     #pressure
     pu2=out[:a0+1,0]
@@ -143,12 +155,12 @@ def get_cl(tmp_para,j):
     for j in range(len(xl)-1): 
         pc.append((pl2[j]+pl2[j+1])/2.0)
             
-    for j in range(len(co)-1):
-        xc.append((co[j,0] + co[j+1,0])/2.0)
-        yc.append((co[j,1] + co[j+1,1])/2.0)    
+    for j in range(len(x)-1):
+        xc.append((x[j] + x[j+1])/2.0)
+        yc.append((y[j] + y[j+1])/2.0)    
             
-        dx.append((co[j+1,0] - co[j,0]))
-        dy.append((co[j+1,1] - co[j,1]))    
+        dx.append((x[j+1] - x[j]))
+        dy.append((y[j+1] - x[j]))    
         
     cp=[]    
     for j in range(len(xc)):
@@ -161,59 +173,40 @@ def get_cl(tmp_para,j):
         else:                
             lF.append(0.5*cp[j]*abs(dx[j]))
                 
-    mycl=sum(lF)*np.cos(np.radians(aoa))/(0.5)
-    return mycl
-
-def get_para_16(p2):
-    x,y=naca4(p2,100)
-    img=get_foil_mat(x,y)
-    xtr1=np.reshape(img,(1,216,216,1)) 
-    get_para= K.function([model_para.layers[0].input],[model_para.layers[11].output])
-    para_16=get_para([xtr1])[0]
-    #retun shape (1,16)
-    return para_16
-
-def loss(p2):
-    global my_counter
-    #shape (1,16)    
-    my_para=get_para_16(p2)
-    #shape (16,)
-    tmp_para=my_para[0]
-    #get coord from para 
-    # requires input shape (1,16)
-    get_coord= K.function([model_para.layers[12].input],[model_para.layers[15].output])
-    c1 = get_coord([my_para])[0][0,:]
-    
-    co[0:35,0]=xx[::-1]
-    co[0:35,1]=c1[:35][::-1]
-    co[35:69,0]=xx[1:]
-    co[35:69,1]=c1[36:]
-    
-    plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(co[:,0],co[:,1],'r',label='true')
-    plt.ylim([-0.5,0.5])
-    plt.savefig('./opt_plot/%s.png'%my_counter,format='png')
-    plt.close()
-    
-    for j in range(len(tar_cl)):
-        pred_cl[j]=get_cl(tmp_para,j)
-    
+    pred_cl=sum(lF)*np.cos(np.radians(aoa))/(0.5)
+        
     print ('Pred_cl:', pred_cl)
     
     my_counter = my_counter +1
     print ('Iter:', my_counter)
     e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
     print ('mse:', e)
+        
+    plt.figure(figsize=(6,5),dpi=100)
+    plt.plot(x,y,'r',label='true')
+    plt.ylim([-0.5,0.5])
+    plt.savefig('./opt_plot/%s.png'%my_counter,format='png')
+    plt.close()
+       
     return  e
 
-p1=[0,0,10]
+p1=np.asarray([0.2,0.2,0.5])
+p1=para[24]
     
 print('Starting loss = {}'.format(loss(p1)))
 
 res = minimize(loss, x0=p1, method = 'L-BFGS-B', \
                options={'disp': True, 'maxcor':20, 'ftol': 1e-16, \
-                                 'eps': 0.5, 'maxfun': 20, \
-                                 'maxiter': 10, 'maxls': 20})
+                                 'eps': 0.01, 'maxfun': 20, \
+                                 'maxiter': 100, 'maxls': 20})
 print('Ending loss = {}'.format(loss(res.x)))
 
-'''
+plt.figure(figsize=(6,5),dpi=100)
+xi,yi=get_coord(p1)
+xo,yo=get_coord(res.x)
+plt.plot(xi,yi,'r',label='base')
+plt.plot(xo,yo,'g',label='optimized')
+plt.ylim([-0.3,0.3])
+plt.legend()
+plt.savefig('./naca_sp.png',format='png')
+plt.close()

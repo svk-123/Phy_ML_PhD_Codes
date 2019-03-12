@@ -51,115 +51,75 @@ import matplotlib
 matplotlib.rc('xtick', labelsize=18) 
 matplotlib.rc('ytick', labelsize=18) 
 
+from naca import naca4
 
 # ref:[data,name]
 #load airfoil para
 path='./data_file/'
-data_file='param_216_tanh_16_v1.pkl'
+data_file='naca4_lam_clcd_3para.pkl'
 with open(path + data_file, 'rb') as infile:
     result1 = pickle.load(infile)
-para=result1[0]
-name=result1[1]
-scaler=result1[3]
 
-para=np.asarray(para)
+cd=result1[1]
+cl=result1[2]
+myreno=result1[3]
+myaoa=result1[4]
+mypara=result1[5]
+name=result1[6]
+
+mypara=np.asarray(mypara)
 name=np.asarray(name)
 
+#fp=open('cl_data.txt','w')
+#for i in range(len(cl)):
+#    fp.write('%s %f %f %f \n'%(name[i],myreno[i],myaoa[i],cl[i]))
+#    
+#fp.close()
+    
+
 #load model para: airfoil coord from parameters
-model_para=load_model('./selected_model/case_16_tanh_v1/model_cnn_2050_0.000007_0.000056.hdf5')  
-
-#load model: predict flow and calcyulate cl
-model_flow=load_model('./selected_model/case_11_naca_lam_np_lr1em4/model_sf_150_0.00000717_0.00000745.hdf5') 
-
-#load coordnate xx
-global xx
-xx=tmp=np.loadtxt('./data_file/xx.txt')
+#scaler used in cl pred network
+# reno=10000
+#aoa=14
+#para=np.array([6,6,30])
+#cl=0.8
+#cd=0.25
+model=load_model('./selected_model/3para_6x30/model_sf_1500_0.00041091_0.00041618.hdf5')  
+global scaler
+scaler=np.array([6,6,30])
 
 global tar_cl
 global reno
 global aoa
 
 tar_cl=0.6
-reno=2000/2000.
-aoa=6/14.
+reno=np.asarray([1200])/10000.
+aoa=np.asarray([6])/14.
+
+reno=np.asarray(reno)
+aoa=np.asarray(aoa)
 
 global my_counter
 my_counter =0
 
+def get_coord(p2):
+    x,y=naca4(p2*scaler,100)
+    return (x,y)
+
 def loss(para):
-    para=para*scaler
-    global my_counter    
-    my_para=np.reshape(para,(1,16))
-    tmp_para=para
-    #get coord from para 
-    # requires input shape (1,16)
-    get_coord= K.function([model_para.layers[16].input],[model_para.layers[19].output])
-    c1 = get_coord([my_para])[0][0,:]
-    co=np.zeros((69,2))
-    co[0:35,0]=xx[::-1]
-    co[0:35,1]=c1[:35]
-    co[35:69,0]=xx[1:]
-    co[35:69,1]=c1[36:]
-    
-    plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(co[:,0],co[:,1]*0.25,'r',label='true')
-    plt.savefig('./opt_plot/%s.png'%my_counter,format='png')
-    plt.close()
-    
-    #get flow field 
-    inp_x=co[:,0]
-    inp_y=co[:,1]
-   
-    inp_reno=np.repeat(reno, len(inp_x))
-    inp_aoa=np.repeat(aoa, len(inp_x))   
-    inp_para=np.repeat(tmp_para[:,None],len(inp_x),axis=1).transpose()   
-    #reqires shape others-(70,1) & para-(70,16) & val_inp (70,20)    
-    val_inp=np.concatenate((inp_x[:,None],inp_y[:,None],inp_reno[:,None],inp_aoa[:,None],inp_para[:,:]),axis=1)
-    out=model_flow.predict([val_inp]) 
-    
-            
-    #a0=find_nearest(co[:,0],0)
-    a0=34
-    xu=co[:a0+1,0]
-    yu=co[:a0+1,1]
-    xl=co[a0:,0]
-    yl=co[a0:,1]
-        
-    #pressure
-    pu2=out[:a0+1,0]
-    pl2=out[a0:,0]
-                  
-    #cl calculation        
-    xc=[]
-    yc=[]
-    dx=[]
-    dy=[]
-        
-    pc=[]
-    for j in range(len(xu)-1): 
-        pc.append((pu2[j]+pu2[j+1])/2.0)
-    for j in range(len(xl)-1): 
-        pc.append((pl2[j]+pl2[j+1])/2.0)
-            
-    for j in range(len(co)-1):
-        xc.append((co[j,0] + co[j+1,0])/2.0)
-        yc.append((co[j,1] + co[j+1,1])/2.0)    
-            
-        dx.append((co[j+1,0] - co[j,0]))
-        dy.append((co[j+1,1] - co[j,1]))    
-        
-    cp=[]    
-    for j in range(len(xc)):
-        cp.append(2*pc[j])
-         
-    lF=[]
-    for j in range(len(xc)):
-        if(dx[j] <=0):
-            lF.append(-0.5*cp[j]*abs(dx[j]))
-        else:                
-            lF.append(0.5*cp[j]*abs(dx[j]))
+       
+    global my_counter  
+    para=para
+
+    x,y=get_coord(para)
+
+    my_inp=np.concatenate((reno,aoa,para),axis=0)
+    my_inp=np.reshape(my_inp,(1,5))
+    #cd, cl
+    out=model.predict([my_inp])
+    out=out*np.asarray([0.25,0.8])
                 
-    pred_cl=sum(lF)*np.cos(np.radians(aoa))/(0.5)
+    pred_cl=out[0,1]
     
     print ('Pred_cl:', pred_cl)
     e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
@@ -167,22 +127,28 @@ def loss(para):
     
     my_counter = my_counter +1
     print ('Iter:', my_counter)
-    
+       
+    plt.figure(figsize=(6,5),dpi=100)
+    plt.plot(x,y,'r',label='true')
+    plt.ylim([-0.5,0.5])
+    plt.savefig('./opt_plot/%s.png'%my_counter,format='png')
+    plt.close()
+        
     return  e
      
 
-idx=np.argwhere(name=='naca2412')[0][0]
-p1=para[idx,:]
+
+p1=mypara[10000,:]/scaler
     
 print('Starting loss = {}'.format(loss(p1)))
 
 res = minimize(loss, x0=p1, method = 'L-BFGS-B', \
-               options={'disp': True, 'maxcor':20, 'ftol': 1e-16, \
+               options={'disp': True, 'maxcor':20, 'ftol': 1e-3, \
                                  'eps': 1e-1, 'maxfun': 20, \
                                  'maxiter': 100, 'maxls': 20})
 print('Ending loss = {}'.format(loss(res.x)))
 
-
+'''
 get_coord= K.function([model_para.layers[16].input],[model_para.layers[19].output])
 
 my_para=np.reshape(res.x,(1,16))*scaler
@@ -209,3 +175,4 @@ plt.ylim([-0.3,0.3])
 plt.legend()
 plt.savefig('./gen_sp.png',format='png')
 plt.close()
+'''

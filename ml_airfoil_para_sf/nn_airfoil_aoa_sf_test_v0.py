@@ -55,7 +55,7 @@ out_v=[]
 
 #load data
 #with open('./data_file/ph_1_test/foil_aoa_nn_p16_ph_1_ts_1.pkl', 'rb') as infile:
-with open('./data_file/foil_aoa_nn_nacan_lam_ts_1.pkl', 'rb') as infile:
+with open('./data_file/foil_aoa_nn_nacan_lam_trts_1.pkl', 'rb') as infile:
     result = pickle.load(infile)
 
 inp_x.extend(result[0])   
@@ -83,7 +83,7 @@ out_u=np.asarray(out_u)
 out_v=np.asarray(out_v)
 
 #plot
-def con_plot(xp,yp,zp,nc,i,pname):
+def con_plot(xp,yp,zp,nc,i,pname,sub_name):
 
     plt.figure(figsize=(8, 4), dpi=100)
     #cp = pyplot.tricontour(ys, zs, pp,nc)
@@ -114,7 +114,8 @@ def con_plot(xp,yp,zp,nc,i,pname):
     
     plt.xlabel('X ',fontsize=20)
     plt.ylabel('Y ',fontsize=20)
-    plt.subplots_adjust(top = 0.95, bottom = 0.15, right = 0.98, left = 0.14, hspace = 0, wspace = 0)
+    plt.figtext(0.5, 0.01, '%s'%sub_name, wrap=True, horizontalalignment='center', fontsize=24)
+    plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.98, left = 0.14, hspace = 0, wspace = 0)
     plt.savefig('./plot_ts/%s_%s_Re=%s_AoA=%s.tiff'%(pname,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)),format='tiff',dpi=300)
     plt.show()
     plt.close()
@@ -173,7 +174,8 @@ def line_plotu_sub(i):
     plt.yticks([])    
     plt.xlim(-0.1,1.2)
     
-    plt.subplots_adjust(top = 0.95, bottom = 0.2, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
+    plt.figtext(0.4, 0.00, '(a)', wrap=True, horizontalalignment='center', fontsize=24)
+    plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
     plt.savefig('./plot_ts/%s_%s_Re=%s_AoA=%s-u.tiff'%(i,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)), format='tiff', bbox_inches='tight',dpi=300)
     plt.show()   
     plt.close()
@@ -206,8 +208,8 @@ def line_plotv_sub(i):
     plt.yticks([])    
     plt.xlim(-0.1,0.5)
        
-        
-    plt.subplots_adjust(top = 0.95, bottom = 0.2, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
+    plt.figtext(0.4, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
+    plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
     plt.savefig('./plot_ts/%s_%s_Re=%s_AoA=%s-v.tiff'%(i,name[i][0],int(inp_reno[i][0]*2000),int(inp_aoa[i][0]*14)), format='tiff',bbox_inches='tight', dpi=300)
     plt.show() 
     plt.close()
@@ -219,9 +221,8 @@ def find_nearest(array, value):
 
 #tr: 2: naca65209, Reno: 400, aoa: 14
 #ts_1: 0: naca63415, Reno: 1900, aoa: 7    
-    
 
-for i in range(1):
+for i in range(2,3):
     
     #normalize
     inp_reno[i]=inp_reno[i]/2000.
@@ -235,14 +236,14 @@ for i in range(1):
     model_test=load_model('./selected_model/case_9_naca_lam_1/model_sf_65_0.00000317_0.00000323.hdf5') 
     out=model_test.predict([val_inp]) 
          
-    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,0],20,i,'p-cfd')
-    con_plot(val_inp[:,0],val_inp[:,1],out[:,0],20,i,'p-nn')
+    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,0],20,i,'p-cfd','(a)')
+    con_plot(val_inp[:,0],val_inp[:,1],out[:,0],20,i,'p-nn','(b)')
     #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,0]-val_out[:,0]),20,i,'p-error')
-    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,1],20,i,'u-cfd')
-    con_plot(val_inp[:,0],val_inp[:,1],out[:,1],20,i,'u-nn')
+    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,1],20,i,'u-cfd','(c)')
+    con_plot(val_inp[:,0],val_inp[:,1],out[:,1],20,i,'u-nn','(d)')
     #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,1]-val_out[:,1]),20,i,'u-error')
-    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,2],20,i,'v-cfd')
-    con_plot(val_inp[:,0],val_inp[:,1],out[:,2],20,i,'v-nn')
+    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,2],20,i,'v-cfd','(e)')
+    con_plot(val_inp[:,0],val_inp[:,1],out[:,2],20,i,'v-nn','(f)')
     #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,2]-val_out[:,2]),20,i,'v-error')
     
     #LinearNDinterpolator
@@ -263,7 +264,7 @@ for i in range(1):
 
            
         
- 
+
     #for -p
     print 'interpolation-1...'      
     f1p=interpolate.LinearNDInterpolator(pD,val_out[:,0])

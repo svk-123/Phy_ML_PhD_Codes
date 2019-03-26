@@ -29,14 +29,12 @@ import pandas
 from skimage import io, viewer,util 
 np.set_printoptions(threshold=np.inf)
 
-
 path='./'
 
-indir='./coord_shifted_scaled'
+indir='./coord_CST/airfoils_set_3'
 
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 fname.sort()  
-
 
 nname=[]
 for i in range(len(fname)):
@@ -47,10 +45,10 @@ for i in range(len(fname)):
     print ('coord',i)
     coord.append(np.loadtxt(indir+'/%s.dat'%nname[i],skiprows=1))
 
-st=[0,    2000, 4000, 6000, 8000,  10000, 12000, 14000]
-end=[2000, 4000, 6000, 8000, 10000, 12000, 14000, len(coord)]
+st=[0,    2000, 4000, 6000, 8000]
+end=[2000, 4000, 6000,  len(fname)]
 xx=np.loadtxt('xx.txt')
-for iiii in range(8):
+for iiii in range(3,4):
     foil_fp=[]
     foil_mat=[]
     
@@ -65,21 +63,24 @@ for iiii in range(8):
             print(e)
             
     for i in range(st[iiii],end[iiii]):
+    #for i in range(3):
         print ('interp',i)
         l=len(coord[i])
         ind=np.argmin(coord[i][:,0])
+
+        # ----for CST coords-----#
+        lr_x=coord[i][:ind+1,0]
+        lr_y=coord[i][:ind+1,1]
         
-        up_x=coord[i][:ind+1,0]
-        up_y=coord[i][:ind+1,1]
+        up_x=coord[i][ind:,0]
+        up_y=coord[i][ind:,1]    
         
-        lr_x=coord[i][ind:,0]
-        lr_y=coord[i][ind:,1]    
+        up_x[0]=0
+        up_x[-1:]=1
         
-        up_x[0]=1
-        up_x[-1:]=0
-        
-        lr_x[0]=0    
-        lr_x[-1:]=1
+        lr_x[0]=1    
+        lr_x[-1:]=0
+        #----------------------#
         
         fu = interpolate.interp1d(up_x, up_y)
         u_yy = fu(xx)
@@ -137,9 +138,9 @@ for iiii in range(8):
         foil_mat.append(img)
         #print 'image matrix size: ', img.shape      # print the size of image
 
-    info='[foil_mat,foil_fp,xx,nname,info,[x:-.05,1.05,y:-.2,.2:lw=0.5]'    
+    info='[foil_mat,foil_fp,xx,nname,info,[x:-.05,1.05,y:-.25,.25:lw=0.5]'    
     data2=[foil_mat,foil_fp,xx,nname,info]
-    with open(path+'foil_param_aug_%s.pkl'%(iiii+1), 'wb') as outfile:
+    with open(path+'foil_param_CST_%s.pkl'%(iiii+9), 'wb') as outfile:
         pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
     
     

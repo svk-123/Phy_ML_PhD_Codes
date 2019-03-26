@@ -36,7 +36,7 @@ from sklearn import preprocessing
 from keras.layers.advanced_activations import LeakyReLU, PReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 from keras.callbacks import TensorBoard
-import cPickle as pickle
+import pickle
 
 from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, Dense, Dropout, Flatten
 from keras.layers.convolutional import ZeroPadding2D
@@ -58,7 +58,7 @@ from naca import naca4
 path='./data_file/'
 data_file='naca4_lam_clcd_3para.pkl'
 with open(path + data_file, 'rb') as infile:
-    result1 = pickle.load(infile)
+    result1 = pickle.load(infile, encoding='bytes')
 
 cd=result1[1]
 cl=result1[2]
@@ -69,6 +69,12 @@ name=result1[6]
 
 mypara=np.asarray(mypara)
 name=np.asarray(name)
+
+nname=[]
+for i in range(len(name)):
+    nname.append(name[i].decode())
+name=np.asarray(nname)
+
 
 #fp=open('cl_data.txt','w')
 #for i in range(len(cl)):
@@ -93,7 +99,7 @@ global reno
 global aoa
 
 tar_cl=0.6
-reno=np.asarray([1200])/10000.
+reno=np.asarray([2000])/10000.
 aoa=np.asarray([6])/14.
 
 reno=np.asarray(reno)
@@ -101,6 +107,9 @@ aoa=np.asarray(aoa)
 
 global my_counter
 my_counter =0
+
+global error
+error=[]
 
 def get_coord(p2):
     x,y=naca4(p2*scaler,100)
@@ -122,8 +131,14 @@ def loss(para):
     pred_cl=out[0,1]
     
     print ('Pred_cl:', pred_cl)
-    e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
+    if(pred_cl > tar_cl):
+        #e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
+        e=0
+    else:
+        e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
     print ('mse:', e)
+    
+    error.append(e)
     
     my_counter = my_counter +1
     print ('Iter:', my_counter)
@@ -133,46 +148,47 @@ def loss(para):
     plt.ylim([-0.5,0.5])
     plt.savefig('./opt_plot/%s.png'%my_counter,format='png')
     plt.close()
+       
+    
         
     return  e
      
+#idx=np.argwhere(name=='naca1108')
+#idx=np.argwhere(name=='naca4510')
+idx=np.argwhere(name=='naca0014')
 
-
-p1=mypara[10000,:]/scaler
+#naca4510
+p1=mypara[idx[0][0],:]/scaler
     
 print('Starting loss = {}'.format(loss(p1)))
+print('Intial foil = %s' %name[idx[0]])
 
-res = minimize(loss, x0=p1, method = 'L-BFGS-B', \
-               options={'disp': True, 'maxcor':20, 'ftol': 1e-3, \
-                                 'eps': 1e-1, 'maxfun': 20, \
-                                 'maxiter': 100, 'maxls': 20})
+mylimit=((0,1.1),(0,1.1),(0.2,1.1))
+res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
+               options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
+                                 'eps': 1e-2, 'maxfun': 100, \
+                                 'maxiter': 50, 'maxls': 100})
+    
 print('Ending loss = {}'.format(loss(res.x)))
 
-'''
-get_coord= K.function([model_para.layers[16].input],[model_para.layers[19].output])
+fp=open('final.dat','w')
+x,y=get_coord(res.x)
+for i in range(len(x)):
+    fp.write('%f %f 0.00\n'%(x[i],y[i]))
+fp.close()
 
-my_para=np.reshape(res.x,(1,16))*scaler
-# requires input shape (1,16)
-c1 = get_coord([my_para])[0][0,:]
-co=np.zeros((69,2))
-co[0:35,0]=xx[::-1]
-co[0:35,1]=c1[:35]
-co[35:69,0]=xx[1:]
-co[35:69,1]=c1[36:]
+fp=open('resx.dat','w')
+fp.write('%s'%res.x)
+fp.close()
 
-base_para=np.reshape(p1,(1,16))*scaler
-co_b=co.copy()
-c2 = get_coord([base_para])[0][0,:]
-co_b[0:35,0]=xx[::-1]
-co_b[0:35,1]=c2[:35]
-co_b[35:69,0]=xx[1:]
-co_b[35:69,1]=c2[36:]
+#intial shape
+x0,y0=get_coord(p1)
+
 
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot(co_b[:,0],co_b[:,1]*0.25,'r',label='base')
-plt.plot(co[:,0],co[:,1]*0.25,'g',label='optimized')
-plt.ylim([-0.3,0.3])
+plt.plot(x0,y0,'--k',label='base')
+plt.plot(x,y,'g',lw=3,label='optimized')
+plt.ylim([-0.2,0.2])
 plt.legend()
-plt.savefig('./gen_sp.png',format='png')
+plt.savefig('./opti_0024.png',format='png')
 plt.close()
-'''

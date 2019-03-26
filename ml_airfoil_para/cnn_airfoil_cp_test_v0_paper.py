@@ -70,7 +70,7 @@ xtr1=inp
 ttr1=my_out 
 
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
-model_test=load_model('./selected_model/case_5_c/model_cnn_2450_0.000021_0.000032.hdf5')  
+model_test=load_model('./selected_model/case_5c/model_cnn_2450_0.000021_0.000032.hdf5')  
        
 out=model_test.predict([xtr1])
 out=out*0.25
@@ -78,7 +78,8 @@ out=out*0.25
 xxx=xx[::-1].copy()
 xxxx=np.concatenate((xx[:,None],xxx[1:,None]))
 
-for k in [0,9]:
+#[0,9]
+for k in [9]:
     print k
     yy1=my_out[k][0:35]
     yy2=my_out[k][35:]
@@ -97,8 +98,9 @@ for k in [0,9]:
     plt.xlabel('X/c',fontsize=20)
     plt.ylabel('Y',fontsize=20)  
     #plt.axis('off')
-    plt.tight_layout()
-    plt.savefig('./plot/ts_%s_%s.png'%(k,name[k]), bbox_inches='tight',dpi=200)
+    plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize=24) 
+    plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
+    plt.savefig('./plot/ts_%s_%s.tiff'%(k,name[k]),format='tiff',bbox_inches='tight',dpi=300)
     plt.show()
     
 for k in range(1):
@@ -112,7 +114,7 @@ for k in range(1):
     plt.ylabel('Y-pixel',fontsize=20)
     plt.colorbar(cp)   
     plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0.00, wspace = 0)
-    plt.savefig('./plot/%s.png'%(name[k]), format='png', bbox_inches='tight', dpi=200)
+    plt.savefig('./plot/%s.tiff'%(name[k]), format='tiff', bbox_inches='tight', dpi=300)
     plt.show()    
     
     
@@ -150,7 +152,7 @@ for k in range(1):
 
 
 
-
+'''
 #calculate error norm
 train_l2=[]
 train_l1=[]
@@ -185,7 +187,7 @@ plt.xlabel('L2 relative error(%)',fontsize=20)
 plt.ylabel('number of Samples',fontsize=20)
 plt.savefig('trainn_error.png', bbox_inches='tight',dpi=100)
 plt.show()
-
+'''
 
 
 '''path='./selected_model/case_3_fp'

@@ -127,8 +127,6 @@ xu,xl,pu1,pl1=get_details(lesdir)
 _,_,pu2,pl2=get_details(ransdir)
 
 
-
-
 plt.figure(1)
 plt.plot(xu,pu1,'og',linewidth=2,markevery=2,label='LES')
 plt.plot(xl,pl1,'ob',linewidth=2,markevery=2) 

@@ -165,6 +165,8 @@ plt.figure(figsize=(6,5),dpi=100)
 plt.hist(tot, 20,histtype='step', color='grey',stacked=True,fill=True,alpha=1,orientation ='vertical')
 plt.ylabel('Number of Samples',fontsize=20)
 plt.xlabel('$L_2$ relative error(%)',fontsize=20)
+plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
+plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
 #plt.xlim([-0.001,4.0])
 plt.savefig('ts_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()    
@@ -202,20 +204,11 @@ plt.figure(figsize=(6,5),dpi=100)
 plt.hist(tot, 20,histtype='step', color='grey',stacked=True,fill=True,alpha=1,orientation ='vertical')
 plt.ylabel('Number of Samples',fontsize=20)
 plt.xlabel('$L_2$ relative error(%)',fontsize=20)
+plt.figtext(0.40, 0.01, '(a)', wrap=True, horizontalalignment='center', fontsize=24)    
+plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
 #plt.xlim([-0.001,4.0])
 plt.savefig('tr_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
 
 
 

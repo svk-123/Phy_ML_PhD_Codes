@@ -34,7 +34,7 @@ boundary not loaded: may be required?
 """
 
 # read data from below dir...
-path='./paper_plots/clcd/foam'
+path='./paper_plots/contour_plot/foam'
 
 indir = path
 
@@ -112,7 +112,7 @@ for i in range(len(foil)):
 #no use loop
 for jj in range(1):
 
-    for ii in range(6):
+    for ii in range(2):
         print ii
         
         casedir= path +'/%s/%s'%(foil[ii],tmp[ii])
@@ -148,6 +148,37 @@ for jj in range(1):
                 z.append(line)
         z = np.array(map(float, z))
         
+        
+        p1=[]
+        with open(casedir +'/%s/p'%ymax, 'r') as infile:
+            data0=infile.readlines()
+            npt=int(data0[20])
+            for line in data0[22:22+npt]:
+                p1.append(line)
+        p1 = np.array(map(float, p1))
+        
+        
+        # load velocity
+        u1=[]
+        v1=[]
+        w1=[]
+        with open(casedir +'/%s/U'%ymax, 'r') as infile:
+            data0=infile.readlines()
+            npt=int(data0[20])
+            for line in data0[22:22+npt]:
+                line=line.replace("(","")
+                line=line.replace(")","")        
+                a, b, c = (item.strip() for item in line.split(' ', 3))
+                u1.append(a), v1.append(b), w1.append(c)
+        u1 = np.array(map(float, u1))
+        v1 = np.array(map(float, v1))
+        w1 = np.array(map(float, w1))
+           
+               
+         
+        
+        
+        
         #filter within xlim,ylim
         I=[]
         for i in range(len(x)):
@@ -156,6 +187,11 @@ for jj in range(1):
         xl=x[I]
         yl=y[I]
         zl=z[I]
+        #p1=p1[I]
+        #u1=u1[I]
+        #v1=v1[I]
+        
+        
         
         relist=[]
         for k in range(len(xl)):
@@ -165,7 +201,7 @@ for jj in range(1):
  
         aoalist=[]
         for k in range(len(xl)):
-            aoalist.append(aoa[ii])
+            aoalist.append(aoa[jj])
         aoalist=np.asarray(aoalist) 
         
         paralist=[]
@@ -194,8 +230,9 @@ for jj in range(1):
         pl=p[I].copy()
         p[I]=out[:,0]
         
+        p=abs(p-p1)
                 
-        dst2='./paper_plots/clcd/ml' +'/%s/%s_nn'%(foil[ii],tmp[ii])
+        dst2='./paper_plots/contour_plot/error' +'/%s/%s_e'%(foil[ii],tmp[ii])
         
         if os.path.exists(dst2):
             shutil.rmtree(dst2)
@@ -231,7 +268,9 @@ for jj in range(1):
         u[I]=out[:,1]
         v[I]=out[:,2]                      
         
-
+        u=abs(u-u1)
+        v=abs(v-v1)
+        
         print 'writing-U'
         fp= open(dst2 +'/%s/U'%ymax, 'w+')
         

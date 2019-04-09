@@ -257,7 +257,7 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 np.random.seed(1234534)
-mylist=np.random.randint(0,150,10)
+mylist=np.random.randint(0,150,5)
 
 for i in mylist:
     print i
@@ -269,14 +269,13 @@ for i in mylist:
     val_out=np.concatenate((out_p[i][:,None],out_u[i][:,None],out_v[i][:,None]),axis=1)
 
     #load_model
-    model_test=load_model('./selected_model/case_11_naca_lam_np/model_sf_190_0.00001441_0.00001467.hdf5') 
+    model_test=load_model('./selected_model/case_11_naca_lam_np_lr1em4/model_sf_150_0.00000717_0.00000745.hdf5') 
     out=model_test.predict([val_inp]) 
          
     con_plot(i)
 
     #LinearNDinterpolator
     pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
-
 
     a0=find_nearest(co[i][:,0],0)
     

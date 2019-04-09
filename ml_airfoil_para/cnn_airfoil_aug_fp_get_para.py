@@ -54,7 +54,7 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./data_file/'
-data_file='foil_param_216_no_aug.pkl'
+data_file='foil_param_naca4_opti.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -70,7 +70,7 @@ xtr1=inp
 ttr1=my_out 
 
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
-model=load_model('./selected_model/case_aug_tanh_6/model_cnn_2100_0.000030_0.000043.hdf5') 
+model=load_model('./selected_model/case_aug_tanh_8/model_cnn_1500_0.000016_0.000026.hdf5') 
 
 del inp
 del result
@@ -80,21 +80,21 @@ get_out_1c= K.function([model.layers[0].input], [model.layers[16].output])
 c1 = get_out_1c([xtr1])[0]
 
 mm=[]
-for i in range(6):
+for i in range(8):
     mm.append([c1[:,i].max(),c1[:,i].min()])
 mm=np.asarray(mm)
     
 mm_scale=[]    
-for i in range(6):    
+for i in range(8):    
     mm_scale.append(max(abs(mm[i])))
 mm_scale=np.asarray(mm_scale)
 
 c1_scaled=c1.copy()
-for i in range(6): 
+for i in range(8): 
     c1_scaled[:,i]=c1_scaled[:,i]/mm_scale[i]
     
-info='[para_scaled,name,para(unscaled),mm_scaler,info]'    
-data2=[c1_scaled,name,c1,mm_scale,info]
-with open(path+'param_aug_216_tanh_6_v1.pkl', 'wb') as outfile:
-    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
+#info='[para_scaled,name,para(unscaled),mm_scaler,info]'    
+#data2=[c1_scaled,name,c1,mm_scale,info]
+#with open(path+'param_naca4_tanh_8_v1.pkl', 'wb') as outfile:
+#    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
 

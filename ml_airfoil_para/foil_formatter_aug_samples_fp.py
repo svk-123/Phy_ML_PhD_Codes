@@ -31,7 +31,7 @@ np.set_printoptions(threshold=np.inf)
 
 path='./'
 
-indir='./coord_CST/airfoils_set_3'
+indir='./coord_naca4_opti'
 
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 fname.sort()  
@@ -40,15 +40,20 @@ nname=[]
 for i in range(len(fname)):
     nname.append(fname[i].split('.dat')[0])   
 
+##general
 coord=[]
 for i in range(len(fname)):
     print ('coord',i)
     coord.append(np.loadtxt(indir+'/%s.dat'%nname[i],skiprows=1))
 
-st=[0,    2000, 4000, 6000, 8000]
-end=[2000, 4000, 6000,  len(fname)]
+
+
+
+st=[0]
+end=[len(fname)]
+
 xx=np.loadtxt('xx.txt')
-for iiii in range(3,4):
+for iiii in range(1):
     foil_fp=[]
     foil_mat=[]
     
@@ -68,19 +73,37 @@ for iiii in range(3,4):
         l=len(coord[i])
         ind=np.argmin(coord[i][:,0])
 
-        # ----for CST coords-----#
-        lr_x=coord[i][:ind+1,0]
-        lr_y=coord[i][:ind+1,1]
+#        # ----for CST coords-----#
+#        #clock wise coord
+#        lr_x=coord[i][:ind+1,0]
+#        lr_y=coord[i][:ind+1,1]
+#        
+#        up_x=coord[i][ind:,0]
+#        up_y=coord[i][ind:,1]    
+#        
+#        up_x[0]=0
+#        up_x[-1:]=1
+#        
+#        lr_x[0]=1    
+#        lr_x[-1:]=0
+#        #----------------------#
         
-        up_x=coord[i][ind:,0]
-        up_y=coord[i][ind:,1]    
+
+        # ----for general coords-----#
+        #counter clock wise coord
+        up_x=coord[i][:ind+1,0]
+        up_y=coord[i][:ind+1,1]
         
-        up_x[0]=0
-        up_x[-1:]=1
+        lr_x=coord[i][ind:,0]
+        lr_y=coord[i][ind:,1]    
         
-        lr_x[0]=1    
-        lr_x[-1:]=0
-        #----------------------#
+        up_x[0]=1
+        up_x[-1:]=0
+        
+        lr_x[0]=0    
+        lr_x[-1:]=1
+        #----------------------#        
+        
         
         fu = interpolate.interp1d(up_x, up_y)
         u_yy = fu(xx)
@@ -140,10 +163,10 @@ for iiii in range(3,4):
 
     info='[foil_mat,foil_fp,xx,nname,info,[x:-.05,1.05,y:-.25,.25:lw=0.5]'    
     data2=[foil_mat,foil_fp,xx,nname,info]
-    with open(path+'foil_param_CST_%s.pkl'%(iiii+9), 'wb') as outfile:
+    with open(path+'foil_param_naca4_opti.pkl', 'wb') as outfile:
         pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
-    
-    
+
+
     
     
     

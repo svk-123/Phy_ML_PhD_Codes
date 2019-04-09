@@ -38,7 +38,7 @@ matplotlib.rc('ytick', labelsize=16)
 
 
 # read data from below dir...
-path='./foam_case'
+path='./paper_plots/clcd/foam'
 
 indir = path
 
@@ -116,14 +116,19 @@ for i in range(len(foil)):
 #no use loop
 for jj in range(1):
 
-    cl_t=[]
-    cl_p=[]
-    cd_t=[]
-    cd_p=[]
+    cl_t1=[]
+    cl_p1=[]
+    cd_t1=[]
+ 
+    cl_t2=[]
+    cl_p2=[]
+    cd_t2=[]
+
+
     
-    for ii in range(5):
+    for ii in range(6):
         print ii
-        
+        ## Time       	Cm           	Cd           	Cl           	Cl(f)        	Cl(r) 
         casedir= path +'/%s/%s/postProcessing/forceCoeffs1'%(foil[ii],tmp[ii])
         #need to find max time later....
         yname = [f for f in listdir(casedir) if isdir(join(casedir, f))]
@@ -131,23 +136,17 @@ for jj in range(1):
         yname.sort()
         yname=yname.astype(np.int)
         ymax=int(yname.max())
-
                    
         xx1=np.loadtxt(casedir +'/%s/forceCoeffs.dat'%ymax, skiprows=10)
         xx1=xx1[-1:][0]
+        cd_t1.append(xx1[2])
+        cl_t1.append(xx1[3])          
+        cl_p1.append(xx1[5])
         
-        casedir= path +'/%s/%s/postProcessing/forceCoeffs2'%(foil[ii],tmp[ii])        
-        xx2=np.loadtxt(casedir +'/%s/forceCoeffs.dat'%ymax, skiprows=10)
-        xx2=xx2[-1:][0]      
-        
-        cl_t.append(xx1[3] + xx2[3])
-        cd_t.append(xx1[2] + xx2[2])   
-        
-             
-        
+                
         
         # lpred case dir
-        casedirp= './foam_ml' + '/%s/%s_nn/postProcessing/forceCoeffs1'%(foil[ii],tmp[ii])
+        casedirp= './paper_plots/clcd/ml' + '/%s/%s_nn/postProcessing/forceCoeffs1'%(foil[ii],tmp[ii])
         #need to find max time later....
         yname = [f for f in listdir(casedirp) if isdir(join(casedirp, f))]
         yname = np.asarray(yname)
@@ -155,15 +154,12 @@ for jj in range(1):
         yname=yname.astype(np.int)
         ymax=int(yname.max())
                    
-        xx3=np.loadtxt(casedirp +'/%s/forceCoeffs.dat'%ymax, skiprows=10)
-        xx3=xx3[-1:][0]
+        xx2=np.loadtxt(casedirp +'/%s/forceCoeffs.dat'%ymax, skiprows=10)
+        xx2=xx2[-1:][0]
         
-        casedirp= './foam_ml' + '/%s/%s_nn/postProcessing/forceCoeffs2'%(foil[ii],tmp[ii])       
-        xx4=np.loadtxt(casedirp +'/%s/forceCoeffs.dat'%ymax, skiprows=10)
-        xx4=xx4[-1:][0]       
-        
-        cl_p.append(xx3[3] + xx4[3])
-        cd_p.append(xx3[2] + xx4[2])          
+        cd_t2.append(xx2[2])
+        cl_t2.append(xx2[3])          
+        cl_p2.append(xx2[5])  
         
         
         

@@ -94,9 +94,6 @@ plt.ylabel('Cl',fontsize=20)
 plt.tight_layout()
 plt.savefig('./opt_plot/re_cl.png',format='png')
 plt.close()
- 
-
-'''
    
 pred_cl=np.zeros((len(tar_cl)))
 
@@ -213,4 +210,4 @@ co[35:69,0]=xx[1:]
 co[35:69,1]=c1[36:]
 plt.figure(figsize=(6,5),dpi=100)
 plt.plot(co[:,0],co[:,1],'r',label='true')
-plt.show()'''
+plt.show()

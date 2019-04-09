@@ -91,11 +91,13 @@ def con_plot(xp,yp,zp,nc,i,pname,sub_name):
     xx=co[i][:,0]
     yy=co[i][:,1]
     zz=np.zeros(len(xx))
-        
-    #cp = plt.tricontour(xp,yp,zp,25,linewidths=1,colors='k')
-    cp = plt.tricontourf(xp,yp,zp,25,cmap=cm.jet)
-    cp1=plt.tricontourf(xx,yy,zz,colors='white') 
-    
+     
+    cp = plt.tricontour(xp,yp,zp,25,linewidths=0.3,colors='k',zorder=5)
+    cp = plt.tricontourf(xp,yp,zp,25,cmap=cm.jet,zorder=0)
+    cp2=plt.tricontourf(xx,yy,zz,colors='white',zorder=10)    
+            
+    #cp=plt.tricontourf(xx,yy-0.2,zzz,colors='white') 
+     
     #cp = plt.tricontour(xp,yp,zp,nc,cmap=cm.jet)
 
     #cp1=plt.tricontourf(xx,yy,zz,colors='k') 
@@ -237,16 +239,16 @@ for i in range(2,3):
     out=model_test.predict([val_inp]) 
          
     con_plot(val_inp[:,0],val_inp[:,1],val_out[:,0],20,i,'p-cfd','(a)')
-    con_plot(val_inp[:,0],val_inp[:,1],out[:,0],20,i,'p-nn','(b)')
-    #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,0]-val_out[:,0]),20,i,'p-error')
+    '''con_plot(val_inp[:,0],val_inp[:,1],out[:,0],20,i,'p-nn','(b)')
+    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,0]-val_out[:,0]),20,i,'p-error','(a)')
     con_plot(val_inp[:,0],val_inp[:,1],val_out[:,1],20,i,'u-cfd','(c)')
     con_plot(val_inp[:,0],val_inp[:,1],out[:,1],20,i,'u-nn','(d)')
-    #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,1]-val_out[:,1]),20,i,'u-error')
+    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,1]-val_out[:,1]),20,i,'u-error','(b)')
     con_plot(val_inp[:,0],val_inp[:,1],val_out[:,2],20,i,'v-cfd','(e)')
     con_plot(val_inp[:,0],val_inp[:,1],out[:,2],20,i,'v-nn','(f)')
-    #con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,2]-val_out[:,2]),20,i,'v-error')
+    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,2]-val_out[:,2]),20,i,'v-error','(c)')'''
     
-    #LinearNDinterpolator
+    '''#LinearNDinterpolator
     pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
 
     a0=find_nearest(co[i][:,0],0)
@@ -362,4 +364,4 @@ for i in range(2,3):
     #plot
     line_plot3(i)
     line_plotu_sub(i)
-    line_plotv_sub(i)
+    line_plotv_sub(i)'''

@@ -285,7 +285,6 @@ for i in range(len(x)):
     ryy[i]=fvvD(x[i],y[i])
     ryz[i]=fvwD(x[i],y[i])
     rzz[i]=fwwD(x[i],y[i])
-
  
 '''
 plotD(Z,Y,uvD,20,'DNS')
@@ -326,11 +325,6 @@ for i in range(nbc[0]+nbc[1]+nbc[2],nbc[0]+nbc[1]+nbc[2]+nbc[3]):
 for i in range(int(iend[3]),len(data0)):
     fp.write("%s"%(data0[i]))
     
-##skip outlet bc[3]
-##no written value
-#for i in range(int(iendR[2]),len(data0)):
-#    fp.write("%s"%(data0[i]))      
-
 fp.close() 
 
 print 'DONE'

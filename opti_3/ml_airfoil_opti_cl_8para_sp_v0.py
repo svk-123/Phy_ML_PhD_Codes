@@ -63,20 +63,37 @@ for the_file in os.listdir(folder):
     except Exception as e:
         print(e)
 
+cd=[]
+cl=[]
+mypara=[]
+name=[]
+
+
+##load airfoil para
+#path='./data_file/'
+#data_file='naca4_clcd_turb_st_8para.pkl'
+#with open(path + data_file, 'rb') as infile:
+#    result1 = pickle.load(infile,encoding='bytes')
+#
+#cd.extend(result1[1])
+#cl.extend(result1[2])
+#mypara.extend(result1[5])
+#name.extend(result1[6])
+#myscaler=result1[7] #scaled parameter
 
 #load airfoil para
 path='./data_file/'
-data_file='naca4_clcd_turb_st_8para.pkl'
+data_file='gen_clcd_turb_st_8para.pkl'
 with open(path + data_file, 'rb') as infile:
-    result1 = pickle.load(infile, encoding='bytes')
+    result2 = pickle.load(infile,encoding='bytes')
 
-cd=result1[1]
-cl=result1[2]
-myreno=result1[3]
-myaoa=result1[4]
-mypara=result1[5]
-name=result1[6]
-myscaler=result1[7] #scaled parameter
+cd.extend(result2[1])
+cl.extend(result2[2])
+mypara.extend(result2[5])
+name.extend(result2[6])
+myscaler=result2[7] #scaled parameter
+
+
 mypara=np.asarray(mypara)
 name=np.asarray(name)
 
@@ -85,13 +102,16 @@ for i in range(len(name)):
     nname.append(name[i].decode())
 name=np.asarray(nname)
 
-#fp=open('cl_data_turb_st.txt','w')
+#fp=open('cl_data_turb_gen_st.txt','w')
 #for i in range(len(cl)):
 #    fp.write('%s %f %f %f \n'%(name[i],myreno[i],myaoa[i],cl[i]))
 #    
 #fp.close()
 
-model_cl=load_model('./selected_model/turb_8para_6x30/final_sf.hdf5')  
+
+
+model_cl=load_model('./selected_model/turb_gen_8para_6x50/final_sf.hdf5')  
+#model_cl=load_model('./selected_model/turb_naca4_8para_6x30/final_sf.hdf5')  
 model_para=load_model('./selected_model/case_aug_tanh_8/model_cnn_1500_0.000016_0.000026.hdf5') 
 get_c= K.function([model_para.layers[17].input],  [model_para.layers[21].output])
 
@@ -103,7 +123,7 @@ global init_cl
 global reno
 global aoa
 
-tar_cl=0.2
+tar_cl=1.2
 init_cl=0
 reno=np.asarray([50000])/100000.
 aoa=np.asarray([6])/14.
@@ -141,7 +161,7 @@ def loss(para):
     my_inp=np.reshape(my_inp,(1,10))
     #cd, cl
     out=model_cl.predict([my_inp])
-    out=out*np.asarray([0.25,1.6])
+    out=out*np.asarray([0.33,2.04])
                 
     pred_cl=out[0,1]
     
@@ -160,9 +180,7 @@ def loss(para):
     my_counter = my_counter +1
     print ('Iter:', my_counter)
     
-    my_counter = my_counter +1
-    print ('Iter:', my_counter)
-       
+     
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(x,y,'r',label='true')
     plt.ylim([-0.5,0.5])
@@ -173,7 +191,7 @@ def loss(para):
      
 
 #base foil name
-fn='naca0012'
+fn='s1091'
 
 idx=np.argwhere(name=='%s'%fn)
 
@@ -181,7 +199,7 @@ idx=np.argwhere(name=='%s'%fn)
 p1=mypara[idx[0][0],:]
 
 #conv file
-fp=open('./conv_%s.dat'%fn,'w+')
+fp=open('./tmp/conv_%s.dat'%fn,'w+')
  
 print('Starting loss = {}'.format(loss(p1)))
 print('Intial foil = %s' %name[idx[0]])
@@ -203,13 +221,13 @@ print('Ending loss = {}'.format(loss(res.x)))
 fp.close()
 
 
-fp=open('final_%s.dat'%fn,'w')
+fp=open('./tmp/final_%s.dat'%fn,'w')
 x,y=get_coord(res.x)
 for i in range(len(x)):
     fp.write('%f %f 0.00\n'%(x[i],y[i]))
 fp.close()
 
-fp=open('resx_%s.dat'%fn,'w')
+fp=open('./tmp/resx_%s.dat'%fn,'w')
 fp.write('%s'%res.x)
 fp.close()
 
@@ -222,5 +240,5 @@ plt.plot(x0,y0,'--k',label='base')
 plt.plot(x,y,'g',lw=3,label='optimized')
 plt.ylim([-0.2,0.2])
 plt.legend()
-plt.savefig('./opti_%s.png'%fn,format='png')
+plt.savefig('./tmp/opti_%s.png'%fn,format='png')
 plt.close()

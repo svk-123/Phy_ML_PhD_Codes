@@ -54,7 +54,7 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./data_file/'
-data_file='foil_param_216_tr.pkl'
+data_file='foil_param_216_ts.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -78,30 +78,30 @@ out=out*0.25
 xxx=xx[::-1].copy()
 xxxx=np.concatenate((xx[:,None],xxx[1:,None]))
 
-#[0,9]
-for k in [0]:
-    print k
-    yy1=out[k][0:35]
-    yy2=out[k][35:]
-    yy2=yy2[::-1]
-    yy=np.concatenate((yy1[:,None],yy2[1:,None]))
-    
-    plt.figure(figsize=(6,5))
-    plt.plot(xx,my_out[k][0:35],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=1,label='True')
-    plt.plot(xx,my_out[k][35:],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=1)
-    
-    plt.plot(xxxx,yy,'r',lw=3,label='CNN-C5F7')
-
-    plt.xlim([-0.05,1.05])
-    plt.ylim([-0.2,0.25])
-    plt.legend(fontsize=20,frameon=False)
-    plt.xlabel('X/c',fontsize=20)
-    plt.ylabel('Y',fontsize=20)  
-    #plt.axis('off')
-    plt.figtext(0.40, 0.01, '(a)', wrap=True, horizontalalignment='center', fontsize=24) 
-    plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
-    plt.savefig('./plot/ts_%s_%s.tiff'%(k,name[k]),format='tiff',bbox_inches='tight',dpi=300)
-    plt.show()
+##[0,9]
+#for k in [9]:
+#    print k
+#    yy1=my_out[k][0:35]
+#    yy2=my_out[k][35:]
+#    yy2=yy2[::-1]
+#    yy=np.concatenate((yy1[:,None],yy2[1:,None]))
+#    
+#    plt.figure(figsize=(6,5))
+#    plt.plot(xx,my_out[k][0:35],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=1,label='True')
+#    plt.plot(xx,my_out[k][35:],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=1)
+#    
+#    plt.plot(xxxx,yy,'r',lw=3,label='CNN')
+#
+#    plt.xlim([-0.05,1.05])
+#    plt.ylim([-0.2,0.25])
+#    plt.legend(fontsize=20)
+#    plt.xlabel('X/c',fontsize=20)
+#    plt.ylabel('Y',fontsize=20)  
+#    #plt.axis('off')
+#    plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize=24) 
+#    plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
+#    plt.savefig('./plot/ts_%s_%s.tiff'%(k,name[k]),format='tiff',bbox_inches='tight',dpi=300)
+#    plt.show()
 #    
 #for k in range(1):
 #    
@@ -118,7 +118,7 @@ for k in [0]:
 #    plt.show()    
     
     
-'''
+
 
 #calculate error norm
 train_l2=[]
@@ -158,14 +158,14 @@ plt.figure(figsize=(6,5),dpi=100)
 plt.hist(train_l2, 20,histtype='step', color='grey',stacked=True,fill=True,alpha=1,orientation ='vertical')
 plt.ylabel('Number of Samples',fontsize=20)
 plt.xlabel('$L_2$ relative error(%)',fontsize=20)
-plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
+plt.figtext(0.40, 0.01, '(a)', wrap=True, horizontalalignment='center', fontsize=24)    
 plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
 plt.xlim([-0.05,1.3])
 plt.xticks([0,0.5,1.])
 plt.savefig('ts_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
 
-'''
+
 
 
 

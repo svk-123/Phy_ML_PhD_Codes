@@ -54,6 +54,8 @@ for i in range(len(fname_1)):
     dir2=indir + '/%s'%fname_1[i]
     tmp=[f for f in listdir(dir2) if isdir(join(dir2, f))]
     fname_2.append(tmp)
+fname_2=np.asarray(fname_2)
+fname_2.sort()
     
 tmp=[]
 foil=[]
@@ -124,7 +126,9 @@ for jj in range(1):
     cl_p2=[]
     cd_t2=[]
 
-
+    cm_t1=[]
+    cm_t2=[]
+    
     
     for ii in range(6):
         print ii
@@ -142,7 +146,7 @@ for jj in range(1):
         cd_t1.append(xx1[2])
         cl_t1.append(xx1[3])          
         cl_p1.append(xx1[5])
-        
+        cm_t1.append(xx1[1])
                 
         
         # lpred case dir
@@ -160,10 +164,37 @@ for jj in range(1):
         cd_t2.append(xx2[2])
         cl_t2.append(xx2[3])          
         cl_p2.append(xx2[5])  
+        cm_t2.append(xx2[1])        
+         
+        #sort_by_aoa
+        #cl 1, cl2,cd_1,cd_2,aoa
         
         
+    plt.figure(figsize=(6, 6), dpi=100)
         
-        
+    plt0, =plt.plot(aoa,cl_t1,'o',mfc='b',mew=1.5,mec='b',ms=10,label='CFD-$C_l$')
+    plt0, =plt.plot(aoa,cd_t1,'s',mfc='b',mew=1.5,mec='b',ms=10,label='CFD-$C_d$') 
+    plt0, =plt.plot(aoa,cm_t1,'^',mfc='b',mew=1.5,mec='b',ms=10,label='CFD-$C_m$') 
+                
+    plt0, =plt.plot(aoa,cl_t2,'r',lw=3,marker='o',mfc='None',mew=1.5,mec='r',ms=10,label='MLP-$C_l$')
+    plt0, =plt.plot(aoa,cd_t2,'r',lw=3,marker='s',mfc='None',mew=1.5,mec='r',ms=10,label='MLP-$C_d$')     
+    plt0, =plt.plot(aoa,cm_t2,'r',lw=3,marker='^',mfc='None',mew=1.5,mec='r',ms=10,label='MLP-$C_m$')  
+  
+    
+
+    plt.xlabel('AoA',fontsize=20)
+    plt.ylabel('$C_l$,$C_d$,$C_m$' ,fontsize=20)
+    #plt.title('%s-AoA-%s-p'%(flist[ii],AoA[jj]),fontsize=16)
+    plt.subplots_adjust(top = 0.95, bottom = 0.2, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
+    plt.figtext(0.45, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)
+    plt.legend(loc='center left', fontsize=18, bbox_to_anchor=(-0.0,0.75), ncol=1, frameon=False, fancybox=False, shadow=False)
+    plt.xlim(-0.3,15)
+    plt.ylim(-0.01,0.5) 
+    plt.xticks([0,4,8,12])
+    #plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
+    plt.savefig('./plot_ts/clcd_2.tiff', format='tiff',bbox_inches='tight', dpi=300)
+    plt.show()    
+    plt.close()        
         
         
         

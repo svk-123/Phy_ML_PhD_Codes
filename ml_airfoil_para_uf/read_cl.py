@@ -42,24 +42,24 @@ matplotlib.rc('ytick', labelsize=16)
 ## Time       	Cm           	Cd           	Cl           	Cl(f)        	Cl(r)
 for jj in range(1):
 
-    les=np.loadtxt('../ml_airfoil_para_uf/postProcessing/forceCoeffs/0/forceCoeffs.dat', skiprows=10)
+    les=np.loadtxt('./case_un_turb_test_pp/naca0010/naca0010_0010000_18/postProcessing/forceCoeffs/0/forceCoeffs.dat', skiprows=10)
     #rans=np.loadtxt('./rans/rans_naca_0012_aoa_6/postProcessing/forceCoeffs/0/forceCoeffs.dat', skiprows=10)
+    #les=np.loadtxt('./template_unsteady_lam/postProcessing/forceCoeffs/0/forceCoeffs.dat', skiprows=10)
     
-    les=les[520000:,:]
-    
+st=200
 for jj in range(1):
     
     plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(les[:,0],les[:,3],'r',lw=3,label='les')
+    plt.plot(les[st:,0],les[st:,3],'-',lw=2,label='les')
     #plt.plot(range(len(rans)),rans[:,3],'b',lw=3,label='rans')
     plt.legend(fontsize=20)
-    plt.xlabel('X',fontsize=20)
-    plt.ylabel('Y',fontsize=20)  
+    plt.xlabel('time (s)',fontsize=20)
+    plt.ylabel('Cl',fontsize=20)  
     #plt.axis('off')
-    #plt.xlim([50000,200000])
-    #plt.ylim([1.2,1.8])
+    #plt.xlim([15000,30000])
+    #plt.ylim([-0.05,0.05])
     plt.tight_layout()
-    #plt.savefig('./plot/ts_%04d.png'%(k), bbox_inches='tight',dpi=100)
+    plt.savefig('./plot/naca_10000_18.png', bbox_inches='tight',dpi=100)
     plt.show()    
        
         

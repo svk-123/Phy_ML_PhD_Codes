@@ -55,7 +55,7 @@ out_v=[]
 
 #load data
 #with open('./data_file/ph_1_test/foil_aoa_nn_p16_ph_1_ts_1.pkl', 'rb') as infile:
-with open('./data_file/foil_aoa_nn_nacan_lam_trts_1.pkl', 'rb') as infile:
+with open('./data_file/foil_aoa_nn_nacan_lam_ts_1.pkl', 'rb') as infile:
     result = pickle.load(infile)
 
 inp_x.extend(result[0])   
@@ -91,9 +91,11 @@ def con_plot(xp,yp,zp,nc,i,pname,sub_name):
     xx=co[i][:,0]
     yy=co[i][:,1]
     zz=np.zeros(len(xx))
-     
-    cp = plt.tricontour(xp,yp,zp,25,linewidths=0.3,colors='k',zorder=5)
-    cp = plt.tricontourf(xp,yp,zp,25,cmap=cm.jet,zorder=0)
+    levels=np.linspace(0,0.2,11) 
+    
+    cp = plt.tricontour(xp,yp,zp,levels=levels,linewidths=0.3,colors='k',zorder=5)
+    #plt.clabel(cp,inline=True)
+    cp = plt.tricontourf(xp,yp,zp,levels=levels,cmap=cm.jet,extend='both',zorder=0)
     cp2=plt.tricontourf(xx,yy,zz,colors='white',zorder=10)    
             
     #cp=plt.tricontourf(xx,yy-0.2,zzz,colors='white') 
@@ -133,10 +135,10 @@ def line_plot3(i):
     plt0, =plt.plot(xu,pu1*2,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
     plt0, =plt.plot(xl,pl1*2,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei) 
             
-    plt0, =plt.plot(xu,pu2*2,'r',linewidth=3,label='NN')
+    plt0, =plt.plot(xu,pu2*2,'r',linewidth=3,label='MLP-2')
     plt0, =plt.plot(xl,pl2*2,'r',linewidth=3)     
     
-    plt.legend(fontsize=20)
+    plt.legend(fontsize=16,frameon=False)
     plt.xlabel('X/c',fontsize=20)
     plt.ylabel('$C_p$' ,fontsize=20)
     #plt.title('%s-AoA-%s-p'%(flist[ii],AoA[jj]),fontsize=16)
@@ -157,8 +159,8 @@ def line_plotu_sub(i):
     
     plt.subplot(1,3,1)
     plt.plot(u1a,ya,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
-    plt.plot(u2a,ya,'r',linewidth=3,label='NN')
-    plt.legend()
+    plt.plot(u2a,ya,'r',linewidth=3,label='MLP-2')
+    #plt.legend(fontsize=14)
     plt.ylabel('Y',fontsize=20)
     plt.xlim(-0.1,1.2)
     
@@ -168,11 +170,11 @@ def line_plotu_sub(i):
     plt.xlabel('u-velocity',fontsize=20)
     plt.yticks([])
     plt.xlim(-0.1,1.2)
-    
-    
+        
     plt.subplot(1,3,3)
-    plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
-    plt.plot(u2d,yd,'r',linewidth=3)
+    plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(u2d,yd,'r',linewidth=3,label='MLP-2')
+    plt.legend(loc="upper left", bbox_to_anchor=[-0.02, 0.9], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
     plt.yticks([])    
     plt.xlim(-0.1,1.2)
     
@@ -190,9 +192,9 @@ def line_plotv_sub(i):
     plt.figure(figsize=(6, 4), dpi=100)
     
     plt.subplot(1,3,1)
-    plt.plot(v1a,ya,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
-    plt.plot(v2a,ya,'r',linewidth=3,label='NN')
-    plt.legend()
+    plt.plot(v1a,ya,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(v2a,ya,'r',linewidth=3)
+    #plt.legend(fontsize=14)
     plt.ylabel('Y',fontsize=20)
     plt.xlim(-0.1,1.0)
     
@@ -205,9 +207,11 @@ def line_plotv_sub(i):
     
     
     plt.subplot(1,3,3)
-    plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
-    plt.plot(v2d,yd,'r',linewidth=3)
-    plt.yticks([])    
+    plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(v2d,yd,'r',linewidth=3,label='MLP-2')
+    plt.yticks([])  
+    plt.legend(loc="upper left", bbox_to_anchor=[0.19, 0.5], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
+
     plt.xlim(-0.1,0.5)
        
     plt.figtext(0.4, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
@@ -224,7 +228,7 @@ def find_nearest(array, value):
 #tr: 2: naca65209, Reno: 400, aoa: 14
 #ts_1: 0: naca63415, Reno: 1900, aoa: 7    
 
-for i in range(2,3):
+for i in range(1):
     
     #normalize
     inp_reno[i]=inp_reno[i]/2000.
@@ -238,17 +242,17 @@ for i in range(2,3):
     model_test=load_model('./selected_model/case_9_naca_lam_1/model_sf_65_0.00000317_0.00000323.hdf5') 
     out=model_test.predict([val_inp]) 
          
-    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,0],20,i,'p-cfd','(a)')
-    '''con_plot(val_inp[:,0],val_inp[:,1],out[:,0],20,i,'p-nn','(b)')
-    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,0]-val_out[:,0]),20,i,'p-error','(a)')
-    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,1],20,i,'u-cfd','(c)')
-    con_plot(val_inp[:,0],val_inp[:,1],out[:,1],20,i,'u-nn','(d)')
-    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,1]-val_out[:,1]),20,i,'u-error','(b)')
-    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,2],20,i,'v-cfd','(e)')
-    con_plot(val_inp[:,0],val_inp[:,1],out[:,2],20,i,'v-nn','(f)')
-    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,2]-val_out[:,2]),20,i,'v-error','(c)')'''
+#    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,0],20,i,'p-cfd','(a)')
+#    con_plot(val_inp[:,0],val_inp[:,1],out[:,0],20,i,'p-nn','(b)')
+#    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,0]-val_out[:,0]),20,i,'p-error','(a)')
+#    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,1],20,i,'u-cfd','(c)')
+#    con_plot(val_inp[:,0],val_inp[:,1],out[:,1],20,i,'u-nn','(d)')
+#    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,1]-val_out[:,1]),20,i,'u-error','(b)')
+#    con_plot(val_inp[:,0],val_inp[:,1],val_out[:,2],20,i,'v-cfd','(e)')
+#    con_plot(val_inp[:,0],val_inp[:,1],out[:,2],20,i,'v-nn','(f)')
+#    con_plot(val_inp[:,0],val_inp[:,1],abs(out[:,2]-val_out[:,2]),20,i,'v-error','(c)')
     
-    '''#LinearNDinterpolator
+    #LinearNDinterpolator
     pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
 
     a0=find_nearest(co[i][:,0],0)
@@ -263,9 +267,7 @@ for i in range(2,3):
     if(yl[-1:] >=-0.001):
         yl[-1:]=-0.001  
         
-
-           
-        
+      
 
     #for -p
     print 'interpolation-1...'      
@@ -362,6 +364,6 @@ for i in range(2,3):
         v2d[j]=f2v(xd[j],yd[j])
 
     #plot
-    line_plot3(i)
+    #line_plot3(i)
     line_plotu_sub(i)
-    line_plotv_sub(i)'''
+    line_plotv_sub(i)

@@ -2,7 +2,12 @@ import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from keras.models import Sequential, Model
+from keras.layers.core import Dense, Activation
+from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
+from keras.layers import merge, Input, dot
+from sklearn.metrics import mean_squared_error
+import random
 from keras.models import Sequential
 from keras.layers.recurrent import LSTM
 from keras.layers.core import Dense, Activation, Dropout
@@ -12,7 +17,7 @@ from sklearn.utils import shuffle
 from scipy import linalg as la
 from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
 from sklearn.preprocessing import MinMaxScaler
-import cPickle as pickle
+import pickle
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 
 
@@ -35,8 +40,8 @@ x=[]
 
 for ii in range(1):
     #x,y,Re,u,v
-    with open('./data_file/burger_data.pkl', 'rb') as infile:
-        result = pickle.load(infile)
+    with open('./data_file/burger_data_more.pkl', 'rb') as infile:
+        result = pickle.load(infile,encoding='bytes')
     utmp.extend(result[0])
     ttmp.extend(result[1])
     x.extend(result[2])
@@ -46,21 +51,29 @@ utmp=np.asarray(utmp)
 ttmp=np.asarray(ttmp)
 x=np.asarray(x)
 
-x_tr=utmp[0:400,:]
-y_tr=utmp[1:401,:]
+x_tr=utmp[0:2000,:]
+y_tr=utmp[1:2001,:]
 
 # ---------ML PART:-----------#
 
 # reshape input to be 3D [samples, timesteps, features]
-x_tr = np.reshape(x_tr, (x_tr.shape[0],x_tr.shape[1],1))
+x_tr = np.concatenate((x_tr[:,:],ttmp[0:2000,None]),axis=1)
 
-model = Sequential()
-model.add(LSTM(1000, return_sequences=True, input_shape = (101,1)))
-model.add(LSTM(1000))
-model.add(Dense(200,activation='relu'))
-model.add(Dense(200,activation='relu'))
-model.add(Dense(200,activation='relu'))
-model.add(Dense(101))
+
+# Multilayer Perceptron
+# create model
+aa=Input(shape=(102,))
+xx =Dense(500,  kernel_initializer='random_normal', activation='relu')(aa)
+xx =Dense(500, activation='relu')(xx)
+xx =Dense(500, activation='relu')(xx)
+xx =Dense(500, activation='relu')(xx)
+xx =Dense(500, activation='relu')(xx)
+xx =Dense(500, activation='relu')(xx)
+xx =Dense(500, activation='relu')(xx)
+xx =Dense(500, activation='relu')(xx)
+g =Dense(101, activation='linear')(xx)
+
+model = Model(inputs=[aa], outputs=[g])
 
 #callbacks
 reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.2, mode='min',verbose=1 ,patience=300, min_lr=1.0e-8)
@@ -88,4 +101,4 @@ model.save('./model/final_sf.hdf5')
 #print"\n"
 #print("val_loss = %f to %f"%(np.asarray(hist.history["val_loss"][:1]),np.asarray(hist.history["val_loss"][-1:])))
 #print"\n"
-##print("--- %s seconds ---" % (time.time() - start_time))
+##print("--- %s seconds ---" % (time.time() - start_time))'''

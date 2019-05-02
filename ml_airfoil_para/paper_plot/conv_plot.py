@@ -113,29 +113,27 @@ h5vl=h5['val_loss']
 h5l=np.asarray(h5l)
 h5vl=np.asarray(h5vl)
 
-plt.plot(range(len(h1l)),h1l,'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='C3-F2 train')
-plt.plot(range(len(h2l)),h2l,'b',marker='o', mfc='b',ms=12,markevery=l2,lw=2,label='C4-F2 train')
-plt.plot(range(len(h3l)),h3l,'g',lw=2,marker='^', mfc='g',ms=12,markevery=l3,label='C5-F2 train')
+plt.plot(range(len(h1l)),h1l,'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='C3F5 train')
+plt.plot(range(len(h2l)),h2l,'b',marker='o', mfc='b',ms=12,markevery=l2,lw=2,label='C4F5 train')
+plt.plot(range(len(h3l)),h3l,'g',lw=2,marker='^', mfc='g',ms=12,markevery=l3,label='C5F5 train')
 
-plt.plot(range(len(h1vl)),h1vl, 'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='C3-F2 val')
-plt.plot(range(len(h2vl)),h2vl, 'b',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='C4-F2 val')
-plt.plot(range(len(h3vl)),h3vl, 'g',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='C5-F2 val')
+plt.plot(range(len(h1vl)),h1vl, 'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='C3F5 val')
+plt.plot(range(len(h2vl)),h2vl, 'b',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='C4F5 val')
+plt.plot(range(len(h3vl)),h3vl, 'g',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='C5F5 val')
     
 #plt.legend(loc='center left', bbox_to_anchor=(0.2, 0.5),fontsize=16)
-plt.legend(loc="upper left", bbox_to_anchor=[0.15, 1], ncol=2, fontsize=12, frameon=False, shadow=False, fancybox=False,title='')
-plt.xlabel('Training Epochs',fontsize=16)
-plt.ylabel('MSE',fontsize=16)
+plt.legend(loc="upper left", bbox_to_anchor=[0.14, 1], ncol=2, fontsize=18, frameon=False, shadow=False, fancybox=False,title='')
+plt.xlabel('Training Epochs',fontsize=20)
+plt.ylabel('MSE',fontsize=20)
 plt.yscale('log')
-
+plt.figtext(0.45, 0.01, '(a)', wrap=True, horizontalalignment='center', fontsize=24)    
+plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
 #plt.xticks(range(0,2001,500))
 
 plt.xlim([-50,2000])
 #plt.ylim([5e-6,1e-3])    
 plt.savefig('conv.tiff', format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
-
-
-
 
 l1=200
 l2=150
@@ -145,21 +143,21 @@ l3=120
 plt.figure(figsize=(6,5),dpi=100)
 path='./data_file/'
 
+plt.plot(range(len(h3l)),h3l,'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='C5F5 train')
+plt.plot(range(len(h4l)),h4l,'b',marker='o', mfc='b',ms=12,markevery=l2,lw=2,label='C5F7 train')
+plt.plot(range(len(h5l)),h5l,'g',lw=2,marker='^', mfc='g',ms=12,markevery=l3,label='C5F9 train')
 
-plt.plot(range(len(h3l)),h3l,'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='C5-F2 train')
-plt.plot(range(len(h4l)),h4l,'b',marker='o', mfc='b',ms=12,markevery=l2,lw=2,label='C5-F3 train')
-plt.plot(range(len(h5l)),h5l,'g',lw=2,marker='^', mfc='g',ms=12,markevery=l3,label='C5-F4 train')
-
-plt.plot(range(len(h3vl)),h3vl, 'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='C5-F2 val')
-plt.plot(range(len(h4vl)),h4vl, 'b',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='C5-F3 val')
-plt.plot(range(len(h5vl)),h5vl, 'g',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='C5-F4 val')
+plt.plot(range(len(h3vl)),h3vl, 'r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l1,lw=2,label='C5F5 val')
+plt.plot(range(len(h4vl)),h4vl, 'b',marker='o',mew=1.5, mfc='None',ms=12, markevery=l2,lw=2,label='C5F7 val')
+plt.plot(range(len(h5vl)),h5vl, 'g',marker='^',mew=1.5, mfc='None',ms=12,markevery=l3,lw=2,label='C5F9 val')
     
 #plt.legend(loc='center left', bbox_to_anchor=(0.2, 0.5),fontsize=16)
-plt.legend(loc="upper left", bbox_to_anchor=[0.15, 1], ncol=2, fontsize=12, frameon=False, shadow=False, fancybox=False,title='')
-plt.xlabel('Training Epochs',fontsize=16)
-plt.ylabel('MSE',fontsize=16)
+plt.legend(loc="upper left", bbox_to_anchor=[0.14, 1], ncol=2, fontsize=18, frameon=False, shadow=False, fancybox=False,title='')
+plt.xlabel('Training Epochs',fontsize=20)
+plt.ylabel('MSE',fontsize=20)
 plt.yscale('log')
-
+plt.figtext(0.45, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
+plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
 #plt.xticks(range(0,2001,500))
 
 plt.xlim([-50,2000])

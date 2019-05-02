@@ -9,8 +9,8 @@ start_time = time.time()
 
 # Python 3.5
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import cm
+#import matplotlib.pyplot as plt
+#from matplotlib import cm
 from os import listdir
 from os.path import isfile, join
 import sys
@@ -38,10 +38,10 @@ from numpy import linalg as LA
 import os, shutil
 from scipy.interpolate import interp1d
  
-import matplotlib
-matplotlib.rc('xtick', labelsize=20) 
-matplotlib.rc('ytick', labelsize=20) 
-plt.rc('font', family='serif')
+#import matplotlib
+#matplotlib.rc('xtick', labelsize=20) 
+#matplotlib.rc('ytick', labelsize=20) 
+#plt.rc('font', family='serif')
 
 """----------Sample--------------------"""
 """ >>>with open('./datafile/to_ml/ml_allData_r0_l1.pkl', 'rb') as infile:
@@ -93,8 +93,8 @@ c1_scaled=c1.copy()
 for i in range(8): 
     c1_scaled[:,i]=c1_scaled[:,i]/mm_scale[i]
     
-#info='[para_scaled,name,para(unscaled),mm_scaler,info]'    
-#data2=[c1_scaled,name,c1,mm_scale,info]
-#with open(path+'param_naca4_tanh_8_v1.pkl', 'wb') as outfile:
-#    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
+info='[para_scaled,name,para(unscaled),mm_scaler,info]'    
+data2=[c1_scaled,name,c1,mm_scale,info]
+with open(path+'param_naca4_tanh_12_v1.pkl', 'wb') as outfile:
+    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
 

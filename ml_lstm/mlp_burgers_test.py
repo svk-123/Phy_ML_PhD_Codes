@@ -42,17 +42,23 @@ y_tr=utmp[1:2500,:]
 # ---------ML PART:-----------#
 
 # reshape input to be 3D [samples, timesteps, features]
-x_tr = np.reshape(x_tr, (x_tr.shape[0],x_tr.shape[1],1))
-
+x_tr_mlp = np.concatenate((x_tr[:,:],ttmp[0:2499,None]),axis=1)
 #load_model
-model_test=load_model('./selected_model/case_1_2x500_4x500/model_800_0.000001_0.000024.hdf5') 
-out=model_test.predict(x_tr) 
+model_test_mlp=load_model('./selected_model/mlp_1/model_1000_0.000001_0.000221.hdf5') 
+out_mlp=model_test_mlp.predict(x_tr_mlp) 
 
-for k in range(0,1000,20):
+#lstm
+x_tr_lstm = np.reshape(x_tr, (x_tr.shape[0],x_tr.shape[1],1))
+model_test_lstm=load_model('./selected_model/case_1_2x500_4x500/model_800_0.000001_0.000024.hdf5') 
+out_lstm=model_test_lstm.predict(x_tr_lstm) 
+
+
+for k in range(2000,2200,10):
 
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(x,y_tr[k,:],'ro',markersize=8,label='true')
-    plt.plot(x,out[k,:],'b',lw=3,label='lstm')
+    plt.plot(x,out_lstm[k,:],'b',lw=3,label='lstm')
+    plt.plot(x,out_mlp[k,:],'g',lw=3,label='mlp')
     plt.legend(fontsize=20)
     plt.xlabel('X',fontsize=20)
     plt.ylabel('Y',fontsize=20)  

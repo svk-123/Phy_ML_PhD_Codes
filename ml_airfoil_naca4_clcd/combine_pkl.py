@@ -36,10 +36,10 @@ aoa=[]
 para=[]
 foil=[]
 
-path='./data_file/'
-for ii in [1,2,3,4,5,6]:
+path='./data_file_to_combine/'
+for ii in range(49):
     
-    data_file='naca4_clcd_turb_unc_%s.pkl'%ii
+    data_file='gen_clcd_turb_st_%s.pkl'%ii
     with open(path + data_file, 'rb') as infile:
         result = pickle.load(infile)
     
@@ -59,10 +59,10 @@ aoa=np.asarray(aoa)
 para=np.asarray(para) 
 foil=np.asarray(foil) 
      
-# ref:[x,y,z,ux,uy,uz,k,ep,nut]
-info= '[cm, cd, cl, reno, aoa, para, name, info-converged ]'
-
-data1 = [cm, cd, cl, reno, aoa, para, foil, info ]
-
-with open(path+'/naca4_clcd_turb_ust_3para.pkl', 'wb') as outfile1:
-    pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
+## ref:[x,y,z,ux,uy,uz,k,ep,nut]
+#info= '[cm, cd, cl, reno, aoa, para, name, info-converged ]'
+#
+#data1 = [cm, cd, cl, reno, aoa, para, foil, info ]
+#
+#with open(path+'/gen_clcd_turb_st_all_0para.pkl', 'wb') as outfile1:
+#    pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)

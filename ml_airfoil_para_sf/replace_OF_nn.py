@@ -242,7 +242,7 @@ for jj in range(1):
         for i in range((22+npt),len(data0)):    
             fp.write("%s"%(data0[i]))        
         fp.close()         
-   
+
         
 
 

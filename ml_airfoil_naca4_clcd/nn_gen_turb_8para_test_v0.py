@@ -90,14 +90,20 @@ my_out=np.concatenate((out_cd[:,None],out_cl[:,None]),axis=1)
 model_test=load_model('./selected_model/turb_gen_8para_6x50/model_sf_1600_0.00003714_0.00004874.hdf5') 
 out=model_test.predict([my_inp]) 
 
+my_out[:,0]=my_out[:,0] * 0.33
+my_out[:,1]=my_out[:,1] * 2.04
+
+out[:,0]=out[:,0] * 0.33
+out[:,1]=out[:,1] * 2.04
+
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot([-0.5,1.5],[-0.5,1.5],'k',lw=3)
-plt.plot(my_out[:,1],out[:,1],'o',markersize=4)
-#plt.xlim([-0.05,1.05])
-#plt.legend(fontsize=20)
-plt.xlabel('X',fontsize=20)
-plt.ylabel('Y',fontsize=20)  
-#plt.savefig('./plot/ts_%s_%s.png'%(k,name[k]), bbox_inches='tight',dpi=100)
+plt.plot([-0.0,0.35],[-0.0,0.35],'k',lw=3)
+plt.plot(my_out[:,0],out[:,0],'og',markersize=3)
+plt.xticks(fontsize=16)
+plt.yticks(fontsize=16)
+plt.xlabel('True $C_d$',fontsize=20)
+plt.ylabel('Predicted $C_d$',fontsize=20)  
+plt.savefig('./plot/gen_cd.png', bbox_inches='tight',dpi=100)
 plt.show()
 
 

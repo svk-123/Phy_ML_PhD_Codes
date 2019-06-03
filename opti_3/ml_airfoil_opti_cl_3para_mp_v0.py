@@ -48,8 +48,8 @@ from skimage import io, viewer,util
 from scipy.optimize import minimize
 
 import matplotlib
-matplotlib.rc('xtick', labelsize=18) 
-matplotlib.rc('ytick', labelsize=18) 
+matplotlib.rc('xtick', labelsize=16) 
+matplotlib.rc('ytick', labelsize=16) 
 
 from naca import naca4
 
@@ -201,20 +201,23 @@ fp.close()
 x0,y0=get_coord(p1)
 
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot(x0,y0,'--k',label='base')
-plt.plot(x,y,'g',lw=3,label='optimized')
-plt.ylim([-0.2,0.2])
-plt.legend()
-plt.savefig('./opti_0014.png',format='png')
+plt.plot(x0,y0,'--k',label='Base')
+plt.plot(x,y,'g',lw=3,label='Optimized')
+plt.legend(fontsize=14)
+plt.xlim([-0.05,1.05])
+plt.ylim([-0.25,0.25])
+plt.xlabel('X',fontsize=16)
+plt.ylabel('Y',fontsize=16)
+plt.savefig('./opti_0014.png',format='png',bbox_inches='tight',dpi=300)
 plt.close()
 
 
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot(reno*100000,tar_cl,'-ok',label='target')
-plt.plot(reno*100000,init_cl,'-ob',label='base')
-plt.plot(reno*100000,pred_cl,'-og',label='optimized')
-plt.legend()
-plt.xlabel('Reynolds No')
-plt.ylabel('Cl')
-plt.savefig('./line_0014.png',format='png')
+plt.plot(reno*100000,tar_cl,'-ok',lw=3,label='Target')
+plt.plot(reno*100000,init_cl,'-ob',lw=3,label='Base')
+plt.plot(reno*100000,pred_cl,'-og',lw=3,label='Optimized')
+plt.legend(fontsize=14)
+plt.xlabel('Reynolds No',fontsize=16)
+plt.ylabel('Cl',fontsize=16)
+plt.savefig('./line_0014.png',format='png',bbox_inches='tight',dpi=300)
 plt.close()

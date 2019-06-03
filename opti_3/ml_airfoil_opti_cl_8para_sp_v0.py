@@ -48,8 +48,8 @@ from skimage import io, viewer,util
 from scipy.optimize import minimize
 
 import matplotlib
-matplotlib.rc('xtick', labelsize=18) 
-matplotlib.rc('ytick', labelsize=18) 
+matplotlib.rc('xtick', labelsize=16) 
+matplotlib.rc('ytick', labelsize=16) 
 
 
 # ref:[data,name]
@@ -69,16 +69,16 @@ mypara=[]
 name=[]
 
 
-##load airfoil para
-#path='./data_file/'
-#data_file='naca4_clcd_turb_st_8para.pkl'
-#with open(path + data_file, 'rb') as infile:
-#    result1 = pickle.load(infile,encoding='bytes')
-#
-#cd.extend(result1[1])
-#cl.extend(result1[2])
-#mypara.extend(result1[5])
-#name.extend(result1[6])
+#load airfoil para
+path='./data_file/'
+data_file='naca4_clcd_turb_st_8para.pkl'
+with open(path + data_file, 'rb') as infile:
+    result1 = pickle.load(infile,encoding='bytes')
+
+cd.extend(result1[1])
+cl.extend(result1[2])
+mypara.extend(result1[5])
+name.extend(result1[6])
 #myscaler=result1[7] #scaled parameter
 
 #load airfoil para
@@ -123,7 +123,7 @@ global init_cl
 global reno
 global aoa
 
-tar_cl=1.2
+tar_cl=0.7
 init_cl=0
 reno=np.asarray([50000])/100000.
 aoa=np.asarray([6])/14.
@@ -161,7 +161,7 @@ def loss(para):
     my_inp=np.reshape(my_inp,(1,10))
     #cd, cl
     out=model_cl.predict([my_inp])
-    out=out*np.asarray([0.33,2.04])
+    out=out*np.asarray([0.33,2.05])
                 
     pred_cl=out[0,1]
     
@@ -191,7 +191,7 @@ def loss(para):
      
 
 #base foil name
-fn='s1091'
+fn='naca2412'
 
 idx=np.argwhere(name=='%s'%fn)
 
@@ -236,9 +236,12 @@ x0,y0=get_coord(p1)
 
 
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot(x0,y0,'--k',label='base')
-plt.plot(x,y,'g',lw=3,label='optimized')
-plt.ylim([-0.2,0.2])
-plt.legend()
-plt.savefig('./tmp/opti_%s.png'%fn,format='png')
+plt.plot(x0,y0,'--k',label='Base')
+plt.plot(x,y,'g',lw=3,label='Optimized')
+plt.legend(fontsize=14)
+plt.xlim([-0.05,1.05])
+plt.ylim([-0.25,0.25])
+plt.xlabel('X',fontsize=16)
+plt.ylabel('Y',fontsize=16)
+plt.savefig('./tmp/opti_%s.png'%fn,format='png',bbox_inches='tight',dpi=300)
 plt.close()

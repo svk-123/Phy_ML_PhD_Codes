@@ -39,8 +39,8 @@ import os, shutil
 from scipy.interpolate import interp1d
  
 import matplotlib
-matplotlib.rc('xtick', labelsize=20) 
-matplotlib.rc('ytick', labelsize=20) 
+matplotlib.rc('xtick', labelsize=16) 
+matplotlib.rc('ytick', labelsize=16) 
 plt.rc('font', family='serif')
 
 """----------Sample--------------------"""
@@ -72,10 +72,11 @@ ttr1=my_out
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
 
 np.random.seed(1234534)
-I=np.random.randint(0,329,100)
+I=np.random.randint(0,329,15)
 
 xtr1=xtr1[I]
 ttr1=ttr1[I]
+name=name[I]
 
 model_6=load_model('./selected_model/case_aug_tanh_6/model_cnn_2100_0.000030_0.000043.hdf5') 
 model_8=load_model('./selected_model/case_aug_tanh_8/model_cnn_1500_0.000016_0.000026.hdf5') 
@@ -92,22 +93,23 @@ c16 = model_16.predict([xtr1])
 for i in range(len(c6)):
     print i
     plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(xx[::-1],c6[i,:35]*0.25,'r',lw=2,label='p-6')
+    plt.plot(xx[::-1],c6[i,:35]*0.25,'r',lw=2,label='CNN P-6')
     plt.plot(xx,c6[i,35:]*0.25,'r',lw=2)
     
-    plt.plot(xx[::-1],c8[i,:35]*0.25,'g',lw=2,label='p-8')
+    plt.plot(xx[::-1],c8[i,:35]*0.25,'g',lw=2,label='CNN P-8')
     plt.plot(xx,c8[i,35:]*0.25,'g',lw=2)    
     
-    plt.plot(xx[::-1],c16[i,:35]*0.25,'b',lw=2,label='p-16')
+    plt.plot(xx[::-1],c16[i,:35]*0.25,'b',lw=2,label='CNN P-16')
     plt.plot(xx,c16[i,35:]*0.25,'b',lw=2)
     
-    plt.plot(xx[::-1],ttr1[i,:35],'gray',marker='o', mfc='None',mew=1.0,ms=8,lw=0,label='true')
-    plt.plot(xx,ttr1[i,35:],'gray',marker='o', mfc='None',mew=1.0,ms=8,lw=0)
+    plt.plot(xx[::-1],ttr1[i,:35],'k',marker='o', mfc='None',mew=1.0,ms=8,lw=0,label='True')
+    plt.plot(xx,ttr1[i,35:],'k',marker='o', mfc='None',mew=1.0,ms=8,lw=0)
     
-    plt.legend()
+    plt.legend(fontsize=14)
     
     plt.xlim([-0.05,1.05])
     plt.ylim([-0.25,0.25])
-    
-    plt.savefig('./plot/ts_%04d.png'%(i), bbox_inches='tight',dpi=100)
+    plt.xlabel('X',fontsize=16)
+    plt.ylabel('Y',fontsize=16)
+    plt.savefig('./plot/%s_%04d.png'%(name[i],i), bbox_inches='tight',dpi=300)
     plt.close()

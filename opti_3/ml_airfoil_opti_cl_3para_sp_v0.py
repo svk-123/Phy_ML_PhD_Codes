@@ -99,7 +99,7 @@ global tar_cl
 global reno
 global aoa
 
-tar_cl=0.1
+tar_cl=1.2
 reno=np.asarray([50000])/100000.
 aoa=np.asarray([6])/14.
 
@@ -156,7 +156,7 @@ def loss(para):
      
 #idx=np.argwhere(name=='naca2412')
 #idx=np.argwhere(name=='naca4510')
-#idx=np.argwhere(name=='naca0014')
+idx=np.argwhere(name=='naca0014')
 
 #naca4510
 p1=mypara[idx[0][0],:]/scaler
@@ -189,9 +189,12 @@ x0,y0=get_coord(p1)
 
 
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot(x0,y0,'--k',label='base')
-plt.plot(x,y,'g',lw=3,label='optimized')
-plt.ylim([-0.2,0.2])
-plt.legend()
-plt.savefig('./opti_4510.png',format='png')
+plt.plot(x0,y0,'--k',label='Base')
+plt.plot(x,y,'g',lw=3,label='Optimized')
+plt.legend(fontsize=14)
+plt.xlim([-0.05,1.05])
+plt.ylim([-0.25,0.25])
+plt.xlabel('X',fontsize=16)
+plt.ylabel('Y',fontsize=16)
+plt.savefig('./opti_0014.png',bbox_inches='tight',dpi=300)
 plt.close()

@@ -48,7 +48,7 @@ for jj in range(1):
         tu1=[]
         tu2=[]
         
-        with open('./cases_test/testing/Re_1000' + '/139.2/wallShearStress', 'r') as infile:
+        with open('./case_2d_turb_2d_testing/testing/Re_120000' + '/143.4/wallShearStress', 'r') as infile:
             
             data0=infile.readlines()
             ln=0
@@ -72,7 +72,7 @@ for jj in range(1):
         tu1p=[]
         tu2p=[]
         
-        with open('./case_ml/Re_1000' + '/139.2/wallShearStress', 'r') as infile:
+        with open('./case_ml/Re_120000' + '/143.4/wallShearStress', 'r') as infile:
             
             data0=infile.readlines()
             ln=0
@@ -92,12 +92,12 @@ for jj in range(1):
         tu3p=np.sqrt(tu1p**2 + tu2p**2)     
           
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot(np.linspace(0,360,199),tu3,'-b',lw=2,label='CFD')
-plt.plot(np.linspace(0,360,199),tu3p,'-r',lw=2,label='ML')
+plt.plot(np.linspace(0,360,149),tu3,'-b',lw=2,label='CFD')
+plt.plot(np.linspace(0,360,149),tu3p,'-r',lw=2,label='ML')
 plt.legend(loc='center left', fontsize=18, bbox_to_anchor=(1,0.75), ncol=1, frameon=True, fancybox=False, shadow=False)
 plt.xlabel('theta',fontsize=20)
 plt.ylabel('mag(tau)',fontsize=20)  
-plt.savefig('./plots/tau_re1000.png', bbox_inches='tight',dpi=100)
+plt.savefig('./plots/tau_re120000.png', bbox_inches='tight',dpi=100)
 plt.show()          
         
         

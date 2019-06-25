@@ -34,7 +34,7 @@ boundary not loaded: may be required?
 """
 
 # read data from below dir...
-path='./cases_test'
+path='./case_2d_turb_2d_testing'
 
 indir = path
 
@@ -61,12 +61,12 @@ reno=np.array(reno)
 reno = reno.astype(np.float)
 
 #load model
-model_test=load_model('./selected_model/case_1_8x500/model_sf_130_0.00000190_0.00000267.hdf5')
+model_test=load_model('./selected_model/case_2_turb_8x500/model_sf_210_0.00003297_0.00004138.hdf5') 
 
 #no use loop
 for jj in range(1):
   
-    for ii in range(2):
+    for ii in range(4):
         
         print ( ii)
         
@@ -114,7 +114,7 @@ for jj in range(1):
             print ('t = ', ymax)
             
             x=[]
-            with open(casedir +'/%s/ccx'%ymax, 'r') as infile:
+            with open(casedir +'/%s/Cx'%ymax, 'r') as infile:
                 data0=infile.readlines()
                 npt=int(data0[20])
                 for line in data0[22:22+npt]:
@@ -123,7 +123,7 @@ for jj in range(1):
             x = x.astype(np.float)
            
             y=[]
-            with open(casedir +'/%s/ccy'%ymax, 'r') as infile:
+            with open(casedir +'/%s/Cy'%ymax, 'r') as infile:
                 data0=infile.readlines()
                 npt=int(data0[20])
                 for line in data0[22:22+npt]:
@@ -132,7 +132,7 @@ for jj in range(1):
             y = y.astype(np.float)
             
             z=[]
-            with open(casedir +'/%s/ccz'%ymax, 'r') as infile:
+            with open(casedir +'/%s/Cz'%ymax, 'r') as infile:
                 data0=infile.readlines()
                 npt=int(data0[20])
                 for line in data0[22:22+npt]:
@@ -173,7 +173,7 @@ for jj in range(1):
             #filter within xlim,ylim
             I=[]
             for i in range(len(x)):
-                if (x[i]<=3 and x[i]>=-0.6 and y[i]<=3.1 and y[i]>=-3.1):
+                if (x[i]<=5.1 and x[i]>=-3.1 and y[i]<=3.1 and y[i]>=-3.1):
                     I.append(i)
                               
             xl=x[I]
@@ -195,7 +195,7 @@ for jj in range(1):
             relist=np.asarray(relist)
                      
             #ml-predict        
-            relist=relist/1000.
+            relist=relist/100000.
             val_inp=np.concatenate((xl[:,None],yl[:,None],relist[:,None],tlist[:,None]),axis=1)
             
             out=model_test.predict([val_inp])

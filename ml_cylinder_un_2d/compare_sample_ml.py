@@ -37,7 +37,7 @@ matplotlib.rc('xtick', labelsize=16)
 matplotlib.rc('ytick', labelsize=16) 
 
 ## ml - prediction
-indir = './case_ml/Re_1000/postProcessing/sampleDict'
+indir = './case_ml/Re_120000/postProcessing/sampleDict'
 
 fname_1 = [f for f in listdir(indir) if isdir(join(indir, f))]
 fname_1.sort()
@@ -54,7 +54,7 @@ for i in range(len(fname_1)):
 ml=np.asarray(ml)
         
 ## CFD
-indir = './cases_test/testing/Re_1000/postProcessing/sampleDict'
+indir = './case_2d_turb_2d_testing/testing/Re_120000/postProcessing/sampleDict'
 
 fname_1 = [f for f in listdir(indir) if isdir(join(indir, f))]
 fname_1.sort()
@@ -77,7 +77,7 @@ plt.plot(ml[:,0],ml[:,1],'-', lw=3,label='ML-p')
 plt.legend(loc='center left', fontsize=18, bbox_to_anchor=(1,0.75), ncol=1, frameon=True, fancybox=False, shadow=False)
 plt.xlabel('time (s)',fontsize=20)
 plt.ylabel('p',fontsize=20)  
-plt.savefig('./plots/p_re1000.png', bbox_inches='tight',dpi=100)
+plt.savefig('./plots/p_re120000.png', bbox_inches='tight',dpi=100)
 plt.show()    
 
 #u
@@ -87,7 +87,7 @@ plt.plot(ml[:,0],ml[:,2],'-', lw=3,label='ML-u')
 plt.legend(loc='center left', fontsize=18, bbox_to_anchor=(1,0.75), ncol=1, frameon=True, fancybox=False, shadow=False)
 plt.xlabel('time (s)',fontsize=20)
 plt.ylabel('u',fontsize=20)  
-plt.savefig('./plots/u_re1000.png', bbox_inches='tight',dpi=100)
+plt.savefig('./plots/u_re120000.png', bbox_inches='tight',dpi=100)
 plt.show() 
 
 
@@ -98,7 +98,7 @@ plt.plot(ml[:,0],ml[:,3],'-', lw=3,label='ML-v')
 plt.legend(loc='center left', fontsize=18, bbox_to_anchor=(1,0.75), ncol=1, frameon=True, fancybox=False, shadow=False)
 plt.xlabel('time (s)',fontsize=20)
 plt.ylabel('v',fontsize=20)  
-plt.savefig('./plots/v_re1000.png', bbox_inches='tight',dpi=100)
+plt.savefig('./plots/v_re120000.png', bbox_inches='tight',dpi=100)
 plt.show() 
 
 

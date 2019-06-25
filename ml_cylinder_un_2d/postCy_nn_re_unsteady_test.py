@@ -29,7 +29,7 @@ boundary not loaded: may be required?
 """
 
 # read data from below dir...
-path='./cases_test'
+path='./case_2d_turb_2d_testing'
 #path='./cut_from_case_naca_turb'
 indir = path
 
@@ -75,7 +75,7 @@ for jj in range(1):
     otime=[]
     para=[]
     
-    for ii in range(2):
+    for ii in range(4):
         
         print ( ii)
         
@@ -131,7 +131,7 @@ for jj in range(1):
             print ('t = ', ymax)
             
             x=[]
-            with open(casedir +'/%s/ccx'%ymax, 'r') as infile:
+            with open(casedir +'/%s/Cx'%ymax, 'r') as infile:
                 data0=infile.readlines()
                 npt=int(data0[20])
                 for line in data0[22:22+npt]:
@@ -140,7 +140,7 @@ for jj in range(1):
             x = x.astype(np.float)
            
             y=[]
-            with open(casedir +'/%s/ccy'%ymax, 'r') as infile:
+            with open(casedir +'/%s/Cy'%ymax, 'r') as infile:
                 data0=infile.readlines()
                 npt=int(data0[20])
                 for line in data0[22:22+npt]:
@@ -149,7 +149,7 @@ for jj in range(1):
             y = y.astype(np.float)
             
             z=[]
-            with open(casedir +'/%s/ccz'%ymax, 'r') as infile:
+            with open(casedir +'/%s/Cz'%ymax, 'r') as infile:
                 data0=infile.readlines()
                 npt=int(data0[20])
                 for line in data0[22:22+npt]:
@@ -190,7 +190,7 @@ for jj in range(1):
             #filter within xlim,ylim
             I=[]
             for i in range(len(x)):
-                if (x[i]<=8 and x[i]>=-3.1 and y[i]<=3.1 and y[i]>=-3.1 ):
+                if (x[i]<=5.1 and x[i]>=-3.1 and y[i]<=3.1 and y[i]>=-3.1 ):
                     I.append(i)
                                 
             x=x[I]
@@ -262,6 +262,5 @@ for jj in range(1):
 
     data1 = [myinp_x, myinp_y, myinp_re, myinp_t, myout_p, myout_u, myout_v, otime, para, info ]
 
-    with open(filepath+'/cy_un_lam_ts_%s.pkl'%(jj+1), 'wb') as outfile1:
+    with open(filepath+'/cy_un_turb_ts_%s.pkl'%(jj+1), 'wb') as outfile1:
         pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
-

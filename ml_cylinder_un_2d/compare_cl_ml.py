@@ -42,8 +42,8 @@ matplotlib.rc('ytick', labelsize=16)
 ## Time       	Cm           	Cd           	Cl           	Cl(f)        	Cl(r)
 for jj in range(1):
 
-    cfd=np.loadtxt('./cases_test/testing/Re_500/postProcessing/forceCoeffs/1/forceCoeffs.dat', skiprows=10)
-    ml=np.loadtxt('./case_ml/Re_500/postProcessing/forceCoeffs/149/forceCoeffs.dat', skiprows=10)
+    cfd=np.loadtxt('./case_2d_turb_2d_testing/testing/Re_120000/postProcessing/forceCoeffs/1/forceCoeffs.dat', skiprows=10)
+    ml=np.loadtxt('./case_ml/Re_120000/postProcessing/forceCoeffs/147.2/forceCoeffs.dat', skiprows=10)
         
 st=240  
 idx1=np.argwhere(cfd[:,0]==130)[0][0]
@@ -66,7 +66,7 @@ for jj in range(1):
     #plt.xlim([15000,30000])
     #plt.ylim([0.686,0.692])
     plt.tight_layout()
-    plt.savefig('./plots/cl_re500.png', bbox_inches='tight',dpi=100)
+    plt.savefig('./plots/cl_re120000.png', bbox_inches='tight',dpi=100)
     plt.show()    
        
         
@@ -81,7 +81,7 @@ for jj in range(1):
     #plt.xlim([15000,30000])
     #plt.ylim([0.686,0.692])
     plt.tight_layout()
-    plt.savefig('./plots/cd_re500.png', bbox_inches='tight',dpi=100)
+    plt.savefig('./plots/cd_re120000.png', bbox_inches='tight',dpi=100)
     plt.show()    
           
     

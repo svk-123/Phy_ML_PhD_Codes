@@ -55,7 +55,7 @@ out_u=[]
 out_v=[]
 
 #load data
-with open('./data_file/cy_un_lam_ts_1.pkl', 'rb') as infile:
+with open('./data_file/cy_un_turb_ts_1.pkl', 'rb') as infile:
     result = pickle.load(infile)
 
 inp_x.extend(result[0])   
@@ -83,7 +83,7 @@ for i in range(len(theta)):
     co[i,1]= 0.5*np.sin(np.radians(theta[i]))    
     
 #open pdf file
-fp= PdfPages('plots_lam_ts_1.pdf')
+fp= PdfPages('plots_turb_ts_1.pdf')
 
 #plot
 def con_plot(i):
@@ -96,7 +96,7 @@ def con_plot(i):
     ax1.set_title('p-cfd')
     ax1.set_xlabel('X',fontsize=16)
     ax1.set_ylabel('Y',fontsize=16)
-    ax1.set_xlim([-3,8])
+    ax1.set_xlim([-3,5])
     ax1.set_ylim([-3,3])
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes('right', size='5%', pad=0.05)
@@ -111,7 +111,7 @@ def con_plot(i):
     ax2.set_title('p-NN')
     ax2.set_xlabel('X',fontsize=16)
     ax2.set_yticks([])
-    ax2.set_xlim([-3,8])
+    ax2.set_xlim([-3,5])
     ax2.set_ylim([-3,3])
     divider = make_axes_locatable(ax2)
     cax = divider.append_axes('right', size='5%', pad=0.05)
@@ -125,7 +125,7 @@ def con_plot(i):
     ax3.set_title('u-cfd')
     ax3.set_xlabel('X',fontsize=16)
     ax3.set_ylabel('Y',fontsize=16)
-    ax3.set_xlim([-3,8])
+    ax3.set_xlim([-3,5])
     ax3.set_ylim([-3,3])
     divider = make_axes_locatable(ax3)
     cax = divider.append_axes('right', size='5%', pad=0.05)
@@ -139,7 +139,7 @@ def con_plot(i):
     ax4.set_title('u-NN')
     ax4.set_xlabel('X',fontsize=16)
     ax4.set_yticks([])
-    ax4.set_xlim([-3,8])
+    ax4.set_xlim([-3,5])
     ax4.set_ylim([-3,3])
     divider = make_axes_locatable(ax4)
     cax = divider.append_axes('right', size='5%', pad=0.05)
@@ -153,7 +153,7 @@ def con_plot(i):
     ax5.set_title('v-cfd')
     ax5.set_xlabel('X',fontsize=16)
     ax5.set_ylabel('Y',fontsize=16)
-    ax5.set_xlim([-3,8])
+    ax5.set_xlim([-3,5])
     ax5.set_ylim([-3,3])
     divider = make_axes_locatable(ax5)
     cax = divider.append_axes('right', size='5%', pad=0.05)
@@ -167,7 +167,7 @@ def con_plot(i):
     ax6.set_title('v-NN')
     ax6.set_xlabel('X',fontsize=16)
     ax6.set_yticks([])
-    ax6.set_xlim([-3,8])
+    ax6.set_xlim([-3,5])
     ax6.set_ylim([-3,3])
     divider = make_axes_locatable(ax6)
     cax = divider.append_axes('right', size='5%', pad=0.05)
@@ -175,7 +175,7 @@ def con_plot(i):
     cbar6.ax.tick_params(labelsize=10)
     ax6.set_aspect(0.9)
     
-    fig.suptitle("Testing  :  Re=1000 at t=0", fontsize=24)
+    fig.suptitle("Testing  :  Re=120000 at t=0", fontsize=24)
     
     plt.subplots_adjust( wspace=0.2,hspace=0.25)       
     fp.savefig(fig)
@@ -242,7 +242,7 @@ def line_plot(i):
     plt.close()
 
 #model 
-model_test=load_model('./selected_model/case_1_8x500/model_sf_130_0.00000190_0.00000267.hdf5') 
+model_test=load_model('./selected_model/case_2_turb_8x500/model_sf_210_0.00003297_0.00004138.hdf5') 
     
 np.random.seed(1234534)
 mylist=[0]
@@ -252,7 +252,7 @@ for i in mylist:
     print (i)
     
     #normalize
-    inp_reno[i]=inp_reno[i]/1000.
+    inp_reno[i]=inp_reno[i]/100000.
     
     val_inp=np.concatenate((inp_x[i][:,None],inp_y[i][:,None],inp_reno[i][:,None],inp_t[i][:,None]),axis=1)
     val_out=np.concatenate((out_p[i][:,None],out_u[i][:,None],out_v[i][:,None]),axis=1)

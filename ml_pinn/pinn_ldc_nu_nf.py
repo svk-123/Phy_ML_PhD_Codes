@@ -5,6 +5,7 @@
 this is to make prediction using
 p u v instead of original psi_p work
 lamda fixed
+Nu and Nf different points
 '''
 
 
@@ -23,17 +24,22 @@ tf.set_random_seed(1234)
 
 class PhysicsInformedNN:
     # Initialize the class
-    def __init__(self, x, y, u, v, layers):
+    def __init__(self, x, y, u, v, layers, xf, yf):
         
         X = np.concatenate([x, y], 1)
+        Xf = np.concatenate([xf, yf], 1)
         
         self.lb = X.min(0)
         self.ub = X.max(0)
                 
         self.X = X
+        self.Xf = Xf
         
         self.x = X[:,0:1]
         self.y = X[:,1:2]
+        
+        self.xf=Xf[:,0:1]
+        self.yf=Xf[:,1:2]
         
         self.u = u
         self.v = v
@@ -47,6 +53,8 @@ class PhysicsInformedNN:
         self.lambda_1 = tf.Variable([0.0], dtype=tf.float32)
         self.lambda_2 = tf.Variable([0.0], dtype=tf.float32)
         
+        self.nu = tf.constant([0.01], dtype=tf.float32)
+        
         # tf placeholders and graph
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
                                                      log_device_placement=True))
@@ -57,13 +65,26 @@ class PhysicsInformedNN:
         self.u_tf = tf.placeholder(tf.float32, shape=[None, self.u.shape[1]])
         self.v_tf = tf.placeholder(tf.float32, shape=[None, self.v.shape[1]])
         
-        self.u_pred, self.v_pred, self.p_pred, self.f_c_pred, self.f_u_pred, self.f_v_pred = self.net_NS(self.x_tf, self.y_tf)
+        self.xtr_f = tf.placeholder(tf.float32, shape=[None, self.xf.shape[1]])
+        self.ytr_f = tf.placeholder(tf.float32, shape=[None, self.yf.shape[1]])        
         
+
+
+        self.u_pred, self.v_pred, self.p_pred       = self.net_NS1(self.x_tf, self.y_tf)
+
+        self.f_c_pred, self.f_u_pred, self.f_v_pred = self.net_NS2(self.xtr_f, self.ytr_f)
+
+         
         self.loss = tf.reduce_sum(tf.square(self.u_tf - self.u_pred)) + \
                     tf.reduce_sum(tf.square(self.v_tf - self.v_pred)) + \
                     tf.reduce_sum(tf.square(self.f_c_pred)) + \
                     tf.reduce_sum(tf.square(self.f_u_pred)) + \
                     tf.reduce_sum(tf.square(self.f_v_pred))
+
+#        self.loss = tf.reduce_sum(tf.square(self.f_c_pred)) + \
+#                    tf.reduce_sum(tf.square(self.f_u_pred)) + \
+#                    tf.reduce_sum(tf.square(self.f_v_pred))
+
                     
         self.optimizer = tf.contrib.opt.ScipyOptimizerInterface(self.loss, 
                                                                 method = 'L-BFGS-B', 
@@ -73,7 +94,7 @@ class PhysicsInformedNN:
                                                                            'maxls': 50,
                                                                            'ftol' : 1.0 * np.finfo(float).eps})        
         
-        self.optimizer_Adam = tf.train.AdamOptimizer()
+        self.optimizer_Adam = tf.train.AdamOptimizer(0.0001)
         self.train_op_Adam = self.optimizer_Adam.minimize(self.loss)                    
         
         init = tf.global_variables_initializer()
@@ -98,27 +119,36 @@ class PhysicsInformedNN:
     
     def neural_net(self, X, weights, biases):
         num_layers = len(weights) + 1
-        
+
         H = X
         for l in range(0,num_layers-2):
             W = weights[l]
             b = biases[l]
-            H = tf.tanh(tf.add(tf.matmul(H, W), b))
+            H = tf.nn.tanh(tf.add(tf.matmul(H, W), b))
         W = weights[-1]
         b = biases[-1]
         Y = tf.add(tf.matmul(H, W), b)
         return Y
         
-    def net_NS(self, x, y):
+    def net_NS1(self, x, y):
+        
+        uvp = self.neural_net(tf.concat([x,y], 1), self.weights, self.biases)
+        
+        u = uvp[:,0:1]
+        v = uvp[:,1:2]
+        p = uvp[:,2:3]
+             
+        return u, v, p
+    
+    def net_NS2(self, x, y):
         lambda_1 = 1.0      
-        lambda_2 = 1/10000.
+        lambda_2 = 1/100.
         
         uvp = self.neural_net(tf.concat([x,y], 1), self.weights, self.biases)
         u = uvp[:,0:1]
         v = uvp[:,1:2]
         p = uvp[:,2:3]
       
-
         u_x = tf.gradients(u, x)[0]
         u_y = tf.gradients(u, y)[0]
         u_xx = tf.gradients(u_x, x)[0]
@@ -133,10 +163,10 @@ class PhysicsInformedNN:
         p_y = tf.gradients(p, y)[0]
 
         f_c =  u_x + v_y
-        f_u =  lambda_1*(u*u_x + v*u_y) + p_x - lambda_2*(u_xx + u_yy) 
-        f_v =  lambda_1*(u*v_x + v*v_y) + p_y - lambda_2*(v_xx + v_yy)
+        f_u =  (u*u_x + v*u_y) + p_x - self.nu*(u_xx + u_yy) 
+        f_v =  (u*v_x + v*v_y) + p_y - self.nu*(v_xx + v_yy)
         
-        return u, v, p, f_c, f_u, f_v
+        return f_c, f_u, f_v
     
     def callback(self, loss):
         print('Loss: %.3e' % (loss))
@@ -144,7 +174,8 @@ class PhysicsInformedNN:
     def train(self, nIter): 
 
         tf_dict = {self.x_tf: self.x, self.y_tf: self.y,
-                   self.u_tf: self.u, self.v_tf: self.v}
+                   self.u_tf: self.u, self.v_tf: self.v,
+                   self.xtr_f:self.xf, self.ytr_f:self.yf}
         
         start_time = time.time()
         for it in range(nIter):
@@ -182,7 +213,7 @@ class PhysicsInformedNN:
 if __name__ == "__main__": 
       
         
-    layers = [2, 30, 30, 30, 30, 30, 30, 3]
+    layers = [2, 30, 30, 30, 30, 30, 30, 30, 30, 30, 3]
     
     # Load Data
     #load data
@@ -195,7 +226,7 @@ if __name__ == "__main__":
     
     for ii in range(1):
         #x,y,Re,u,v
-        with open('./data_file_ldc/cavity_Re10000.pkl', 'rb') as infile:
+        with open('./data_file_ldc/cavity_Re100.pkl', 'rb') as infile:
             result = pickle.load(infile,encoding='bytes')
         xtmp.extend(result[0])
         ytmp.extend(result[1])
@@ -210,26 +241,54 @@ if __name__ == "__main__":
     vtmp=np.asarray(vtmp)
     ptmp=np.asarray(ptmp) 
            
-    x = xtmp[:,None] # NT x 1
-    y = ytmp[:,None] # NT x 1
+#    x = xtmp[:,None] # NT x 1
+#    y = ytmp[:,None] # NT x 1
+#    
+#    u = utmp[:,None] # NT x 1
+#    v = vtmp[:,None] # NT x 1
+#    p = ptmp[:,None] # NT x 1
     
-    u = utmp[:,None] # NT x 1
-    v = vtmp[:,None] # NT x 1
-    p = ptmp[:,None] # NT x 1
+    #boundary
+    tmp=np.loadtxt('./data_file_ldc/ldc_bc.dat',skiprows=0)
+    x=tmp[:,0:1]
+    y=tmp[:,1:2]    
+    u=tmp[:,2:3]
+    v=tmp[:,3:4]
     
     ######################################################################
     ######################## Noiseles Data ###############################
     ######################################################################
     # Training Data    
-    N_train=100
-    idx = np.random.choice(len(xtmp), N_train, replace=False)
+    N_train=20
+    idx = np.random.choice(len(x), N_train, replace=False)
     x_train = x[idx,:]
     y_train = y[idx,:]
     u_train = u[idx,:]
     v_train = v[idx,:]
 
+    # Training Data    
+    N_train=100
+    idx = np.random.choice(len(xtmp), N_train, replace=False)
+    x_train2 = xtmp[idx,None]
+    y_train2 = ytmp[idx,None]
+    u_train2 = utmp[idx,None]
+    v_train2 = vtmp[idx,None]
+
+    x_train = np.concatenate((x_train,x_train2),axis=0)
+    y_train = np.concatenate((y_train,y_train2),axis=0)
+    u_train = np.concatenate((u_train,u_train2),axis=0)
+    v_train = np.concatenate((v_train,v_train2),axis=0)
+    
+    # Training Data    
+    N_train_f=200
+    idx = np.random.choice(len(xtmp), N_train_f, replace=False)
+    x_train_f = xtmp[idx,None]
+    y_train_f = ytmp[idx,None]
+
+
+
     # Training
-    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, layers)
+    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, layers, x_train_f, y_train_f)
     model.train(30000)
        
     # Prediction
@@ -238,12 +297,13 @@ if __name__ == "__main__":
     #save file
     filepath='./pred/ldc/'
     coord=[]  
+    
     # ref:[x,y,z,ux,uy,uz,k,ep,nu
     info=['xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info']
 
-    data1 = [xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info]
+    data1 = [xtmp, ytmp, ptmp[:,None], u, v, p_pred, u_pred, v_pred, x_train, y_train, info]
     
-    with open(filepath+'pred_ldc_re10000.pkl', 'wb') as outfile1:
+    with open(filepath+'pred_ldc_rexxx.pkl', 'wb') as outfile1:
         pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
         
     plt.figure()

@@ -1,12 +1,6 @@
 """
 @author: Maziar Raissi
 """
-'''
-this is to make prediction using
-p u v instead of original psi_p work
-lamda fixed
-'''
-
 
 import sys
 sys.path.insert(0, '../../Utilities/')
@@ -15,7 +9,13 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io
+from scipy.interpolate import griddata
 import time
+from itertools import product, combinations
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.gridspec as gridspec
 import pickle
 
 np.random.seed(1234)
@@ -57,11 +57,10 @@ class PhysicsInformedNN:
         self.u_tf = tf.placeholder(tf.float32, shape=[None, self.u.shape[1]])
         self.v_tf = tf.placeholder(tf.float32, shape=[None, self.v.shape[1]])
         
-        self.u_pred, self.v_pred, self.p_pred, self.f_c_pred, self.f_u_pred, self.f_v_pred = self.net_NS(self.x_tf, self.y_tf)
+        self.u_pred, self.v_pred, self.p_pred, self.f_u_pred, self.f_v_pred = self.net_NS(self.x_tf, self.y_tf)
         
         self.loss = tf.reduce_sum(tf.square(self.u_tf - self.u_pred)) + \
                     tf.reduce_sum(tf.square(self.v_tf - self.v_pred)) + \
-                    tf.reduce_sum(tf.square(self.f_c_pred)) + \
                     tf.reduce_sum(tf.square(self.f_u_pred)) + \
                     tf.reduce_sum(tf.square(self.f_v_pred))
                     
@@ -110,15 +109,18 @@ class PhysicsInformedNN:
         return Y
         
     def net_NS(self, x, y):
+        #lambda_1 = self.lambda_1
+        #lambda_2 = self.lambda_2
         lambda_1 = 1.0      
-        lambda_2 = 1/10000.
+        lambda_2 = 0.025
         
-        uvp = self.neural_net(tf.concat([x,y], 1), self.weights, self.biases)
-        u = uvp[:,0:1]
-        v = uvp[:,1:2]
-        p = uvp[:,2:3]
-      
-
+        psi_and_p = self.neural_net(tf.concat([x,y], 1), self.weights, self.biases)
+        psi = psi_and_p[:,0:1]
+        p = psi_and_p[:,1:2]
+        
+        u = tf.gradients(psi, y)[0]
+        v = -tf.gradients(psi, x)[0]  
+        
         u_x = tf.gradients(u, x)[0]
         u_y = tf.gradients(u, y)[0]
         u_xx = tf.gradients(u_x, x)[0]
@@ -132,14 +134,17 @@ class PhysicsInformedNN:
         p_x = tf.gradients(p, x)[0]
         p_y = tf.gradients(p, y)[0]
 
-        f_c =  u_x + v_y
         f_u =  lambda_1*(u*u_x + v*u_y) + p_x - lambda_2*(u_xx + u_yy) 
         f_v =  lambda_1*(u*v_x + v*v_y) + p_y - lambda_2*(v_xx + v_yy)
         
-        return u, v, p, f_c, f_u, f_v
+        return u, v, p, f_u, f_v
     
+#    def callback(self, loss, lambda_1, lambda_2):
+#        print('Loss: %.3e, l1: %.3f, l2: %.5f' % (loss, lambda_1, lambda_2))
+
     def callback(self, loss):
         print('Loss: %.3e' % (loss))
+
       
     def train(self, nIter): 
 
@@ -160,12 +165,20 @@ class PhysicsInformedNN:
                       (it, loss_value, lambda_1_value, lambda_2_value, elapsed))
                 start_time = time.time()
             
+#        self.optimizer.minimize(self.sess,
+#                                feed_dict = tf_dict,
+#                                fetches = [self.loss, self.lambda_1, self.lambda_2],
+#                                loss_callback = self.callback)
+
         self.optimizer.minimize(self.sess,
                                 feed_dict = tf_dict,
                                 fetches = [self.loss],
-                                loss_callback = self.callback)
-
+                                loss_callback = self.callback)     
         
+        self.optimizer.minimize(self.sess,
+                                feed_dict = tf_dict,
+                                fetches = [self.loss],
+                                loss_callback = self.callback)           
     
     def predict(self, x_star, y_star):
         
@@ -182,7 +195,7 @@ class PhysicsInformedNN:
 if __name__ == "__main__": 
       
         
-    layers = [2, 30, 30, 30, 30, 30, 30, 3]
+    layers = [2, 20, 20, 20, 20,20, 20, 20, 2]
     
     # Load Data
     #load data
@@ -195,14 +208,13 @@ if __name__ == "__main__":
     
     for ii in range(1):
         #x,y,Re,u,v
-        with open('./data_file_ldc/cavity_Re10000.pkl', 'rb') as infile:
+        with open('./data_file/cy_40_around.pkl', 'rb') as infile:
             result = pickle.load(infile,encoding='bytes')
         xtmp.extend(result[0])
         ytmp.extend(result[1])
-        reytmp.extend(result[2])
+        ptmp.extend(result[2])
         utmp.extend(result[3])
-        vtmp.extend(result[4])
-        ptmp.extend(result[5])   
+        vtmp.extend(result[4])   
         
     xtmp=np.asarray(xtmp)
     ytmp=np.asarray(ytmp)
@@ -221,7 +233,7 @@ if __name__ == "__main__":
     ######################## Noiseles Data ###############################
     ######################################################################
     # Training Data    
-    N_train=100
+    N_train=200
     idx = np.random.choice(len(xtmp), N_train, replace=False)
     x_train = x[idx,:]
     y_train = y[idx,:]
@@ -230,22 +242,28 @@ if __name__ == "__main__":
 
     # Training
     model = PhysicsInformedNN(x_train, y_train, u_train, v_train, layers)
-    model.train(30000)
-       
+    model.train(10000)
+    
+   
     # Prediction
     u_pred, v_pred, p_pred = model.predict(xtmp[:,None], ytmp[:,None])
-                                        
-    #save file
-    filepath='./pred/ldc/'
-    coord=[]  
-    # ref:[x,y,z,ux,uy,uz,k,ep,nu
-    info=['xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info']
-
-    data1 = [xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info]
+    lambda_1_value = model.sess.run(model.lambda_1)
+    lambda_2_value = model.sess.run(model.lambda_2)
     
-    with open(filepath+'pred_ldc_re10000.pkl', 'wb') as outfile1:
-        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
-        
+#    # Error
+#    error_u = np.linalg.norm(u_star-u_pred,2)/np.linalg.norm(u_star,2)
+#    error_v = np.linalg.norm(v_star-v_pred,2)/np.linalg.norm(v_star,2)
+#    error_p = np.linalg.norm(p_star-p_pred,2)/np.linalg.norm(p_star,2)
+
+#    error_lambda_1 = np.abs(lambda_1_value - 1.0)*100
+#    error_lambda_2 = np.abs(lambda_2_value - 0.01)/0.01 * 100
+    
+#    print('Error u: %e' % (error_u))    
+#    print('Error v: %e' % (error_v))    
+#    print('Error p: %e' % (error_p))    
+#    print('Error l1: %.5f%%' % (error_lambda_1))                             
+#    print('Error l2: %.5f%%' % (error_lambda_2))                  
+    
     plt.figure()
     plt.tricontourf(xtmp,ytmp,u_pred[:,0])
     plt.show()

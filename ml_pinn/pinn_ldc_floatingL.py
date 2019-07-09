@@ -4,7 +4,7 @@
 '''
 this is to make prediction using
 p u v instead of original psi_p work
-lamda fixed
+lamda floating
 '''
 
 
@@ -15,7 +15,14 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io
+from scipy.interpolate import griddata
 import time
+from itertools import product, combinations
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from plotting import newfig, savefig
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.gridspec as gridspec
 import pickle
 
 np.random.seed(1234)
@@ -61,7 +68,7 @@ class PhysicsInformedNN:
         
         self.loss = tf.reduce_sum(tf.square(self.u_tf - self.u_pred)) + \
                     tf.reduce_sum(tf.square(self.v_tf - self.v_pred)) + \
-                    tf.reduce_sum(tf.square(self.f_c_pred)) + \
+                    tf.reduce_sum(tf.square(self.f_c_pred)) + \                    
                     tf.reduce_sum(tf.square(self.f_u_pred)) + \
                     tf.reduce_sum(tf.square(self.f_v_pred))
                     
@@ -110,8 +117,10 @@ class PhysicsInformedNN:
         return Y
         
     def net_NS(self, x, y):
-        lambda_1 = 1.0      
-        lambda_2 = 1/10000.
+        lambda_1 = self.lambda_1
+        lambda_2 = self.lambda_2
+        #lambda_1 = 1.0      
+        #lambda_2 = 0.01
         
         uvp = self.neural_net(tf.concat([x,y], 1), self.weights, self.biases)
         u = uvp[:,0:1]
@@ -138,8 +147,8 @@ class PhysicsInformedNN:
         
         return u, v, p, f_c, f_u, f_v
     
-    def callback(self, loss):
-        print('Loss: %.3e' % (loss))
+    def callback(self, loss, lambda_1, lambda_2):
+        print('Loss: %.3e, l1: %.3f, l2: %.5f' % (loss, lambda_1, lambda_2))
       
     def train(self, nIter): 
 
@@ -162,7 +171,7 @@ class PhysicsInformedNN:
             
         self.optimizer.minimize(self.sess,
                                 feed_dict = tf_dict,
-                                fetches = [self.loss],
+                                fetches = [self.loss, self.lambda_1, self.lambda_2],
                                 loss_callback = self.callback)
 
         
@@ -182,7 +191,7 @@ class PhysicsInformedNN:
 if __name__ == "__main__": 
       
         
-    layers = [2, 30, 30, 30, 30, 30, 30, 3]
+    layers = [2, 20, 20, 20, 20, 2]
     
     # Load Data
     #load data
@@ -195,7 +204,7 @@ if __name__ == "__main__":
     
     for ii in range(1):
         #x,y,Re,u,v
-        with open('./data_file_ldc/cavity_Re10000.pkl', 'rb') as infile:
+        with open('./data_file/cavity_Re500.pkl', 'rb') as infile:
             result = pickle.load(infile,encoding='bytes')
         xtmp.extend(result[0])
         ytmp.extend(result[1])
@@ -230,22 +239,28 @@ if __name__ == "__main__":
 
     # Training
     model = PhysicsInformedNN(x_train, y_train, u_train, v_train, layers)
-    model.train(30000)
-       
+    model.train(10000)
+    
+   
     # Prediction
     u_pred, v_pred, p_pred = model.predict(xtmp[:,None], ytmp[:,None])
-                                        
-    #save file
-    filepath='./pred/ldc/'
-    coord=[]  
-    # ref:[x,y,z,ux,uy,uz,k,ep,nu
-    info=['xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info']
-
-    data1 = [xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info]
+    lambda_1_value = model.sess.run(model.lambda_1)
+    lambda_2_value = model.sess.run(model.lambda_2)
     
-    with open(filepath+'pred_ldc_re10000.pkl', 'wb') as outfile1:
-        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
-        
+#    # Error
+#    error_u = np.linalg.norm(u_star-u_pred,2)/np.linalg.norm(u_star,2)
+#    error_v = np.linalg.norm(v_star-v_pred,2)/np.linalg.norm(v_star,2)
+#    error_p = np.linalg.norm(p_star-p_pred,2)/np.linalg.norm(p_star,2)
+
+#    error_lambda_1 = np.abs(lambda_1_value - 1.0)*100
+#    error_lambda_2 = np.abs(lambda_2_value - 0.01)/0.01 * 100
+    
+#    print('Error u: %e' % (error_u))    
+#    print('Error v: %e' % (error_v))    
+#    print('Error p: %e' % (error_p))    
+#    print('Error l1: %.5f%%' % (error_lambda_1))                             
+#    print('Error l2: %.5f%%' % (error_lambda_2))                  
+    
     plt.figure()
     plt.tricontourf(xtmp,ytmp,u_pred[:,0])
     plt.show()

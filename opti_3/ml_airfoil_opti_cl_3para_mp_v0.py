@@ -100,11 +100,18 @@ global reno
 global aoa
 global init_cl
 
-tar_cl=np.asarray([0.627,0.773,0.898,0.930])
+#tar_cl=np.asarray([0.627,0.773,0.898,0.930])
+#pred_cl=np.asarray([0,0,0,0])
+#init_cl=np.asarray([0,0,0,0])
+#reno=np.asarray([10000,20000,40000,50000])/100000.
+#aoa=np.asarray([6])/14.
+
+tar_cl=np.asarray([0.54, 0.66, 0.72, 0.76])
 pred_cl=np.asarray([0,0,0,0])
 init_cl=np.asarray([0,0,0,0])
-reno=np.asarray([10000,20000,40000,50000])/100000.
-aoa=np.asarray([4])/14.
+reno=np.asarray([10000,20000,40000,70000])/100000.
+aoa=np.asarray([6])/14.
+
 
 reno=np.asarray(reno)
 aoa=np.asarray(aoa)
@@ -148,12 +155,13 @@ def loss(para):
     
     print ('mse:', e)
     
-    fp.write('%s %s %s\n'%(my_counter,e,pred_cl))    
+    fp_conv.write('%s %s %s\n'%(my_counter,e,pred_cl))    
     if(my_counter == 0):
         init_cl=pred_cl
     my_counter = my_counter +1
     print ('Iter:', my_counter)
-       
+    
+    
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(x,y,'r',label='true')
     plt.ylim([-0.5,0.5])
@@ -162,13 +170,16 @@ def loss(para):
        
             
     return  e
+
+
+fn='naca4424'
+path='./result_paper/mp_2/'
      
-idx=np.argwhere(name=='naca0014')
-#idx=np.argwhere(name=='naca4510')
-#naca4510
+idx=np.argwhere(name=='%s'%fn)
 p1=mypara[idx[0][0],:]/scaler
 
 
+fp_conv=open(path+'conv_%s.dat'%fn,'w+')
 
    
 print('Starting loss = {}'.format(loss(p1)))
@@ -182,18 +193,25 @@ res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
    
  
     
+
     
 print('Ending loss = {}'.format(loss(res.x)))
 
 
-fp=open('final.dat','w')
+fp=open(path+'final_%s.dat'%fn,'w')
 x,y=get_coord(res.x)
 for i in range(len(x)):
     fp.write('%f %f 0.00\n'%(x[i],y[i]))
 fp.close()
 
-fp=open('resx.dat','w')
-fp.write('%s'%res.x)
+fp=open(path+'resx_%s.dat'%fn,'w')
+fp.write('tar-cl = %s \n'%tar_cl)
+fp.write('init-cl = %s \n'%init_cl)
+fp.write('pred-cl = %s \n'%pred_cl)
+fp.write('Re = %s \n'%(reno*100000))
+fp.write('aoa = %s \n'%(aoa*14))
+fp.write('%s \n'%res.x)
+fp.write('%s \n'%(res.x*[6,6,30]))
 fp.close()
 
 
@@ -208,7 +226,7 @@ plt.xlim([-0.05,1.05])
 plt.ylim([-0.25,0.25])
 plt.xlabel('X',fontsize=16)
 plt.ylabel('Y',fontsize=16)
-plt.savefig('./opti_0014.png',format='png',bbox_inches='tight',dpi=300)
+plt.savefig(path+'opti_%s.png'%fn,format='png',bbox_inches='tight',dpi=300)
 plt.close()
 
 
@@ -219,5 +237,9 @@ plt.plot(reno*100000,pred_cl,'-og',lw=3,label='Optimized')
 plt.legend(fontsize=14)
 plt.xlabel('Reynolds No',fontsize=16)
 plt.ylabel('Cl',fontsize=16)
-plt.savefig('./line_0014.png',format='png',bbox_inches='tight',dpi=300)
+plt.savefig(path+'line_%s.png'%fn,format='png',bbox_inches='tight',dpi=300)
 plt.close()
+
+
+
+fp_conv.close()

@@ -60,8 +60,8 @@ data_file='naca4_clcd_turb_st_3para.pkl'
 with open(path + data_file, 'rb') as infile:
     result1 = pickle.load(infile, encoding='bytes')
 
-cd=result1[1]
-cl=result1[2]
+mycd=result1[1]
+mycl=result1[2]
 myreno=result1[3]
 myaoa=result1[4]
 mypara=result1[5]
@@ -76,8 +76,8 @@ for i in range(len(name)):
 name=np.asarray(nname)
 
 #fp=open('cl_data_turb_st.txt','w')
-#for i in range(len(cl)):
-#    fp.write('%s %f %f %f \n'%(name[i],myreno[i],myaoa[i],cl[i]))
+#for i in range(len(mycl)):
+#    fp.write('%s %f %f %f %f %f \n'%(name[i],myreno[i],myaoa[i],mycl[i],mycd[i],mycl[i]/mycd[i]))
 #    
 #fp.close()
     
@@ -94,11 +94,11 @@ model=load_model('./selected_model/turb_3para_st_6x30/final_sf.hdf5')
 global scaler
 scaler=np.array([6,6,30])
 
-global tar_cl
+global tar_clcd
 global reno
 global aoa
 
-tar_cl=1.2
+tar_clcd=26
 reno=np.asarray([50000])/100000.
 aoa=np.asarray([6])/14.
 
@@ -124,18 +124,21 @@ def loss(para):
 
     my_inp=np.concatenate((reno,aoa,mypara),axis=0)
     my_inp=np.reshape(my_inp,(1,5))
+    
     #cd, cl
     out=model.predict([my_inp])
     out=out*np.asarray([0.25,0.9])
-                
+                    
     pred_cl=out[0,1]
+    pred_cd=out[0,0]
+    pred_clcd=pred_cl/pred_cd
     
-    print ('Pred_cl:', pred_cl)
-    if(pred_cl > tar_cl):
-        e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
-        #e=0
+    print ('Pred_cl:', pred_cl, pred_cd, pred_clcd)
+    if(pred_clcd > tar_clcd):
+        #e=np.sqrt(((tar_clcd - pred_clcd) ** 2).mean())
+        e=0
     else:
-        e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
+        e=np.sqrt(((tar_clcd - pred_clcd) ** 2).mean())
     print ('mse:', e)
     
     error.append(e)
@@ -152,12 +155,13 @@ def loss(para):
     
         
     return  e
-     
-#idx=np.argwhere(name=='naca2412')
-#idx=np.argwhere(name=='naca4510')
-idx=np.argwhere(name=='naca0014')
 
-#naca4510
+#base foil name
+#2412, 4510, 0014    
+fn='naca0014'
+    
+idx=np.argwhere(name=='%s'%fn)
+
 p1=mypara[idx[0][0],:]/scaler
 
  
@@ -173,13 +177,13 @@ res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
     
 print('Ending loss = {}'.format(loss(res.x)))
 
-fp=open('final.dat','w')
+fp=open('final_%s.dat'%fn,'w')
 x,y=get_coord(res.x)
 for i in range(len(x)):
     fp.write('%f %f 0.00\n'%(x[i],y[i]))
 fp.close()
 
-fp=open('resx.dat','w')
+fp=open('resx_%s.dat'%fn,'w')
 fp.write('%s'%res.x)
 fp.close()
 
@@ -195,5 +199,5 @@ plt.xlim([-0.05,1.05])
 plt.ylim([-0.25,0.25])
 plt.xlabel('X',fontsize=16)
 plt.ylabel('Y',fontsize=16)
-plt.savefig('./opti_0014.png',bbox_inches='tight',dpi=300)
+plt.savefig('./opti_%s.png'%fn,bbox_inches='tight',dpi=300)
 plt.close()

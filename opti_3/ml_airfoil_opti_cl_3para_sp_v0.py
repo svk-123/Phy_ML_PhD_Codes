@@ -98,10 +98,11 @@ scaler=np.array([6,6,30])
 global tar_cl
 global reno
 global aoa
+global init_cl
 
-tar_cl=1.2
-reno=np.asarray([50000])/100000.
-aoa=np.asarray([6])/14.
+tar_cl=0.9
+reno=np.asarray([10000])/100000.
+aoa=np.asarray([4])/14.
 
 reno=np.asarray(reno)
 aoa=np.asarray(aoa)
@@ -112,6 +113,8 @@ my_counter =0
 global error
 error=[]
 
+
+
 def get_coord(p2):
     x,y=naca4(p2*scaler,100)
     return (x,y)
@@ -119,6 +122,8 @@ def get_coord(p2):
 def loss(para):
        
     global my_counter  
+    global init_cl
+    
     mypara=para
 
     x,y=get_coord(mypara)
@@ -133,16 +138,21 @@ def loss(para):
     
     print ('Pred_cl:', pred_cl)
     if(pred_cl > tar_cl):
-        e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
-        #e=0
+        #e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
+        e=0
     else:
         e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
     print ('mse:', e)
     
-    error.append(e)
+
     
+    if(my_counter == 0):
+        init_cl=pred_cl
+        fp_conv.write('init-Cl = %s\n'%(init_cl)) 
     my_counter = my_counter +1
     print ('Iter:', my_counter)
+    
+    fp_conv.write('%s %s %s\n'%(my_counter,e,pred_cl)) 
        
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(x,y,'r',label='true')
@@ -153,10 +163,15 @@ def loss(para):
     
         
     return  e
-     
-#idx=np.argwhere(name=='naca2412')
-#idx=np.argwhere(name=='naca4510')
-idx=np.argwhere(name=='naca0014')
+
+#naca2412, 4510
+fn='naca3310'     
+path='./result_paper/fix_cl_2/'
+
+
+fp_conv=open(path+'conv_%s.dat'%fn,'w+')
+
+idx=np.argwhere(name=='%s'%fn)
 
 #naca4510
 p1=mypara[idx[0][0],:]/scaler
@@ -169,19 +184,24 @@ mylimit=((0,1.1),(0,1.1),(0.2,1.1))
 #mylimit=((0,6),(0,6),(6,32))
 res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
                options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
-                                 'eps': 0.1, 'maxfun': 100, \
+                                 'eps': 0.05, 'maxfun': 100, \
                                  'maxiter': 50, 'maxls': 100})
-    
+
+fp_conv.close()    
 print('Ending loss = {}'.format(loss(res.x)))
 
-fp=open('final.dat','w')
+fp=open(path+'final_%s.dat'%fn,'w')
 x,y=get_coord(res.x)
 for i in range(len(x)):
     fp.write('%f %f 0.00\n'%(x[i],y[i]))
 fp.close()
 
-fp=open('resx.dat','w')
+fp=open(path+'resx_%s.dat'%fn,'w')
+fp.write('Re = %s\n'%(reno*100000))
+fp.write('AoA = %s\n'%(aoa*14))
+fp.write('init-Cl = %s\n'%(init_cl))
 fp.write('%s'%res.x)
+fp.write('%s'%(res.x*[6,6,30]))
 fp.close()
 
 #intial shape
@@ -196,5 +216,5 @@ plt.xlim([-0.05,1.05])
 plt.ylim([-0.25,0.25])
 plt.xlabel('X',fontsize=16)
 plt.ylabel('Y',fontsize=16)
-plt.savefig('./opti_0014.png',bbox_inches='tight',dpi=300)
+plt.savefig(path+'opti_%s.png'%fn,bbox_inches='tight',dpi=300)
 plt.close()

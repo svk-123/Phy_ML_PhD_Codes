@@ -111,7 +111,7 @@ class PhysicsInformedNN:
         
     def net_NS(self, x, y):
         lambda_1 = 1.0      
-        lambda_2 = 1/10000.
+        lambda_2 = 1/100.0
         
         uvp = self.neural_net(tf.concat([x,y], 1), self.weights, self.biases)
         u = uvp[:,0:1]
@@ -182,7 +182,7 @@ class PhysicsInformedNN:
 if __name__ == "__main__": 
       
         
-    layers = [2, 30, 30, 30, 30, 30, 30, 3]
+    layers = [2, 50, 50, 50, 50, 50, 50, 50,50, 3]
     
     # Load Data
     #load data
@@ -195,14 +195,13 @@ if __name__ == "__main__":
     
     for ii in range(1):
         #x,y,Re,u,v
-        with open('./data_file_ldc/cavity_Re10000.pkl', 'rb') as infile:
+        with open('./data_file/naca0006_100_0_part.pkl', 'rb') as infile:
             result = pickle.load(infile,encoding='bytes')
         xtmp.extend(result[0])
         ytmp.extend(result[1])
-        reytmp.extend(result[2])
+        ptmp.extend(result[2])
         utmp.extend(result[3])
-        vtmp.extend(result[4])
-        ptmp.extend(result[5])   
+        vtmp.extend(result[4])   
         
     xtmp=np.asarray(xtmp)
     ytmp=np.asarray(ytmp)
@@ -210,6 +209,8 @@ if __name__ == "__main__":
     vtmp=np.asarray(vtmp)
     ptmp=np.asarray(ptmp) 
            
+        
+    
     x = xtmp[:,None] # NT x 1
     y = ytmp[:,None] # NT x 1
     
@@ -221,7 +222,7 @@ if __name__ == "__main__":
     ######################## Noiseles Data ###############################
     ######################################################################
     # Training Data    
-    N_train=100
+    N_train=1000
     idx = np.random.choice(len(xtmp), N_train, replace=False)
     x_train = x[idx,:]
     y_train = y[idx,:]
@@ -230,20 +231,20 @@ if __name__ == "__main__":
 
     # Training
     model = PhysicsInformedNN(x_train, y_train, u_train, v_train, layers)
-    model.train(30000)
+    model.train(50000)
        
     # Prediction
     u_pred, v_pred, p_pred = model.predict(xtmp[:,None], ytmp[:,None])
                                         
     #save file
-    filepath='./pred/ldc/'
+    filepath='./pred/airfoil/'
     coord=[]  
     # ref:[x,y,z,ux,uy,uz,k,ep,nu
     info=['xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info']
 
     data1 = [xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info]
     
-    with open(filepath+'pred_ldc_re10000.pkl', 'wb') as outfile1:
+    with open(filepath+'pred_naca0006_100_0_around.pkl', 'wb') as outfile1:
         pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
         
     plt.figure()

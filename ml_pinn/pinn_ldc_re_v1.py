@@ -27,34 +27,21 @@ tf.set_random_seed(1234)
 
 class PhysicsInformedNN:
     # Initialize the class
-    def __init__(self, x, y, r, u, v, layers):
+    def __init__(self, x, y, r, u, v, p):
         
-        X = np.concatenate([x, y, r], 1)
-        
-        self.lb = X.min(0)
-        self.ub = X.max(0)
-                
-        self.X = X
-        
-        self.x = X[:,0:1]
-        self.y = X[:,1:2]
-        self.r = X[:,2:3]
+          
+        self.x = x
+        self.y = y
+        self.r = r
         
         self.u = u
         self.v = v
-        
-        
-        self.layers = layers
-        
-        # Initialize NN
-        self.weights, self.biases = self.initialize_NN(layers)        
+        self.p = p
         
         # Initialize parameters
-        self.lambda_1 = tf.Variable([0.0], dtype=tf.float32)
-        self.lambda_2 = tf.Variable([0.0], dtype=tf.float32)
-        self.nu = tf.constant([0.001], dtype=tf.float32)
+        self.nu = tf.constant([0.0001], dtype=tf.float32)
         
-        self.lr = tf.placeholder(tf.float32, shape=[])
+        self.tf_lr = tf.placeholder(tf.float32, shape=[])
         
         # tf placeholders and graph
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
@@ -66,63 +53,59 @@ class PhysicsInformedNN:
         
         self.u_tf = tf.placeholder(tf.float32, shape=[None, self.u.shape[1]])
         self.v_tf = tf.placeholder(tf.float32, shape=[None, self.v.shape[1]])
-        
+        self.p_tf = tf.placeholder(tf.float32, shape=[None, self.p.shape[1]])
+         
         self.u_pred, self.v_pred, self.p_pred, self.f_c_pred, self.f_u_pred, self.f_v_pred = self.net_NS(self.x_tf, self.y_tf, self.r_tf)
         
         self.loss = tf.reduce_sum(tf.square(self.u_tf - self.u_pred)) + \
                     tf.reduce_sum(tf.square(self.v_tf - self.v_pred)) + \
+                    tf.reduce_sum(tf.square(self.p_tf - self.p_pred)) + \
                     tf.reduce_sum(tf.square(self.f_c_pred)) + \
                     tf.reduce_sum(tf.square(self.f_u_pred)) + \
                     tf.reduce_sum(tf.square(self.f_v_pred))
                     
+#        self.loss_1 = tf.reduce_sum(tf.square(self.u_tf - self.u_pred)) + \
+#                    tf.reduce_sum(tf.square(self.v_tf - self.v_pred)) + \
+#                    tf.reduce_sum(tf.square(self.p_tf - self.p_pred)) + \
+#                    tf.reduce_sum(tf.square(self.f_c_pred)) + \
+#                    tf.reduce_sum(tf.square(self.f_u_pred)) + \
+#                    tf.reduce_sum(tf.square(self.f_v_pred))
+                    
         self.optimizer = tf.contrib.opt.ScipyOptimizerInterface(self.loss, 
                                                                 method = 'L-BFGS-B', 
-                                                                options = {'maxiter': 100000,
+                                                                options = {'maxiter': 50000,
                                                                            'maxfun': 50000,
                                                                            'maxcor': 100,
                                                                            'maxls': 100,
                                                                            'ftol' : 1.0 * np.finfo(float).eps})        
         
-        #self.optimizer_Adam = tf.train.AdamOptimizer(self.lr)
-        self.train_op_Adam = tf.train.AdamOptimizer(self.lr).minimize(self.loss)                    
+
+        self.train_op_Adam = tf.train.AdamOptimizer(self.tf_lr).minimize(self.loss)                    
         
         init = tf.global_variables_initializer()
         self.sess.run(init)
 
-    def initialize_NN(self, layers):        
-        weights = []
-        biases = []
-        num_layers = len(layers) 
-        for l in range(0,num_layers-1):
-            W = self.xavier_init(size=[layers[l], layers[l+1]])
-            b = tf.Variable(tf.zeros([1,layers[l+1]], dtype=tf.float32), dtype=tf.float32)
-            weights.append(W)
-            biases.append(b)        
-        return weights, biases
-        
-    def xavier_init(self, size):
-        in_dim = size[0]
-        out_dim = size[1]        
-        xavier_stddev = np.sqrt(2/(in_dim + out_dim))
-        return tf.Variable(tf.truncated_normal([in_dim, out_dim], stddev=xavier_stddev), dtype=tf.float32)
     
-    def neural_net(self, X, weights, biases):
-        num_layers = len(weights) + 1
+    def neural_net(self, X):
+
+        #create model
+        l1 = tf.layers.dense(X,  100, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
+        Y  = tf.layers.dense(l1,3,activation=None,name='prediction')
         
-        H = X
-        for l in range(0,num_layers-2):
-            W = weights[l]
-            b = biases[l]
-            H = tf.tanh(tf.add(tf.matmul(H, W), b))
-        W = weights[-1]
-        b = biases[-1]
-        Y = tf.add(tf.matmul(H, W), b)
+        
         return Y
         
     def net_NS(self, x, y, r):
-        #print (x.shape)
+
+        uvp = self.neural_net(tf.concat([x,y,r], 1))
         
-        uvp = self.neural_net(tf.concat([x,y,r], 1), self.weights, self.biases)
         u = uvp[:,0:1]
         v = uvp[:,1:2]
         p = uvp[:,2:3]
@@ -145,36 +128,95 @@ class PhysicsInformedNN:
         f_v =  (u*v_x + v*v_y) + p_y - (self.nu/r)*(v_xx + v_yy)
         
         return u, v, p, f_c, f_u, f_v
-    
-    def callback(self, loss):
-        print('Loss: %.3e' % (loss))
+        
+    def get_batch(self,idx,bs,tb):
+        
+        return self.x[idx*bs:(idx+1)*bs],self.y[idx*bs:(idx+1)*bs],self.r[idx*bs:(idx+1)*bs],\
+                self.u[idx*bs:(idx+1)*bs],self.v[idx*bs:(idx+1)*bs],self.p[idx*bs:(idx+1)*bs]
       
-    def train(self, nIter, lr, lbfgs=False): 
+    def train(self, nIter, lbfgs=False): 
+        
+        fp=open('conv.dat','w')
+        
 
-        tf_dict = {self.x_tf: self.x, self.y_tf: self.y,self.r_tf: self.r,
-                   self.u_tf: self.u, self.v_tf: self.v, self.lr: lr}
+        batch_size=50
+          
+        total_batch=20
         
-        
-        #print (self.x.shape)
+        lr=0.001
+        min_lr=1e-6
+        #reduce lr iter(patience)
+        rli=300
+        #numbers to avg
+        L=50
+        #early stop wait
+        estop=1000
+        e_eps=1e-5
         
         start_time = time.time()
-        for it in range(nIter):
-            self.sess.run(self.train_op_Adam, tf_dict)
+        
+        my_hist=[]
+        
+        #epochs traings
+        count=0
+        while(count < nIter):
+            count=count+1
+            avg_loss = 0.
             
-            # Print
-            if it % 10 == 0:
-                elapsed = time.time() - start_time
-                loss_value = self.sess.run(self.loss, tf_dict)
-                print('It: %d, Loss: %.3e, Time: %.2f' % 
-                      (it, loss_value, elapsed))
-                start_time = time.time()
-        if (lbfgs==True):    
+            #batch training
+            for i in range(total_batch):
+            
+                batch_x, batch_y, batch_r, batch_u, batch_v, batch_p = self.get_batch(i,batch_size,total_batch)
+                
+                tf_dict = {self.x_tf: batch_x, self.y_tf: batch_y, self.r_tf: batch_r,
+                   self.u_tf: batch_u, self.v_tf: batch_v, self.p_tf: batch_p, self.tf_lr:lr}
+            
+                _,loss_value=self.sess.run([self.train_op_Adam,self.loss], tf_dict)
+                avg_loss += loss_value / total_batch
+            
+            my_hist.append(avg_loss)
+            
+            #reduce lr
+            if(len(my_hist) > rli  and lr > min_lr):
+                if (sum(my_hist[-L-1:-1]) > sum(my_hist[-rli:-rli+L])):
+                    lr=lr*0.5
+                    print('Reduce Learning rate',lr,len(my_hist[-L-1:-1]),len(my_hist[-rli:-rli+L]))
+                    my_hist=[]
+                    
+                    fp.write('Reduce Learning rate: %f \n' %lr)
+                        
+            #early stop        
+            if(len(my_hist) > estop  and lr <= min_lr):
+                if ( (sum(my_hist[-estop:-estop+L]) - sum(my_hist[-L-1:-1])) < (e_eps*L) ):
+                    print ('Early STOP STOP STOP')
+                    fp.write('Early STOP STOP STOP')
+                    nIter=count
+                    
+            #print
+            elapsed = time.time() - start_time
+            print('It: %d, Loss: %.6e, lr:%0.6f, Time: %.2f' %(count, avg_loss,lr, elapsed))
+            fp.write('It: %d, Loss: %.6e, lr:%0.6f, Time: %.2f \n' %(count, avg_loss,lr, elapsed))    
+            start_time = time.time()
+            
+            #save model
+            if ((count % 10000) ==0):
+                model.save_model(count)
+                
+       
+        #final_optimization using lbfgsb
+        if (lbfgs==True):
+                    
+            tf_dict = {self.x_tf: self.x, self.y_tf: self.y, self.r_tf: self.r,
+                       self.u_tf: self.u, self.v_tf: self.v, self.p_tf: self.p}            
+                
             self.optimizer.minimize(self.sess,
                                     feed_dict = tf_dict,
                                     fetches = [self.loss],
                                     loss_callback = self.callback)
+ 
 
-        
+        fp.close()
+            
     
     def predict(self, x_star, y_star,r_star):
         
@@ -186,16 +228,17 @@ class PhysicsInformedNN:
         
         return u_star, v_star, p_star
 
-    def save_model(self):
-        
-        saver = tf.train.Saver()
-        saver.save(self.sess,'./tf_model/model')        
+    def save_model(self,count):
+        j=0
+        if (j==0):
+            saver = tf.train.Saver()
+            j=1
+            
+        saver.save(self.sess,'./tf_model/model_%d'%count)        
         
 if __name__ == "__main__": 
       
-        
-    layers = [3, 50, 50, 50, 50, 50, 50, 3]
-    
+           
     # Load Data
     #load data
     xtmp=[]
@@ -205,8 +248,8 @@ if __name__ == "__main__":
     vtmp=[]
     ptmp=[]
     
-    relist=[100,200,400,600,800,900]
-    for ii in range(6):
+    relist=[100,200,400,600,1000,2000,4000,6000,8000,9000]
+    for ii in range(len(relist)):
         #x,y,Re,u,v
         with open('./data_file_ldc/cavity_Re%s.pkl'%relist[ii], 'rb') as infile:
             result = pickle.load(infile,encoding='bytes')
@@ -222,7 +265,7 @@ if __name__ == "__main__":
     utmp=np.asarray(utmp)
     vtmp=np.asarray(vtmp)
     ptmp=np.asarray(ptmp) 
-    reytmp=np.asarray(reytmp)/1000.    
+    reytmp=np.asarray(reytmp)/10000.    
        
     x = xtmp[:,None] # NT x 1
     y = ytmp[:,None] # NT x 1
@@ -237,55 +280,25 @@ if __name__ == "__main__":
     ######################################################################
     # Training Data    
     
-    N_train=600
+    N_train=1000
+    
     idx = np.random.choice(len(xtmp), N_train, replace=False)
     x_train = x[idx,:]
     y_train = y[idx,:]
-    u_train = u[idx,:]
-    v_train = v[idx,:]
     r_train = r[idx,:]
     
+    u_train = u[idx,:]
+    v_train = v[idx,:]
+    p_train = p[idx,:]
+
+    
     # Training
-    model = PhysicsInformedNN(x_train, y_train, r_train, u_train, v_train, layers)
-#    model.train(20000,0.001)
-#    model.train(30000,0.0001)   
-#    model.train(30000,0.00001)     
-#    model.train(100000,0.000001,True)  
+    model = PhysicsInformedNN(x_train, y_train, r_train, u_train, v_train, p_train)
+ 
+    model.train(30000, True)  
    
     
-#    model.save_model()
-
-    
-#    # Prediction
-#    u_pred, v_pred, p_pred = model.predict(xtmp[:,None], ytmp[:,None], reytmp[:,None])
-#                                        
-#    #save file
-#    filepath='./pred/ldc/'
-#    coord=[]  
-#    # ref:[x,y,z,ux,uy,uz,k,ep,nu
-#    info=['xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info']
-#
-#    data1 = [xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info]
-#    
-#    with open(filepath+'pred_ldc_xxx.pkl', 'wb') as outfile1:
-#        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
-
-
-    u_pred, v_pred, p_pred = model.predict(xtmp[:,None], ytmp[:,None], reytmp[:,None])
-    
-    plt.figure()
-    #plt.tricontourf(xtmp,ytmp,u_pred[:,0])
-    plt.plot(x_train,y_train,'og')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.xlim([0,1])
-    plt.ylim([0,1])
-    plt.savefig('points.png')
-    plt.show()
-    
-    plt.figure()
-    plt.tricontourf(xtmp,ytmp,utmp)
-    plt.show()    
+    model.save_model(000000)
 
     print("--- %s seconds ---" % (time.time() - start_time))
     

@@ -79,19 +79,22 @@ for ii in range(len(flist)):
     p=np.asarray(p) 
     reytmp=np.asarray(reytmp)/1000 
 
+    u_pred, v_pred, p_pred = model.predict(xtmp[:,None], ytmp[:,None], reytmp[:,None])
+
+
     X.append(xtmp)
     Y.append(ytmp)
     Re.append(reytmp)
-    U.append(u)
-    V.append(v)
-    P.append(p)
+    U.append(u_pred)
+    V.append(v_pred)
+    P.append(p_pred)
     
 # ref:[x,y,z,ux,uy,uz,k,ep,nu
 info=['X, Y, Re, U, V, P, flist, re_train, info']
 
 data1 = [X, Y, Re, U, V, P, flist, re_train, info]
     
-with open('pred_ldc_100_2000.pkl', 'wb') as outfile1:
+with open('pred_ldc_re_100_2000.pkl', 'wb') as outfile1:
     pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
 

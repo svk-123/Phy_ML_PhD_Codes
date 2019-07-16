@@ -50,7 +50,7 @@ p_pred=[]
 u_pred=[]
 v_pred=[]
 
-flist=['rexxx']
+flist=['re100']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./pred/ldc/pred_ldc_%s.pkl'%flist[ii], 'rb') as infile:

@@ -57,7 +57,7 @@ v_pred=[]
 flist=['re100']
 for ii in range(len(flist)):
     #x,y,Re,u,v
-    with open('./pred/airfoil/pred_naca0006_100_0_around.pkl', 'rb') as infile:
+    with open('./pred/airfoil/pred_naca0006_re100.pkl', 'rb') as infile:
         result = pickle.load(infile)
     xtmp.extend(result[0])
     ytmp.extend(result[1])

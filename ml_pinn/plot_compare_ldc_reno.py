@@ -44,9 +44,6 @@ matplotlib.rc('ytick', labelsize=18)
 
 
 
-
-
-
 def kextract(xtmp,ytmp,u,u_pred,v,v_pred):
     
     #LinearNDinterpolator
@@ -149,15 +146,14 @@ for ii in range(len(flist)):
     P=result1[5]    
     
 idx=np.argwhere(flist==flist_idx)[0][0]
-ya,u1a,u2a,xb,v1a,v2a = kextract(xtmp,ytmp,u,kout[:,0],v,kout[:,1])
+kya,ku1a,ku2a,kxb,kv1a,kv2a = kextract(xtmp,ytmp,u,kout[:,0],v,kout[:,1])
 pya,pu1a,pu2a,pxb,pv1a,pv2a = kextract(X[idx],Y[idx],u,U[idx],v,V[idx])
-
 
 #plot
 def line_plot1():
     plt.figure(figsize=(6, 5), dpi=100)
-    plt0, =plt.plot(u1a,ya,'-og',linewidth=3,label='true')
-    plt0, =plt.plot(u2a,ya,'r',linewidth=3,label='NN')
+    plt0, =plt.plot(ku1a,kya,'-og',linewidth=3,label='true')
+    plt0, =plt.plot(ku2a,kya,'r',linewidth=3,label='NN')
     plt0, =plt.plot(pu2a,pya,'b',linewidth=3,label='PINN')
     plt.legend(fontsize=20)
     plt.xlabel('u-velocity',fontsize=20)
@@ -171,8 +167,8 @@ def line_plot1():
     
 def line_plot2():
     plt.figure(figsize=(6, 5), dpi=100)
-    plt0, =plt.plot(xb,v1a,'-og',linewidth=3,label='true')
-    plt0, =plt.plot(xb,v2a,'r',linewidth=3,label='NN')    
+    plt0, =plt.plot(kxb,kv1a,'-og',linewidth=3,label='true')
+    plt0, =plt.plot(kxb,kv2a,'r',linewidth=3,label='NN')    
     plt0, =plt.plot(pxb,pv2a,'b',linewidth=3,label='PINN')
     plt.legend(fontsize=20)
     plt.xlabel('X ',fontsize=20)
@@ -184,6 +180,45 @@ def line_plot2():
     plt.savefig('./plot/%s-v'%(flist[ii]), format='png',bbox_inches='tight', dpi=100)
     plt.show()     
         
+    
+#plot
+def plot(xp,yp,zp,nc,name):
+
+    plt.figure(figsize=(6, 5), dpi=100)
+    #cp = pyplot.tricontour(ys, zs, pp,nc)
+    cp = plt.tricontour(xp,yp,zp,nc,linewidths=0.3,colors='k',zorder=5)
+    cp = plt.tricontourf(xp,yp,zp,nc,cmap=cm.jet,zorder=0)
+    # v= np.linspace(0, 0.05, 15, endpoint=True)
+    #cp = plt.tricontourf(xp,yp,zp,v,cmap=cm.jet,extend='both')
+    #cp = pyplot.tripcolor(ys, zs, pp)
+    #cp = pyplot.scatter(ys, zs, pp)
+    #pyplot.clabel(cp, inline=False,fontsize=8)
+    plt.colorbar()
+    #plt.title('%s  '%flist[ii]+name)
+    plt.xlabel('X ',fontsize=20)
+    plt.ylabel('Y ',fontsize=20)
+    plt.savefig('./plot/%s'%flist[ii]+name, format='png',bbox_inches='tight', dpi=100)
+    plt.show()
+          
+#plot(xtmp,ytmp,u,20,'u-cfd')
+#plot(xtmp,ytmp,kout[:,0],20,'u-nn')
+#plot(xtmp,ytmp,U[idx][:,0],20,'u-pinn')
+#plot(xtmp,ytmp,abs(u-kout[:,0]),20,'u-error-nn')
+#plot(xtmp,ytmp,abs(u-U[idx][:,0]),20,'u-error-pinn')
+#    
+#plot(xtmp,ytmp,v,20,'v-cfd')
+#plot(xtmp,ytmp,kout[:,1],20,'v-nn')
+#plot(xtmp,ytmp,V[idx][:,0],20,'v-pinn')
+#plot(xtmp,ytmp,abs(u-kout[:,1]),20,'v-error-nn')
+#plot(xtmp,ytmp,abs(u-U[idx][:,0]),20,'v-error-pinn')
+
+    
+    
+    
+    
+    
+    
+    
 line_plot1()
 line_plot2()
 

@@ -37,41 +37,65 @@ import pandas
 from scipy import interpolate
 from numpy import linalg as LA
 import matplotlib
+import tensorflow as tf
+
 matplotlib.rc('xtick', labelsize=18) 
 matplotlib.rc('ytick', labelsize=18) 
 
+
+
+# Load Data
 #load data
 xtmp=[]
 ytmp=[]
-p=[]
-u=[]
-v=[]
-p_pred=[]
-u_pred=[]
-v_pred=[]
-
-flist=['re100']
-for ii in range(len(flist)):
+reytmp=[]
+utmp=[]
+vtmp=[]
+ptmp=[]
+flist=['re100']    
+for ii in range(1):
     #x,y,Re,u,v
-    with open('./pred/ldc/pred_ldc_%s.pkl'%flist[ii], 'rb') as infile:
+    with open('./data_file_ldc/cavity_Re100.pkl', 'rb') as infile:
         result = pickle.load(infile)
     xtmp.extend(result[0])
     ytmp.extend(result[1])
-    p.extend(result[2])
-    u.extend(result[3])
-    v.extend(result[4])    
-    p_pred.extend(result[5])
-    u_pred.extend(result[6])
-    v_pred.extend(result[7]) 
+    reytmp.extend(result[2])
+    utmp.extend(result[3])
+    vtmp.extend(result[4])
+    ptmp.extend(result[5])   
+        
+    xtmp=np.asarray(xtmp)
+    ytmp=np.asarray(ytmp)
+    utmp=np.asarray(utmp)
+    vtmp=np.asarray(vtmp)
+    ptmp=np.asarray(ptmp) 
+           
+    x = xtmp[:,None] # NT x 1
+    y = ytmp[:,None] # NT x 1
     
-xtmp=np.asarray(xtmp)
-ytmp=np.asarray(ytmp)
-p=np.asarray(p)
-u=np.asarray(u)
-v=np.asarray(v)
-p_pred=np.asarray(p_pred)
-u_pred=np.asarray(u_pred)
-v_pred=np.asarray(v_pred)
+    u = utmp[:,None] # NT x 1
+    v = vtmp[:,None] # NT x 1
+    p = ptmp[:,None] # NT x 1
+
+
+
+
+
+#session-run
+graph = tf.get_default_graph() 
+
+#load model
+with tf.Session() as sess:
+    
+    
+    new_saver = tf.train.import_meta_graph('./tf_model_nscc/model.meta')
+    new_saver.restore(sess, tf.train.latest_checkpoint('./tf_model_nscc/'))
+
+    tf_dict = {'ipt0:0': xtmp[:,None], 'ipt1:0': ytmp[:,None]}
+    op_to_load = graph.get_tensor_by_name('prediction/BiasAdd:0')    
+    
+    #uvp
+    tout = sess.run(op_to_load, tf_dict)
 
 
 #plot
@@ -123,12 +147,12 @@ def plot(xp,yp,zp,nc,name):
     plt.show()
           
 plot(xtmp,ytmp,u[:,0],20,'u-cfd')
-plot(xtmp,ytmp,u_pred[:,0],20,'u-nn')
-plot(xtmp,ytmp,abs(u[:,0]-u_pred[:,0]),20,'u-error')
+plot(xtmp,ytmp,tout[:,0],20,'u-nn')
+plot(xtmp,ytmp,abs(u[:,0]-tout[:,0]),20,'u-error')
     
 plot(xtmp,ytmp,v[:,0],20,'v-cfd')
-plot(xtmp,ytmp,v_pred[:,0],20,'v-nn')
-plot(xtmp,ytmp,abs(v[:,0]-v_pred[:,0]),20,'v-error')
+plot(xtmp,ytmp,tout[:,1],20,'v-nn')
+plot(xtmp,ytmp,abs(v[:,0]-tout[:,1]),20,'v-error')
 
 
 #LinearNDinterpolator
@@ -147,7 +171,7 @@ for i in range(len(ya)):
     u1b[i]=f1u(xb[i],yb[i])
 
 print ('interpolation-2...')      
-f2u=interpolate.LinearNDInterpolator(pD,u_pred[:,0])
+f2u=interpolate.LinearNDInterpolator(pD,tout[:,0])
 
 u2a=np.zeros((len(ya)))
 u2b=np.zeros((len(ya)))
@@ -165,7 +189,7 @@ for i in range(len(ya)):
     v1b[i]=f1v(xa[i],ya[i])
 
 print ('interpolation-4...')      
-f2v=interpolate.LinearNDInterpolator(pD,v_pred[:,0])
+f2v=interpolate.LinearNDInterpolator(pD,tout[:,1])
 
 v2a=np.zeros((len(ya)))
 v2b=np.zeros((len(ya)))

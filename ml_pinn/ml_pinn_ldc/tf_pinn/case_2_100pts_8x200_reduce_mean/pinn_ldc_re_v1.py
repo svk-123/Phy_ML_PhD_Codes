@@ -1,3 +1,11 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jul 17 20:49:13 2019
+
+@author: vino
+"""
+
 """
 @author: Maziar Raissi
 """
@@ -57,12 +65,12 @@ class PhysicsInformedNN:
          
         self.u_pred, self.v_pred, self.p_pred, self.f_c_pred, self.f_u_pred, self.f_v_pred = self.net_NS(self.x_tf, self.y_tf, self.r_tf)
         
-        self.loss = tf.reduce_sum(tf.square(self.u_tf - self.u_pred)) + \
-                    tf.reduce_sum(tf.square(self.v_tf - self.v_pred)) + \
-                    tf.reduce_sum(tf.square(self.p_tf - self.p_pred)) + \
-                    tf.reduce_sum(tf.square(self.f_c_pred)) + \
-                    tf.reduce_sum(tf.square(self.f_u_pred)) + \
-                    tf.reduce_sum(tf.square(self.f_v_pred))
+        self.loss = tf.reduce_mean(tf.square(self.u_tf - self.u_pred)) + \
+                    tf.reduce_mean(tf.square(self.v_tf - self.v_pred)) + \
+                    tf.reduce_mean(tf.square(self.p_tf - self.p_pred)) + \
+                    tf.reduce_mean(tf.square(self.f_c_pred)) + \
+                    tf.reduce_mean(tf.square(self.f_u_pred)) + \
+                    tf.reduce_mean(tf.square(self.f_v_pred))
                     
 #        self.loss_1 = tf.reduce_sum(tf.square(self.u_tf - self.u_pred)) + \
 #                    tf.reduce_sum(tf.square(self.v_tf - self.v_pred)) + \
@@ -84,19 +92,20 @@ class PhysicsInformedNN:
         
         init = tf.global_variables_initializer()
         self.sess.run(init)
-
+        
+        self.saver = tf.train.Saver()
     
     def neural_net(self, X):
 
         #create model
-        l1 = tf.layers.dense(X,  100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(X,  200, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 200, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 200, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 200, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 200, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 200, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 200, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 200, activation=tf.nn.tanh)
         Y  = tf.layers.dense(l1,3,activation=None,name='prediction')
         
         
@@ -128,6 +137,10 @@ class PhysicsInformedNN:
         f_v =  (u*v_x + v*v_y) + p_y - (self.nu/r)*(v_xx + v_yy)
         
         return u, v, p, f_c, f_u, f_v
+    
+    def callback(self, loss):
+        print('Loss: %.3e' % (loss))       
+        self.fp.write('Loss: %.6e \n' % (loss)) 
         
     def get_batch(self,idx,bs,tb):
         
@@ -136,17 +149,18 @@ class PhysicsInformedNN:
       
     def train(self, nIter, lbfgs=False): 
         
-        fp=open('conv.dat','w')
+        self.fp=open('./tf_model/conv.dat','w')
         
 
-        batch_size=50
+        batch_size=100
           
-        total_batch=20
+        total_batch=10
         
         lr=0.001
         min_lr=1e-6
         #reduce lr iter(patience)
         rli=300
+        l_eps=1e-5
         #numbers to avg
         L=50
         #early stop wait
@@ -178,28 +192,28 @@ class PhysicsInformedNN:
             
             #reduce lr
             if(len(my_hist) > rli  and lr > min_lr):
-                if (sum(my_hist[-L-1:-1]) > sum(my_hist[-rli:-rli+L])):
+                if ((sum(my_hist[-rli:-rli+L]) - sum(my_hist[-L-1:-1])) < (l_eps*L) ):
                     lr=lr*0.5
                     print('Reduce Learning rate',lr,len(my_hist[-L-1:-1]),len(my_hist[-rli:-rli+L]))
                     my_hist=[]
                     
-                    fp.write('Reduce Learning rate: %f \n' %lr)
+                    self.fp.write('Reduce Learning rate: %f \n' %lr)
                         
             #early stop        
             if(len(my_hist) > estop  and lr <= min_lr):
                 if ( (sum(my_hist[-estop:-estop+L]) - sum(my_hist[-L-1:-1])) < (e_eps*L) ):
                     print ('Early STOP STOP STOP')
-                    fp.write('Early STOP STOP STOP')
+                    self.fp.write('Early STOP STOP STOP')
                     nIter=count
                     
             #print
             elapsed = time.time() - start_time
             print('It: %d, Loss: %.6e, lr:%0.6f, Time: %.2f' %(count, avg_loss,lr, elapsed))
-            fp.write('It: %d, Loss: %.6e, lr:%0.6f, Time: %.2f \n' %(count, avg_loss,lr, elapsed))    
+            self.fp.write('It: %d, Loss: %.6e, lr:%0.6f, Time: %.2f \n' %(count, avg_loss,lr, elapsed))    
             start_time = time.time()
             
             #save model
-            if ((count % 10000) ==0):
+            if ((count % 5000) ==0):
                 model.save_model(count)
                 
        
@@ -215,7 +229,7 @@ class PhysicsInformedNN:
                                     loss_callback = self.callback)
  
 
-        fp.close()
+        self.fp.close()
             
     
     def predict(self, x_star, y_star,r_star):
@@ -229,12 +243,8 @@ class PhysicsInformedNN:
         return u_star, v_star, p_star
 
     def save_model(self,count):
-        j=0
-        if (j==0):
-            saver = tf.train.Saver()
-            j=1
-            
-        saver.save(self.sess,'./tf_model/model_%d'%count)        
+           
+        self.saver.save(self.sess,'./tf_model/model_%d'%count)        
         
 if __name__ == "__main__": 
       
@@ -251,8 +261,8 @@ if __name__ == "__main__":
     relist=[100,200,400,600,1000,2000,4000,6000,8000,9000]
     for ii in range(len(relist)):
         #x,y,Re,u,v
-        with open('./data_file_ldc/cavity_Re%s.pkl'%relist[ii], 'rb') as infile:
-            result = pickle.load(infile,encoding='bytes')
+        with open('../data_file_ldc_st/cavity_Re%s.pkl'%relist[ii], 'rb') as infile:
+            result = pickle.load(infile)
         xtmp.extend(result[0])
         ytmp.extend(result[1])
         reytmp.extend(result[2])
@@ -295,9 +305,8 @@ if __name__ == "__main__":
     # Training
     model = PhysicsInformedNN(x_train, y_train, r_train, u_train, v_train, p_train)
  
-    model.train(30000, True)  
-   
-    
+    model.train(50000, True)  
+       
     model.save_model(000000)
 
     print("--- %s seconds ---" % (time.time() - start_time))

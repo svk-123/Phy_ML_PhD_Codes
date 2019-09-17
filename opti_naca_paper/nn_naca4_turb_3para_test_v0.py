@@ -34,6 +34,7 @@ import pickle
 import pandas
 
 import os, shutil
+from numpy import linalg as LA
 
 
 
@@ -50,7 +51,7 @@ for ii in [1]:
     
     data_file='./data_file/naca4_clcd_turb_st_3para.pkl'
     with open(data_file, 'rb') as infile:
-        result = pickle.load(infile,encoding='bytes')
+        result = pickle.load(infile)
     out_cm.extend(result[0])   
     out_cd.extend(result[1])
     out_cl.extend(result[2])
@@ -75,14 +76,15 @@ inp_aoa=inp_aoa/14.0
 my_inp=np.concatenate((inp_reno[:,None],inp_aoa[:,None],inp_para[:,:]),axis=1)
 my_out=np.concatenate((out_cd[:,None],out_cl[:,None]),axis=1)
 
-model_test=load_model('./selected_model/turb_3para_st_6x30/model_sf_1200_0.00004442_0.00004694.hdf5') 
+nname='relu-6x80'
+model_test=load_model('./selected_model_0p9/turb_naca4_3para_st_6x80_relu/model/final_sf.hdf5') 
 out=model_test.predict([my_inp]) 
 
-np.random.seed(123534)
+np.random.seed(123)
 
 I = np.arange(len(my_inp))
 np.random.shuffle(I)
-n=18800
+n=18000
 
 my_out_train= my_out[I][:n] 
 my_out_val = my_out[I][n:] 
@@ -90,52 +92,59 @@ my_out_val = my_out[I][n:]
 out_train= out[I][:n]
 out_val = out[I][n:]
 
-plt.figure(figsize=(6,5),dpi=100)
-plt.plot([-0.0,1],[-0.0,1],'k',lw=3)
-plt.plot(my_out_train[:,0]*0.9,out_train[:,0]*0.9,'og',markersize=3)
-plt.xticks(fontsize=16)
-plt.yticks(fontsize=16)
-plt.xlabel('True $C_l$',fontsize=20)
-plt.ylabel('Predicted $C_l$',fontsize=20)  
-plt.savefig('./plot/naca_cl_train.tiff',format='tiff' ,bbox_inches='tight',dpi=300)
-plt.show()
+tmp1=abs(my_out_train[:,0]-out_train[:,0])
+cd_train=(LA.norm(tmp1)/LA.norm(my_out_train[:,0]) )*100 
+tmp2=abs(my_out_val[:,0]-out_val[:,0])
+cd_val=(LA.norm(tmp2)/LA.norm(my_out_val[:,0]) )*100 
 
-plt.figure(figsize=(6,5),dpi=100)
-plt.plot([-0.0,1],[-0.0,1],'k',lw=3)
-plt.plot(my_out_val[:,0]*0.9,out_val[:,0]*0.9,'or',markersize=3)
-plt.xticks(fontsize=16)
-plt.yticks(fontsize=16)
-plt.xlabel('True $C_l$',fontsize=20)
-plt.ylabel('Predicted $C_l$',fontsize=20)  
-plt.savefig('./plot/naca_cl_test.tiff',format='tiff' ,bbox_inches='tight',dpi=300)
-plt.show()
+tmp3=abs(my_out_train[:,1]-out_train[:,1])
+cl_train=(LA.norm(tmp3)/LA.norm(my_out_train[:,1]) )*100 
+tmp4=abs(my_out_val[:,1]-out_val[:,1])
+cl_val=(LA.norm(tmp4)/LA.norm(my_out_val[:,1]) )*100 
 
+print('cd_train', cd_train)
+print('cd_val', cd_val)
+print('cl_train', cl_train)
+print('cl_val', cl_val)
+
+
+
+
+l1=1
+l2=1
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot([-0.2,.5],[-0.2,.5],'k',lw=3)
-plt.plot(my_out_train[:,1]*0.25,out_train[:,1]*0.25,'og',markersize=3)
+plt.plot([-0.0,0.28],[-0.0,0.28],'k',lw=2)
+plt.plot(my_out_train[:,0]*0.25,out_train[:,0]*0.25,'g',marker='o',mew=1.5, mfc='None',markevery=l1,lw=0,ms=8,label='Train')
+plt.plot(my_out_val[:,0]*0.25,out_val[:,0]*0.25,'r',marker='+',mew=1.5, mfc='None',markevery=l2,lw=0,ms=6,label='Val')
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
+plt.legend(fontsize=16,frameon=False, shadow=False, fancybox=False)
 plt.xlabel('True $C_d$',fontsize=20)
 plt.ylabel('Predicted $C_d$',fontsize=20)  
-plt.savefig('./plot/naca_cd_train.tiff',format='tiff' ,bbox_inches='tight',dpi=300)
+plt.savefig('./plot/naca_cd-%s.tiff'%(nname),format='tiff' ,bbox_inches='tight',dpi=300)
 plt.show()
 
+
+l1=1
+l2=1
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot([-0.2,.5],[-0.2,.5],'k',lw=3)
-plt.plot(my_out_val[:,1]*0.25,out_val[:,1]*0.25,'or',markersize=3)
+plt.plot([-0.4,1.6],[-0.4,1.6],'k',lw=2)
+plt.plot(my_out_train[:,1]*0.9,out_train[:,1]*0.9,'g',marker='o',mew=1.5, mfc='None',markevery=l1,lw=0,ms=8,label='Train')
+plt.plot(my_out_val[:,1]*0.9,out_val[:,1]*0.9,'r',marker='+',mew=1.5, mfc='None',markevery=l2,lw=0,ms=6,label='Val')
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
-plt.xlabel('True $C_d$',fontsize=20)
-plt.ylabel('Predicted $C_d$',fontsize=20)  
-plt.savefig('./plot/naca_cd_val.tiff',format='tiff' ,bbox_inches='tight',dpi=300)
+plt.legend(fontsize=16,frameon=False, shadow=False, fancybox=False)
+plt.xlabel('True $C_l$',fontsize=20)
+plt.ylabel('Predicted $C_l$',fontsize=20)  
+plt.savefig('./plot/naca_cl-%s.tiff'%(nname),format='tiff' ,bbox_inches='tight',dpi=300)
 plt.show()
-
-
-
-
-
-
-
-
-
-
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#

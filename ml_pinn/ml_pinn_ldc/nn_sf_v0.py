@@ -30,11 +30,11 @@ from sklearn import preprocessing
 from keras.layers.advanced_activations import LeakyReLU, PReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 from keras.callbacks import TensorBoard
-import cPickle as pickle
+import  pickle
 import pandas
 
 import os, shutil
-folder = './model/'
+folder = './keras_model/'
 for the_file in os.listdir(folder):
     file_path = os.path.join(folder, the_file)
     try:
@@ -51,10 +51,10 @@ reytmp=[]
 utmp=[]
 vtmp=[]
 ptmp=[]
-flist=['Re100','Re200','Re400','Re600','Re1000','Re2000','Re3000','Re4000','Re5000','Re7000','Re8000','Re9000']
+flist=['Re100','Re200','Re400','Re600','Re1000','Re2000','Re4000','Re6000','Re8000','Re9000']
 for ii in range(len(flist)):
     #x,y,Re,u,v
-    with open('./data/cavity_%s_part.pkl'%flist[ii], 'rb') as infile:
+    with open('./data_file_st/cavity_%s.pkl'%flist[ii], 'rb') as infile:
         result = pickle.load(infile)
     xtmp.extend(result[0])
     ytmp.extend(result[1])
@@ -75,7 +75,7 @@ ptmp=np.asarray(ptmp)
 N= len(utmp)
 I = np.arange(N)
 np.random.shuffle(I)
-n=1200 + 300
+n=600
 
 #normalize
 reytmp=reytmp/10000.
@@ -90,24 +90,24 @@ ttr1 = my_out[I][:n]
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(3,))
-xx =Dense(50,  kernel_initializer='random_normal', activation='tanh')(aa)
-xx =Dense(50, activation='tanh')(xx)
-xx =Dense(50, activation='tanh')(xx)
-xx =Dense(50, activation='tanh')(xx)
-xx =Dense(50, activation='tanh')(xx)
-xx =Dense(50, activation='tanh')(xx)
-xx =Dense(50, activation='tanh')(xx)
-xx =Dense(50, activation='tanh')(xx)
+xx =Dense(100,  kernel_initializer='random_normal', activation='tanh')(aa)
+xx =Dense(100, activation='tanh')(xx)
+xx =Dense(100, activation='tanh')(xx)
+xx =Dense(100, activation='tanh')(xx)
+xx =Dense(100, activation='tanh')(xx)
+xx =Dense(100, activation='tanh')(xx)
+xx =Dense(100, activation='tanh')(xx)
+xx =Dense(100, activation='tanh')(xx)
 g =Dense(3, activation='linear')(xx)
 
 #model = Model(inputs=a, outputs=g)
 model = Model(inputs=[aa], outputs=[g])
 #callbacks
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,patience=50, min_lr=1.0e-8)
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,patience=100, min_lr=1.0e-8)
 
-e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-8, patience=100, verbose=1, mode='auto')
+e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-8, patience=200, verbose=1, mode='auto')
 
-filepath="./model/model_sf_{epoch:02d}_{loss:.6f}_{val_loss:.6f}.hdf5"
+filepath="./keras_model/model_sf_{epoch:02d}_{loss:.6f}_{val_loss:.6f}.hdf5"
 
 chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
                                 save_best_only=False, save_weights_only=False, mode='auto', period=500)
@@ -117,11 +117,11 @@ opt = Adam(lr=5.0e-4,decay=1.0e-12)
 
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
-hist = model.fit([xtr0], [ttr1], validation_split=0.2,\
-                 epochs=5000, batch_size=32,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
+hist = model.fit([xtr0], [ttr1], validation_split=0.167,\
+                 epochs=10000, batch_size=32,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
 
 #save model
-model.save('./model/final_sf.hdf5') 
+model.save('./keras_model/final_sf.hdf5') 
 
 print("\n")
 print("loss = %f to %f"%(np.asarray(hist.history["loss"][:1]),np.asarray(hist.history["loss"][-1:])))
@@ -131,7 +131,7 @@ print("\n")
 print("--- %s seconds ---" % (time.time() - start_time))
 
 data1=[hist.history]
-with open('./model/hist.pkl', 'wb') as outfile:
+with open('./keras_model/hist.pkl', 'wb') as outfile:
     pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
 

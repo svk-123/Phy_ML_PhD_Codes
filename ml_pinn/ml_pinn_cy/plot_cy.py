@@ -17,21 +17,13 @@ import pandas
 from os import listdir
 from os.path import isfile, join
 
-import keras
-from keras.models import Sequential, Model
-from keras.layers.core import Dense, Activation
-from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
-from keras.layers import merge, Input, dot
-from sklearn.metrics import mean_squared_error
-import random
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.io
+import time
+import pickle
 
-from keras.models import model_from_json
-from keras.models import load_model
-from sklearn import preprocessing
-from keras.layers.advanced_activations import LeakyReLU, PReLU
-from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
-from keras.callbacks import TensorBoard
-import  pickle
 import pandas
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.backends.backend_pdf import PdfPages
@@ -54,37 +46,62 @@ p_pred=[]
 u_pred=[]
 v_pred=[]
 
-flist=['re100']
+flist=['re40']
 for ii in range(len(flist)):
     #x,y,Re,u,v
-    with open('./pred/airfoil/pred_naca0006_re100.pkl', 'rb') as infile:
+    with open('./data_file/cy_40_around.pkl', 'rb') as infile:
         result = pickle.load(infile)
     xtmp.extend(result[0])
     ytmp.extend(result[1])
     p.extend(result[2])
     u.extend(result[3])
     v.extend(result[4])    
-    p_pred.extend(result[5])
-    u_pred.extend(result[6])
-    v_pred.extend(result[7]) 
+
     
 xtmp=np.asarray(xtmp)
 ytmp=np.asarray(ytmp)
 p=np.asarray(p)
 u=np.asarray(u)
 v=np.asarray(v)
-p_pred=np.asarray(p_pred)
-u_pred=np.asarray(u_pred)
-v_pred=np.asarray(v_pred)
 
-
-co=np.loadtxt('./data_file/naca0006.dat',skiprows=1)  
+co=np.zeros((100,2))
+theta=np.linspace(0,360,100)
+for i in range(len(theta)):
+    co[i,0]= 0.5*np.cos(np.radians(theta[i]))
+    co[i,1]= 0.5*np.sin(np.radians(theta[i]))  
     
     
+
+#load model
+#session-run
+tf.reset_default_graph    
+graph = tf.get_default_graph() 
+#load model
+with tf.Session() as sess1:
+    
+    path1='./tf_model/'
+    new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
+    new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
+
+    tf_dict = {'input0:0': xtmp[:,None], 'input1:0': ytmp[:,None]}
+
+    op_to_load1 = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')    
+    
+    #uvp
+    tout = sess1.run(op_to_load1, tf_dict)
+
+sess1.close()
+
+
+p_pred=tout[:,2]
+u_pred=tout[:,0]
+v_pred=tout[:,1]
+
+
     
    
 #open pdf file
-fp= PdfPages('plots_airfoil_ts_1.pdf')
+fp= PdfPages('plots_turb_ts_1.pdf')
 
 #plot
 def con_plot():
@@ -92,13 +109,13 @@ def con_plot():
     fig = plt.figure(figsize=(10, 12),dpi=100)
         
     ax1 = fig.add_subplot(3,2,1)
-    cp1 = ax1.tricontourf(xtmp,ytmp,p[:,0],20,cmap=cm.jet)
+    cp1 = ax1.tricontourf(xtmp,ytmp,p,20,cmap=cm.jet)
     ax1.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
     ax1.set_title('p-cfd')
     ax1.set_xlabel('X',fontsize=16)
     ax1.set_ylabel('Y',fontsize=16)
-    ax1.set_xlim([-0.5,1.5])
-    ax1.set_ylim([-0.5,0.5])
+    ax1.set_xlim([-3,5])
+    ax1.set_ylim([-3,3])
     divider = make_axes_locatable(ax1)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar1=plt.colorbar(cp1, cax=cax, orientation='vertical');
@@ -107,13 +124,13 @@ def con_plot():
     ax1.set_aspect(0.9)
     
     ax2 = fig.add_subplot(3,2,2)
-    cp2 = ax2.tricontourf(xtmp,ytmp,p_pred[:,0],20,cmap=cm.jet)
+    cp2 = ax2.tricontourf(xtmp,ytmp,p_pred,20,cmap=cm.jet)
     ax2.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
     ax2.set_title('p-NN')
     ax2.set_xlabel('X',fontsize=16)
     ax2.set_yticks([])
-    ax2.set_xlim([-0.5,1.5])
-    ax2.set_ylim([-0.5,0.5])
+    ax2.set_xlim([-3,5])
+    ax2.set_ylim([-3,3])
     divider = make_axes_locatable(ax2)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar2=plt.colorbar(cp2, cax=cax, orientation='vertical');
@@ -121,13 +138,13 @@ def con_plot():
     ax2.set_aspect(0.9)
         
     ax3 = fig.add_subplot(3,2,3)
-    cp3 = ax3.tricontourf(xtmp,ytmp,u[:,0],20,cmap=cm.jet)
+    cp3 = ax3.tricontourf(xtmp,ytmp,u,20,cmap=cm.jet)
     ax3.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
     ax3.set_title('u-cfd')
     ax3.set_xlabel('X',fontsize=16)
     ax3.set_ylabel('Y',fontsize=16)
-    ax3.set_xlim([-0.5,1.5])
-    ax3.set_ylim([-0.5,0.5])
+    ax3.set_xlim([-3,5])
+    ax3.set_ylim([-3,3])
     divider = make_axes_locatable(ax3)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar3=plt.colorbar(cp3, cax=cax, orientation='vertical');
@@ -135,13 +152,13 @@ def con_plot():
     ax3.set_aspect(0.9)
         
     ax4 = fig.add_subplot(3,2,4)
-    cp4 = ax4.tricontourf(xtmp,ytmp,u_pred[:,0],20,cmap=cm.jet)
+    cp4 = ax4.tricontourf(xtmp,ytmp,u_pred,20,cmap=cm.jet)
     ax4.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
     ax4.set_title('u-NN')
     ax4.set_xlabel('X',fontsize=16)
     ax4.set_yticks([])
-    ax4.set_xlim([-0.5,1.5])
-    ax4.set_ylim([-0.5,0.5])
+    ax4.set_xlim([-3,5])
+    ax4.set_ylim([-3,3])
     divider = make_axes_locatable(ax4)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
@@ -149,13 +166,13 @@ def con_plot():
     ax4.set_aspect(0.9)      
         
     ax5 = fig.add_subplot(3,2,5)
-    cp5 = ax5.tricontourf(xtmp,ytmp,v[:,0],20,cmap=cm.jet)
+    cp5 = ax5.tricontourf(xtmp,ytmp,v,20,cmap=cm.jet)
     ax5.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
     ax5.set_title('v-cfd')
     ax5.set_xlabel('X',fontsize=16)
     ax5.set_ylabel('Y',fontsize=16)
-    ax5.set_xlim([-0.5,1.5])
-    ax5.set_ylim([-0.5,0.5])
+    ax5.set_xlim([-3,5])
+    ax5.set_ylim([-3,3])
     divider = make_axes_locatable(ax5)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar5=plt.colorbar(cp5, cax=cax, orientation='vertical');
@@ -163,33 +180,34 @@ def con_plot():
     ax5.set_aspect(0.9)
         
     ax6 = fig.add_subplot(3,2,6)
-    cp6 = ax6.tricontourf(xtmp,ytmp,v_pred[:,0],20,cmap=cm.jet)
+    cp6 = ax6.tricontourf(xtmp,ytmp,v_pred,20,cmap=cm.jet)
     ax6.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
     ax6.set_title('v-NN')
     ax6.set_xlabel('X',fontsize=16)
     ax6.set_yticks([])
-    ax6.set_xlim([-0.5,1.5])
-    ax6.set_ylim([-0.5,0.5])
+    ax6.set_xlim([-3,5])
+    ax6.set_ylim([-3,3])
     divider = make_axes_locatable(ax6)
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar6=plt.colorbar(cp6, cax=cax, orientation='vertical');
     cbar6.ax.tick_params(labelsize=10)
     ax6.set_aspect(0.9)
     
-    fig.suptitle(" NACA 0006 , Re=100", fontsize=20)
+    fig.suptitle(" Re=40 at t=0", fontsize=20)
     
     plt.subplots_adjust( wspace=0.2,hspace=0.25)       
-    plt.savefig('airfoil.png',format='png',dpi=300)
+    plt.savefig('cy.png',format='png',dpi=300)
     plt.close()
 
-con_plot()  
+
+con_plot()    
 
 def plot_cp():
         
     #LinearNDinterpolator
     pD=np.asarray([xtmp,ytmp]).transpose()
 
-    a0=17
+    a0=50
     
     xu=co[:a0+1,0]
     yu=co[:a0+1,1]
@@ -202,7 +220,7 @@ def plot_cp():
 
     #for -p
     print ('interpolation-1...')      
-    f1p=interpolate.LinearNDInterpolator(pD,p[:,0])
+    f1p=interpolate.LinearNDInterpolator(pD,p)
         
     pu1=np.zeros(len(xu))
     for j in range(len(xu)):
@@ -212,7 +230,7 @@ def plot_cp():
         pl1[j]=f1p(xl[j],yl[j])
         
     print ('interpolation-2...')      
-    f2p=interpolate.LinearNDInterpolator(pD,p_pred[:,0])
+    f2p=interpolate.LinearNDInterpolator(pD,p_pred)
       
     pu2=np.zeros(len(xu))
     for j in range(len(xu)):
@@ -221,24 +239,22 @@ def plot_cp():
     for j in range(len(xl)):
        pl2[j]=f2p(xl[j],yl[j])    
     
-    mei=1       
+    mei=2       
     plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(xu,pu1,'og',linewidth=3,markevery=mei,label='CFD-upper')
-    plt.plot(xl,pl1,'ob',linewidth=3,markevery=mei,label='CFD-lower') 
-    plt.plot(xu,pu2,'r',linewidth=3,label='NN-upper')
-    plt.plot(xl,pl2,'k',linewidth=3,label='NN-lower')  
+    plt.plot(xu,pu1,'og',linewidth=3,markevery=mei,label='CFD')
+    #plt.plot(xl,pl1,'ob',linewidth=3,markevery=mei,label='CFD-lower') 
+    plt.plot(xu,pu2,'r',linewidth=3,label='NN')
+    #plt.plot(xl,pl2,'k',linewidth=3,label='NN-lower')  
     plt.xlabel('X',fontsize=20)
     plt.ylabel('P',fontsize=20)
-    plt.title('Pressure Dist. over airfoil')
+    plt.title('Pressure Dist. over cylinder')
     plt.legend(fontsize=14)
-    plt.savefig('./plot/cp_re100.png',format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./cp_re40.png',format='png',bbox_inches='tight', dpi=100)
     plt.show()
     
-plot_cp()  
-    
-    
-    
-    
+plot_cp()
+
+
     
 fp.close()    
     

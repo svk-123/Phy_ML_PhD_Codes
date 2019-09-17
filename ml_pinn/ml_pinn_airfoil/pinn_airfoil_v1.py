@@ -229,8 +229,8 @@ if __name__ == "__main__":
     
     for ii in range(1):
         #x,y,Re,u,v
-        with open('./data_file/naca0006_100_0_part.pkl', 'rb') as infile:
-            result = pickle.load(infile,encoding='bytes')
+        with open('./data_file/cy_40_wake.pkl', 'rb') as infile:
+            result = pickle.load(infile)
         xtmp.extend(result[0])
         ytmp.extend(result[1])
         ptmp.extend(result[2])
@@ -250,21 +250,21 @@ if __name__ == "__main__":
     v = vtmp[:,None] # NT x 1
     p = ptmp[:,None] # NT x 1
     
-    #load BC data
-    xy_bc=np.loadtxt('./data_file/naca0006.dat',skiprows=1)
-    x_bc=xy_bc[:,0:1]
-    y_bc=xy_bc[:,1:2]
-    u_bc=x_bc.copy()
-    v_bc=y_bc.copy()
-    u_bc[:,:] = 0
-    v_bc[:,:] = 0
+#    #load BC data
+#    xy_bc=np.loadtxt('./data_file/naca0006.dat',skiprows=1)
+#    x_bc=xy_bc[:,0:1]
+#    y_bc=xy_bc[:,1:2]
+#    u_bc=x_bc.copy()
+#    v_bc=y_bc.copy()
+#    u_bc[:,:] = 0
+#    v_bc[:,:] = 0
           
         
     ######################################################################
     ######################## Noiseles Data ###############################
     ######################################################################
     # Training Data    
-    N_train=1000
+    N_train=10
     idx = np.random.choice(len(xtmp), N_train, replace=False)
     x_train = x[idx,:]
     y_train = y[idx,:]
@@ -285,34 +285,32 @@ if __name__ == "__main__":
 #    u_train = u[idx,:]
 #    v_train = v[idx,:]
 
-    # Training
-    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train)
-    
-    model.train(100000)
-    
-    model.save_model()
-    
-    # Prediction
-    u_pred, v_pred, p_pred = model.predict(xtmp[:,None], ytmp[:,None])
-                                        
-    #save file
-    filepath='./pred/airfoil/'
-    coord=[]  
-    # ref:[x,y,z,ux,uy,uz,k,ep,nu
-    info=['xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info']
-
-    data1 = [xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info]
-    
-    with open(filepath+'pred_naca0006_re100.pkl', 'wb') as outfile1:
-        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
+#    # Training
+#    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train)
+#    
+#    model.train(100000)
+#    
+#    model.save_model()
+#    
+#    # Prediction
+#    u_pred, v_pred, p_pred = model.predict(xtmp[:,None], ytmp[:,None])
+#                                        
+#    #save file
+#    filepath='./pred/airfoil/'
+#    coord=[]  
+#    # ref:[x,y,z,ux,uy,uz,k,ep,nu
+#    info=['xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info']
+#
+#    data1 = [xtmp, ytmp, p, u, v, p_pred, u_pred, v_pred, x_train, y_train, info]
+#    
+#    with open(filepath+'pred_naca0006_re100.pkl', 'wb') as outfile1:
+#        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
         
     plt.figure()
-    plt.tricontourf(xtmp,ytmp,u_pred[:,0])
+    plt.tricontourf(xtmp,ytmp,utmp)
     plt.show()
     
-    plt.figure()
-    plt.tricontourf(xtmp,ytmp,utmp)
-    plt.show()    
+
 
     
     

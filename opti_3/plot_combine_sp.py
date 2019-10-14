@@ -51,30 +51,38 @@ import matplotlib
 matplotlib.rc('xtick', labelsize=18) 
 matplotlib.rc('ytick', labelsize=18) 
 
-from naca import naca4
 
-path='./result_paper_v2/max_cl_1_tanh/'
-name=['naca0012','naca0014','naca2412','naca3310','naca4510']
+
+path='./result_paper_v7/sp_2_relu_max/'
+name=[]
+for i in os.listdir(path):
+    if os.path.isfile(os.path.join(path,i)) and 'opti' in i:
+        name.append(i.split('_')[1].split('.')[0])
+
+#name=foil
+c=['g','b','y','c','r','m','darkorange','lime','pink','purple','peru','gold','olive','salmon','brown',\
+   'g','b','y','c','r','m','darkorange','lime','pink','purple','peru','gold','olive','salmon','brown']
 
 base=[]
 opti=[]
 
-for ii in range(5):
+for ii in range(len(name)):
     tmp=np.loadtxt(path + 'base_%s.dat'%name[ii])
     base.append(tmp)
     tmp=np.loadtxt(path + 'final_%s.dat'%name[ii])
     opti.append(tmp)
 
 plt.figure(figsize=(6,5),dpi=100)
-for ii in range(5):
+for ii in range(len(name)):
     if(ii==0):
-        plt.plot(base[ii][:,0],base[ii][:,1],'--k',lw=1,label='Base Shapes')
-        plt.plot(opti[ii][:,0],opti[ii][:,1],'g',lw=3,label='Optimized Shapes')
+        #plt.plot(base[ii][:,0],base[ii][:,1],'--k',lw=1,label='Base Shapes')
+        plt.plot(opti[ii][:,0],opti[ii][:,1],'g',lw=2,label='Optimized Shape-%d'%ii)
     else:
-        plt.plot(base[ii][:,0],base[ii][:,1],'--k',lw=1)
-        plt.plot(opti[ii][:,0],opti[ii][:,1],'g',lw=3)    
+        #plt.plot(base[ii][:,0],base[ii][:,1],'--k',lw=1)
+        plt.plot(opti[ii][:,0],opti[ii][:,1],'%s'%c[ii],lw=2,label='Optimized Shape-%d'%ii)    
         
-plt.legend(fontsize=14)
+plt.legend(loc="upper left", bbox_to_anchor=[1, 1], ncol=1, fontsize=14, \
+           frameon=False, shadow=False, fancybox=False,title='')
 plt.xlim([-0.05,1.05])
 plt.ylim([-0.25,0.25])
 plt.xlabel('X',fontsize=16)
@@ -82,8 +90,6 @@ plt.ylabel('Y',fontsize=16)
 plt.savefig(path+'combine.png',bbox_inches='tight',dpi=300)
 plt.show()
 plt.close()
-
-
 
 
 

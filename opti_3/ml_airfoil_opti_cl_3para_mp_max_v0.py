@@ -7,13 +7,14 @@ with new parameters tanh_16_v1:
 
 with new flow prediction network using v1.
 
+maximize cl , while contrain Cd
+
 @author: vinoth
 """
 #based on parameters 
 
 import time
 start_time = time.time()
-
 
 # Python 3.5
 import numpy as np
@@ -94,60 +95,49 @@ model=load_model('./selected_model_0p9/turb_naca4_3para_st_6x80_relu/model/final
 global scaler
 scaler=np.array([6,6,30])
 
-global tar_cl
-global pred_cl
+
 global reno
 global aoa
 global init_cl
+global pred_cl
+global tar_cl
+global tar_cd
+global pred_cd
+global tar_cd
+global init_cd
 
-##mp-1
-#tar_cl=np.asarray([0.645,0.791,0.882,0.904])
-#pred_cl=np.asarray([0,0,0,0])
-#init_cl=np.asarray([0,0,0,0])
-#reno=np.asarray([10000,20000,40000,50000])/100000.
-#aoa=np.asarray([6])/14.
-
-
+path='./result_paper_v7/mp_2_relu_cdc/'
 
 #mp-2
-tar_cl=np.asarray([1.014,1.12,1.15,1.165])
-pred_cl=np.asarray([0,0,0,0])
-init_cl=np.asarray([0,0,0,0])
-reno=np.asarray([20000,40000,50000,60000])/100000.
+tar_cl=np.asarray([1.12,1.15,1.165])
+pred_cl=np.asarray([0,0,0])
+init_cl=np.asarray([0,0,0])
+reno=np.asarray([20000,30000,40000])/100000.
 aoa=np.asarray([6])/14.
 
+tar_cd=np.asarray([0.05,0.05,0.05])
+pred_cd=np.asarray([0,0,0])
 
-
-
-##mp-2old
-#tar_cl=np.asarray([0.54, 0.66, 0.72, 0.76])
-#pred_cl=np.asarray([0,0,0,0])
-#init_cl=np.asarray([0,0,0,0])
-#reno=np.asarray([10000,20000,40000,70000])/100000.
-#aoa=np.asarray([6])/14.
-
-##mp-2
-#tar_cl=np.asarray([1.03, 1.16, 1.24, 1.3])
-#pred_cl=np.asarray([0,0,0,0])
-#init_cl=np.asarray([0,0,0,0])
-#reno=np.asarray([10000,20000,30000,40000])/100000.
-#aoa=np.asarray([8])/14.
-
+final_cl=np.asarray([0,0,0])
+final_cd=np.asarray([0,0,0])
 
 reno=np.asarray(reno)
 aoa=np.asarray(aoa)
 
-np.random.seed(12343)
-#np.random.seed(12345)
+#mp-1-tanh-cdc: 32125
+
+np.random.seed(32125)
+
 I=range(481)
 np.random.shuffle(I)
 #mp2-relu
 #foil=['naca5014','naca5008','naca3012','naca2030','naca2010','naca1416']
-foil=np.unique(name)[I[0:15]]
+foil=np.unique(name)[I[0:10]]
 
-for jj in range(len(foil)):
+for jj in range(10):
     
-    global my_counter
+
+    
     my_counter =0
       
     
@@ -160,8 +150,12 @@ for jj in range(len(foil)):
     def loss(para):
            
         global my_counter  
+        global tar_cd
         global pred_cl
+        global pred_cd
         global init_cl
+        global init_cd
+        
         para=para
     
         x,y=get_coord(para)
@@ -178,24 +172,26 @@ for jj in range(len(foil)):
         out=out*np.asarray([0.25,0.9])
                     
         pred_cl=out[:,1]
+        pred_cd=out[:,0]
         
         print ('Pred_cl:', pred_cl)
+        e1=pred_cd-tar_cd
+        for k in range(3):
+            if e1[k] <=0:
+                e1[k]=0
+
+        e=sum(e1)*10.0 + sum(1.0/pred_cl)
+
         
-#        e1=tar_cl - pred_cl
-#        for i in range(3):
-#            if(e1[i] < 0):
-#                e1[i] = 0
-#                
-#        e=np.sqrt((e1** 2).mean())
+        print ('mse:', e,e1)
         
-        e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
+        fp_conv.write('%s %s %s %s %s\n'%(my_counter,e,pred_cl[0],pred_cl[1]\
+                                             ,pred_cl[2]))    
         
-        print ('mse:', e)
         
-        fp_conv.write('%s %s %s %s %s %s\n'%(my_counter,e,pred_cl[0],pred_cl[1]\
-                                             ,pred_cl[2],pred_cl[3]))    
         if(my_counter == 0):
             init_cl=pred_cl
+            init_cd=pred_cd
             fp_conv.write(' Iter, MSE, Pred_cl 0,1,2,3 \n') 
         my_counter = my_counter +1
         print ('Iter:', my_counter)
@@ -212,7 +208,7 @@ for jj in range(len(foil)):
     
     
     fn=foil[jj]  
-    path='./result_paper_v3/mp_2_relu/'
+
          
     idx=np.argwhere(name=='%s'%fn)
     p1=mypara[idx[0][0],:]/scaler
@@ -225,7 +221,7 @@ for jj in range(len(foil)):
     print('Intial foil = %s' %name[idx[0]])
     
     mylimit=((0,1.1),(0,1.1),(0.2,1.1))
-    res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, tol=0.01, \
+    res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
                    options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
                                      'eps': 0.01, 'maxfun': 100, \
                                      'maxiter': 100, 'maxls': 100})
@@ -247,6 +243,9 @@ for jj in range(len(foil)):
     fp.write('tar-cl = %s \n'%tar_cl)
     fp.write('init-cl = %s \n'%init_cl)
     fp.write('pred-cl = %s \n'%pred_cl)
+    fp.write('tar-cd = %s \n'%tar_cd)
+    fp.write('init-cd = %s \n'%init_cd)    
+    fp.write('pred-cd = %s \n'%pred_cd)
     fp.write('Re = %s \n'%(reno*100000))
     fp.write('aoa = %s \n'%(aoa*14))
     fp.write('%s \n'%res.x)
@@ -260,8 +259,7 @@ for jj in range(len(foil)):
     for i in range(len(x0)):
         fp.write('%f %f 0.00\n'%(x0[i],y0[i]))
     fp.close()
-    
-    
+        
     
     
     plt.figure(figsize=(6,5),dpi=100)
@@ -277,10 +275,11 @@ for jj in range(len(foil)):
     
     
     plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(reno*100000,tar_cl,'-ok',lw=3,label='Target')
+    #plt.plot(reno*100000,tar_cl,'-ok',lw=3,label='Target')
     plt.plot(reno*100000,init_cl,'-ob',lw=3,label='Base')
     plt.plot(reno*100000,pred_cl,'-og',lw=3,label='Optimized')
     plt.legend(fontsize=14)
+    plt.ylim([0.1,1.2])
     plt.xlabel('Reynolds No',fontsize=16)
     plt.ylabel('Cl',fontsize=16)
     plt.savefig(path+'line_%s.png'%fn,format='png',bbox_inches='tight',dpi=300)

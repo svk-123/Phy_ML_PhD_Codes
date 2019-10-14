@@ -53,37 +53,38 @@ matplotlib.rc('ytick', labelsize=18)
 
 from naca import naca4
 
-path='./result_paper_v2/mp_1_tanh/'
+path='./result_paper_v7/mp_1_tanh_cdc/'
 
 ##for mp-1-relu
 #name=['naca0016','naca0028','naca0222','naca3416','naca4414','naca4524','naca5024']
+name=[]
+for i in os.listdir(path):
+    if os.path.isfile(os.path.join(path,i)) and 'opti' in i:
+        name.append(i.split('_')[1].split('.')[0])
+        print i
 
-#for mp-1-tanh
-name=['naca0016','naca3416','naca4414','naca4524']
 
-##for mp-2-relu
-#name=['naca5014','naca5008','naca3012','naca2030','naca2010','naca1416']
 
 
 #name=foil
-c=['b','b','y','c','r','m']
+c=['g','b','y','c','r','m','darkorange','lime','pink','purple','peru','gold','olive','salmon','brown']
 base=[]
 opti=[]
 
-for ii in range(4):
+for ii in range(len(name)):
     tmp=np.loadtxt(path + 'base_%s.dat'%name[ii])
     base.append(tmp)
     tmp=np.loadtxt(path + 'final_%s.dat'%name[ii])
     opti.append(tmp)
 
 plt.figure(figsize=(6,5),dpi=100)
-for ii in [0,1,2,3]:
+for ii in range(len(name)):
     if(ii==0):
         #plt.plot(base[ii][:,0],base[ii][:,1],'--k',lw=1,label='Base Shapes')
         plt.plot(opti[ii][:,0],opti[ii][:,1],'g',lw=2,label='Optimized Shape-%d'%ii)
     else:
         #plt.plot(base[ii][:,0],base[ii][:,1],'--k',lw=1)
-        plt.plot(opti[ii][:,0],opti[ii][:,1],'-%s'%c[ii],lw=2,label='Optimized Shape-%d'%ii)    
+        plt.plot(opti[ii][:,0],opti[ii][:,1],'%s'%c[ii],lw=2,label='Optimized Shape-%d'%ii)    
         
         
 plt.legend(loc="upper left", bbox_to_anchor=[1, 1], ncol=1, fontsize=14, \

@@ -89,16 +89,20 @@ name=np.asarray(name)
 #para=np.array([6,6,30])
 #cl=0.8
 #cd=0.25
-model=load_model('./selected_model_0p9/turb_naca4_3para_st_6x80_relu/model/final_sf.hdf5')  
-
+model=load_model('./selected_model_0p9/turb_naca4_3para_st_6x80_tanh/model/final_sf.hdf5')  
+path='./result_paper_v7/mp_1_tanh_5p/'
 global scaler
 scaler=np.array([6,6,30])
 
 global tar_cl
 global pred_cl
+global init_cl
 global reno
 global aoa
-global init_cl
+global tar_cd
+global pred_cd
+global init_cd
+
 
 ##mp-1
 #tar_cl=np.asarray([0.645,0.791,0.882,0.904])
@@ -110,10 +114,15 @@ global init_cl
 
 
 #mp-2
-tar_cl=np.asarray([1.014,1.12,1.15,1.165])
-pred_cl=np.asarray([0,0,0,0])
-init_cl=np.asarray([0,0,0,0])
-reno=np.asarray([20000,40000,50000,60000])/100000.
+tar_cl=np.asarray([1.15,1.1,1.15,1.2,1.15])
+pred_cl=np.asarray([0,0,0,0,0])
+init_cl=np.asarray([0,0,0,0,0])
+
+tar_cd=np.asarray([0.05,0.05,0.05,0.05,0.05])
+pred_cd=np.asarray([0,0,0,0,0])
+init_cd=np.asarray([0,0,0,0,0])
+
+reno=np.asarray([40000,50000,50000,50000,60000])/100000.
 aoa=np.asarray([6])/14.
 
 
@@ -137,7 +146,8 @@ aoa=np.asarray([6])/14.
 reno=np.asarray(reno)
 aoa=np.asarray(aoa)
 
-np.random.seed(12343)
+#mp-1-tanh-5p
+np.random.seed(12444)
 #np.random.seed(12345)
 I=range(481)
 np.random.shuffle(I)
@@ -160,8 +170,11 @@ for jj in range(len(foil)):
     def loss(para):
            
         global my_counter  
+        global tar_cd
         global pred_cl
+        global pred_cd
         global init_cl
+        global init_cd
         para=para
     
         x,y=get_coord(para)
@@ -178,17 +191,24 @@ for jj in range(len(foil)):
         out=out*np.asarray([0.25,0.9])
                     
         pred_cl=out[:,1]
+        pred_cd=out[:,0]
         
         print ('Pred_cl:', pred_cl)
+        e1=pred_cd-tar_cd
+        for k in range(5):
+            if e1[k] <=0:
+                e1[k]=0
+
+        e2=tar_cl-pred_cl
+#        for k in range(5):
+#            if e2[k] <=0:
+#                e2[k]=0
+                
+        e=sum(e1)*10.0 + sum(e2)
+
         
-#        e1=tar_cl - pred_cl
-#        for i in range(3):
-#            if(e1[i] < 0):
-#                e1[i] = 0
-#                
-#        e=np.sqrt((e1** 2).mean())
-        
-        e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
+        print ('mse:', e,e1)
+
         
         print ('mse:', e)
         
@@ -196,6 +216,7 @@ for jj in range(len(foil)):
                                              ,pred_cl[2],pred_cl[3]))    
         if(my_counter == 0):
             init_cl=pred_cl
+            init_cd=pred_cd
             fp_conv.write(' Iter, MSE, Pred_cl 0,1,2,3 \n') 
         my_counter = my_counter +1
         print ('Iter:', my_counter)
@@ -212,7 +233,7 @@ for jj in range(len(foil)):
     
     
     fn=foil[jj]  
-    path='./result_paper_v3/mp_2_relu/'
+
          
     idx=np.argwhere(name=='%s'%fn)
     p1=mypara[idx[0][0],:]/scaler
@@ -225,7 +246,7 @@ for jj in range(len(foil)):
     print('Intial foil = %s' %name[idx[0]])
     
     mylimit=((0,1.1),(0,1.1),(0.2,1.1))
-    res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, tol=0.01, \
+    res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit,  \
                    options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
                                      'eps': 0.01, 'maxfun': 100, \
                                      'maxiter': 100, 'maxls': 100})
@@ -247,6 +268,9 @@ for jj in range(len(foil)):
     fp.write('tar-cl = %s \n'%tar_cl)
     fp.write('init-cl = %s \n'%init_cl)
     fp.write('pred-cl = %s \n'%pred_cl)
+    fp.write('tar-cd = %s \n'%tar_cd)
+    fp.write('init-cd = %s \n'%init_cd)
+    fp.write('pred-cd = %s \n'%pred_cd)
     fp.write('Re = %s \n'%(reno*100000))
     fp.write('aoa = %s \n'%(aoa*14))
     fp.write('%s \n'%res.x)

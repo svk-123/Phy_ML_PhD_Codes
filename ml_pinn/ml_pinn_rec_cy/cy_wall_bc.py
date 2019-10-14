@@ -22,7 +22,7 @@ y=0.5*np.sin(theta)
 fp=open('cy_wall_bc_20.dat','w')
 
 for i in range(len(x)):
-    fp.write('%f %f 1e-12 \n'%(x[i],y[i]))
+    fp.write('%f %f 1e-12 1e-12 \n'%(x[i],y[i]))
     
     
 fp.close()    

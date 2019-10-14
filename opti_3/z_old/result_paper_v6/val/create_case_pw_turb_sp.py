@@ -1,6 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
+Created on Tue Sep 24 01:02:17 2019
+
+@author: vino
+"""
+
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
 Created on Mon Sep 25 21:12:02 2017
 
 @author: vino
@@ -134,14 +142,14 @@ def change_re_aoa(name,myre,myaoa):
     fp.close()
 
 #------ path & create files---------------------------------------------#
-mshdir='./naca4_mesh_turb'
-fname = [f for f in listdir(mshdir) if isdir(join(mshdir, f))]
-fname.sort()
+mshdir='./sp_1_tanh/mesh'
+#fname = [f for f in listdir(mshdir) if isdir(join(mshdir, f))]
+#fname.sort()
 
-dst1='./case_naca4_turb'
+dst1='./sp_1_tanh/foam'
 
-relist=np.asarray([10000,20000,40000,50000,70000,80000,90000,100000])
-aoalist=np.asarray([0,2,4,6,8,10,12,14])
+relist=np.asarray([20000])
+aoalist=np.asarray([4])
 
 #relist=np.asarray([10000])
 #aoalist=np.asarray([1,5])
@@ -153,25 +161,25 @@ for i in range(1):
     
     np.random.shuffle(relist)
     
-    dst2= dst1+'/%s'%fname[i]
+    dst2= dst1
         
     if not os.path.exists(dst2):
         os.makedirs(dst2)
             
-    for reno in range(8):
+    for reno in range(1):
         
         np.random.shuffle(aoalist)
             
-        for aoa in range(8):
+        for aoa in range(1):
             
-            src='./naca4_template_case_turb/'
-            dst3=dst2 + '/%s_%07d_%02d'%(fname[i],relist[reno],aoalist[aoa])
+            src='./case_temp/'
+            dst3=dst2 + '/%07d_%02d'%(relist[reno],aoalist[aoa])
     
             if os.path.exists(dst3):
                 shutil.rmtree(dst3)
         
             shutil.copytree(src,dst3) 
-            shutil.copytree(mshdir + '/%s'%fname[i], dst3 + '/constant/polyMesh')  
+            shutil.copytree(mshdir, dst3 + '/constant/polyMesh')  
         
             change_re_aoa(dst3,relist[reno],aoalist[aoa])
             

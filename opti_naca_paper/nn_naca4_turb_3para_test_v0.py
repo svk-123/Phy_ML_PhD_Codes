@@ -36,7 +36,11 @@ import pandas
 import os, shutil
 from numpy import linalg as LA
 
-
+plt.rc('xtick', labelsize=16) 
+plt.rc('ytick', labelsize=16) 
+#plt.rc('text', usetex=True)
+#plt.rcParams['text.latex.preamble'] = [r'\usepackage{lmodern}']
+plt.rc('font', family='serif')
 
 #load data
 inp_reno=[]
@@ -76,8 +80,8 @@ inp_aoa=inp_aoa/14.0
 my_inp=np.concatenate((inp_reno[:,None],inp_aoa[:,None],inp_para[:,:]),axis=1)
 my_out=np.concatenate((out_cd[:,None],out_cl[:,None]),axis=1)
 
-nname='relu-6x80'
-model_test=load_model('./selected_model_0p9/turb_naca4_3para_st_6x80_relu/model/final_sf.hdf5') 
+nname='tanh-6x80'
+model_test=load_model('./selected_model_0p9/turb_naca4_3para_st_6x80_tanh/model/final_sf.hdf5') 
 out=model_test.predict([my_inp]) 
 
 np.random.seed(123)
@@ -115,12 +119,13 @@ l2=1
 plt.figure(figsize=(6,5),dpi=100)
 plt.plot([-0.0,0.28],[-0.0,0.28],'k',lw=2)
 plt.plot(my_out_train[:,0]*0.25,out_train[:,0]*0.25,'g',marker='o',mew=1.5, mfc='None',markevery=l1,lw=0,ms=8,label='Train')
-plt.plot(my_out_val[:,0]*0.25,out_val[:,0]*0.25,'r',marker='+',mew=1.5, mfc='None',markevery=l2,lw=0,ms=6,label='Val')
+plt.plot(my_out_val[:,0]*0.25,out_val[:,0]*0.25,'r',marker='+',mew=1.5, mfc='None',markevery=l2,lw=0,ms=6,label='Test')
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
 plt.legend(fontsize=16,frameon=False, shadow=False, fancybox=False)
-plt.xlabel('True $C_d$',fontsize=20)
-plt.ylabel('Predicted $C_d$',fontsize=20)  
+plt.xlabel('True $C_D$',fontsize=20)
+plt.figtext(0.50, -0.07, '(d)', wrap=True, horizontalalignment='center', fontsize=24) 
+plt.ylabel('Predicted $C_D$',fontsize=20)  
 plt.savefig('./plot/naca_cd-%s.tiff'%(nname),format='tiff' ,bbox_inches='tight',dpi=300)
 plt.show()
 
@@ -130,12 +135,13 @@ l2=1
 plt.figure(figsize=(6,5),dpi=100)
 plt.plot([-0.4,1.6],[-0.4,1.6],'k',lw=2)
 plt.plot(my_out_train[:,1]*0.9,out_train[:,1]*0.9,'g',marker='o',mew=1.5, mfc='None',markevery=l1,lw=0,ms=8,label='Train')
-plt.plot(my_out_val[:,1]*0.9,out_val[:,1]*0.9,'r',marker='+',mew=1.5, mfc='None',markevery=l2,lw=0,ms=6,label='Val')
+plt.plot(my_out_val[:,1]*0.9,out_val[:,1]*0.9,'r',marker='+',mew=1.5, mfc='None',markevery=l2,lw=0,ms=6,label='Test')
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
 plt.legend(fontsize=16,frameon=False, shadow=False, fancybox=False)
-plt.xlabel('True $C_l$',fontsize=20)
-plt.ylabel('Predicted $C_l$',fontsize=20)  
+plt.figtext(0.50, -0.07, '(c)', wrap=True, horizontalalignment='center', fontsize=24) 
+plt.xlabel('True $C_L$',fontsize=20)
+plt.ylabel('Predicted $C_L$',fontsize=20)  
 plt.savefig('./plot/naca_cl-%s.tiff'%(nname),format='tiff' ,bbox_inches='tight',dpi=300)
 plt.show()
 #

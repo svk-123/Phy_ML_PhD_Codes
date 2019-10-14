@@ -58,7 +58,7 @@ plt.rc('font', family='serif')
     >>>bDtmp.extend(result[2])
     >>>data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I]"""
 """------------------------------------"""
-'''
+
 l1=200
 l2=250
 l3=20
@@ -94,14 +94,14 @@ h3l=np.asarray(h3l)
 h3vl=np.asarray(h3vl)
 
 
-plt.plot(range(len(h1l)),h1l,'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='Relu-6x30 Train')
-plt.plot(range(len(h1vl)),h1vl,'--r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l2,lw=2,label='Relu-6x30 Val')
+plt.plot(range(len(h1l)),h1l,'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='ReLU-6x30 Train')
+plt.plot(range(len(h1vl)),h1vl,'--r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l2,lw=2,label='ReLU-6x30 Val')
 
-plt.plot(range(len(h2l)),h2l,'b',marker='o',mfc='b',ms=12,lw=2,markevery=l1,label='Relu-6x50 Train')
-plt.plot(range(len(h2vl)),h2vl,'--b',marker='o',mew=1.5, mfc='None',ms=12,markevery=l2,lw=2,label='Relu-6x50 Val')
+plt.plot(range(len(h2l)),h2l,'b',marker='o',mfc='b',ms=12,lw=2,markevery=l1,label='ReLU-6x50 Train')
+plt.plot(range(len(h2vl)),h2vl,'--b',marker='o',mew=1.5, mfc='None',ms=12,markevery=l2,lw=2,label='ReLU-6x50 Val')
 
-plt.plot(range(len(h3l)),h3l,'g',marker='^',mfc='g',ms=12,lw=2,markevery=l1,label='Relu-6x80 Train')
-plt.plot(range(len(h3vl)),h3vl,'--g',marker='^', mew=1.5, mfc='None',ms=12,markevery=l2,lw=2,label='Relu-6x80 Val')
+plt.plot(range(len(h3l)),h3l,'g',marker='^',mfc='g',ms=12,lw=2,markevery=l1,label='ReLU-6x80 Train')
+plt.plot(range(len(h3vl)),h3vl,'--g',marker='^', mew=1.5, mfc='None',ms=12,markevery=l2,lw=2,label='ReLU-6x80 Val')
     
 #plt.legend(loc='center left', bbox_to_anchor=(0.2, 0.5),fontsize=16)
 plt.legend(loc="upper left", bbox_to_anchor=[0.25, 1], ncol=1, fontsize=18, frameon=False, shadow=False, fancybox=False,title='')
@@ -114,9 +114,9 @@ plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0
 
 #plt.xlim([-50,2000])
 #plt.ylim([5e-6,1e-3])    
-plt.savefig('mlp_train_relu.tiff', format='tiff', bbox_inches='tight',dpi=300)
+plt.savefig('./plot/mlp_train_relu.tiff', format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
-'''
+
 
 
 l1=180
@@ -153,7 +153,7 @@ h3vl=h3['val_loss']
 h3l=np.asarray(h3l)
 h3vl=np.asarray(h3vl)
 
-'''
+
 plt.plot(range(len(h1l)),h1l,'r',marker='v',mfc='r',ms=12,lw=2,markevery=l1,label='Tanh-6x30 Train')
 plt.plot(range(len(h1vl)),h1vl,'--r',marker='v',mew=1.5, mfc='None',ms=12,markevery=l2,lw=2,label='Tanh-6x30 Val')
 
@@ -168,11 +168,11 @@ plt.legend(loc="upper left", bbox_to_anchor=[0.25, 1], ncol=1, fontsize=18, fram
 plt.xlabel('Training Epochs',fontsize=20)
 plt.ylabel('MSE',fontsize=20)
 plt.yscale('log')
-plt.figtext(0.40, 0.01, '(a)', wrap=True, horizontalalignment='center', fontsize=24)    
+plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
 plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
 #plt.xticks(range(0,2001,500))
 
 #plt.xlim([-50,2000])
 #plt.ylim([5e-6,1e-3])    
-plt.savefig('mlp_train_tanh.tiff', format='tiff', bbox_inches='tight',dpi=300)
-plt.show()'''
+plt.savefig('./plot/mlp_train_tanh.tiff', format='tiff', bbox_inches='tight',dpi=300)
+plt.show()

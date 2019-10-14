@@ -50,32 +50,42 @@ from scipy.optimize import minimize
 import matplotlib
 matplotlib.rc('xtick', labelsize=18) 
 matplotlib.rc('ytick', labelsize=18) 
+plt.rc('font', family='serif')
 
 from naca import naca4
 
-path='./result_paper_v2/max_cl_3_relu/'
-name=['naca0012','naca0014','naca2412','naca3310','naca4510']
-Name=['0012','0014','2412','3310','4510']
+a='sp_2_tanh_cdc/'
+path_out='./paper_plots/' + a
+path='./result_paper_v7/' + a
+
+name=[]
+for i in os.listdir(path):
+    if os.path.isfile(os.path.join(path,i)) and 'opti' in i:
+        name.append(i.split('_')[1].split('.')[0])
 conv=[]
 
-for ii in range(5):
+for ii in range(10):
     tmp=np.loadtxt(path + 'conv_%s.dat'%name[ii],skiprows=2)
     conv.append(tmp)
 
-N=26
-c=['g','b','r','b','m']
+N=30
+c=['g','b','y','c','r','m','darkorange','lime','pink','purple','peru','gold','olive','salmon','brown',\
+   'g','b','y','c','r','m','darkorange','lime','pink','purple','peru','gold','olive','salmon','brown']
 plt.figure(figsize=(6,5),dpi=100)
-for ii in range(5):
+for ii in range(10):
 
-    plt.plot(conv[ii][:N,0], conv[ii][:N,1],'%s'%c[ii],lw=2,label='Base NACA%s'%Name[ii])
+    plt.plot(conv[ii][:N,0], conv[ii][:N,2],'%s'%c[ii],lw=3,label='NACA %s'%name[ii].split('naca')[1])
         
-plt.legend(loc="upper left", bbox_to_anchor=[0, 1], ncol=2, fontsize=12, \
+plt.legend(loc="upper left", bbox_to_anchor=[1, 0.8], ncol=1, fontsize=14, \
            frameon=False, shadow=False, fancybox=False,title='')
-plt.xlim([-0.05,30])
-plt.ylim([-0.05,1.1])
-plt.xlabel('Iter',fontsize=16)
-plt.ylabel('MSE',fontsize=16)
-plt.savefig(path+'conv.png',bbox_inches='tight',dpi=300)
+plt.text(N+3,0.87,'Convergence',fontsize=16)
+plt.text(N+3,0.82,'for base Airfoil',fontsize=16)
+
+#plt.xlim([-0.05,30])
+#plt.ylim([-0.05,1.1])
+plt.xlabel('Iter',fontsize=20)
+plt.ylabel('$C_l$',fontsize=20)
+plt.savefig(path_out+'conv.tiff',format='tiff',bbox_inches='tight',dpi=300)
 plt.show()
 plt.close()
 

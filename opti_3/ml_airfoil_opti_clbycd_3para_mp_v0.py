@@ -100,24 +100,12 @@ global reno
 global aoa
 global init_cl
 
-##mp-1
-#tar_cl=np.asarray([0.645,0.791,0.882,0.904])
-#pred_cl=np.asarray([0,0,0,0])
-#init_cl=np.asarray([0,0,0,0])
-#reno=np.asarray([10000,20000,40000,50000])/100000.
-#aoa=np.asarray([6])/14.
-
-
-
-#mp-2
-tar_cl=np.asarray([1.014,1.12,1.15,1.165])
+#mp-1
+tar_cl=np.asarray([25,30,32.5,35])
 pred_cl=np.asarray([0,0,0,0])
 init_cl=np.asarray([0,0,0,0])
 reno=np.asarray([20000,40000,50000,60000])/100000.
 aoa=np.asarray([6])/14.
-
-
-
 
 ##mp-2old
 #tar_cl=np.asarray([0.54, 0.66, 0.72, 0.76])
@@ -175,9 +163,12 @@ for jj in range(len(foil)):
     
         #cd, cl
         out=model.predict([my_inp])
+        
+    
         out=out*np.asarray([0.25,0.9])
-                    
-        pred_cl=out[:,1]
+        
+                   
+        pred_cl=out[:,1]/out[:,0]
         
         print ('Pred_cl:', pred_cl)
         
@@ -212,7 +203,7 @@ for jj in range(len(foil)):
     
     
     fn=foil[jj]  
-    path='./result_paper_v3/mp_2_relu/'
+    path='./result_paper_v3/mp_max_1000/'
          
     idx=np.argwhere(name=='%s'%fn)
     p1=mypara[idx[0][0],:]/scaler
@@ -225,18 +216,15 @@ for jj in range(len(foil)):
     print('Intial foil = %s' %name[idx[0]])
     
     mylimit=((0,1.1),(0,1.1),(0.2,1.1))
-    res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, tol=0.01, \
-                   options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
-                                     'eps': 0.01, 'maxfun': 100, \
-                                     'maxiter': 100, 'maxls': 100})
+    res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
+                   options={'disp': True, 'maxcor':1000, 'ftol': 1e-16, \
+                                     'eps': 0.001, 'maxfun': 1000, \
+                                     'maxiter': 1000, 'maxls': 1000})
        
      
-        
-    
-        
+          
     print('Ending loss = {}'.format(loss(res.x)))
-    
-    
+        
     fp=open(path+'final_%s.dat'%fn,'w')
     x,y=get_coord(res.x)
     for i in range(len(x)):
@@ -250,20 +238,16 @@ for jj in range(len(foil)):
     fp.write('Re = %s \n'%(reno*100000))
     fp.write('aoa = %s \n'%(aoa*14))
     fp.write('%s \n'%res.x)
-    fp.write('%s %s %s \n'%((res.x*[6,6,30])[0],(res.x*[6,6,30])[1],(res.x*[6,6,30])[2]))
+    fp.write('%s %s %s \n'%(res.x*[6,6,30][0],res.x*[6,6,30][1],res.x*[6,6,30][2]))
     fp.close()
-    
-    
+        
     #intial shape
     x0,y0=get_coord(p1)
     fp=open(path+'base_%s.dat'%fn,'w')
     for i in range(len(x0)):
         fp.write('%f %f 0.00\n'%(x0[i],y0[i]))
     fp.close()
-    
-    
-    
-    
+        
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(x0,y0,'--k',label='Base')
     plt.plot(x,y,'g',lw=3,label='Optimized')
@@ -274,8 +258,7 @@ for jj in range(len(foil)):
     plt.ylabel('Y',fontsize=16)
     plt.savefig(path+'opti_%s.png'%fn,format='png',bbox_inches='tight',dpi=300)
     plt.close()
-    
-    
+        
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(reno*100000,tar_cl,'-ok',lw=3,label='Target')
     plt.plot(reno*100000,init_cl,'-ob',lw=3,label='Base')
@@ -285,7 +268,5 @@ for jj in range(len(foil)):
     plt.ylabel('Cl',fontsize=16)
     plt.savefig(path+'line_%s.png'%fn,format='png',bbox_inches='tight',dpi=300)
     plt.close()
-    
-    
-    
+        
     fp_conv.close()

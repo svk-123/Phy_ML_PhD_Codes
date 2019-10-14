@@ -29,14 +29,14 @@ boundary not loaded: may be required?
 """
 
 
-fname_1=['cy']
+fname_1=['naca4518']
 
 fname_1=np.asarray(fname_1)
 fname_1.sort()
 
 
 # read data from below dir...
-path='./'
+path='./foam_case/'
 #path='/home/vino/ml_test/from_nscc_26_dec_2018/foam_run/case_naca_lam'
 indir = path
 
@@ -83,8 +83,6 @@ aoa = np.array(map(float, aoa))
 st= [0]
 end=[1]
 
-fp=open('foil_error.dat','w+')
-fp1=open('foil_details.dat','w+')
 
 '''np.random.seed(1234534)
 mylist=np.random.randint(0,4500,100)
@@ -94,6 +92,7 @@ for k in mylist:
     nco.append(coord[k])'''
 
 for jj in range(1):
+
 
     myinp_x=[]
     myinp_y=[]
@@ -112,7 +111,7 @@ for jj in range(1):
     for ii in range(st[jj],end[jj]):
         print (ii)
         
-        casedir= path +'/%s/%s'%(foil[ii],tmp[ii])
+        casedir= path +'%s/%s'%(foil[ii],tmp[ii])
                 
         #need to find max time later....
         yname = [f for f in listdir(casedir) if isdir(join(casedir, f))]
@@ -121,9 +120,7 @@ for jj in range(1):
         yname=yname[:-3].astype(np.int) 
         ymax=int(yname.max())
 
-        fp1.write('%s-%s\n'%(ii,casedir))  
-        fp1.write('	yname:%s\n'%(yname))
-        fp1.write('	ymax:%s\n'%(ymax)) 
+
 
         x=[]
         with open(casedir +'/%s/ccx'%ymax, 'r') as infile:
@@ -174,59 +171,38 @@ for jj in range(1):
         v = np.array(map(float, v))
         w = np.array(map(float, w))
                
-        #filter within xlim,ylim
-        I=[]
-        for i in range(len(x)):
-            if (x[i]<=4 and x[i]>=-2 and y[i]<=2 and y[i]>=-2 ):
-                I.append(i)
-                
-                
-        x=x[I]
-        y=y[I]
-        z=z[I]
-        u=u[I]
-        v=v[I]
-        w=w[I]
-        p=p[I]        
+        ab=np.loadtxt('./data_file/af_inout_xy_200.dat')
         
       
-        
-        #plot
-        def plot(xp,yp,zp,nc,name):
-            plt.figure(figsize=(3, 4))
-            #cp = pyplot.tricontour(ys, zs, pp,nc)
-            cp = plt.tricontourf(xp,yp,zp,nc,cmap=cm.jet)
-            #cp=pyplot.tricontourf(x1,y1,z1)
-            #cp=pyplot.tricontourf(x2,y2,z2)   
-            
-            #cp = pyplot.tripcolor(xp, yp, zp)
-            #cp = pyplot.scatter(ys, zs, pp)
-            #pyplot.clabel(cp, inline=False,fontsize=8)
-            #plt.xlim(-1,2)
-            #plt.ylim(-1,1)    
-            plt.axis('off')
-            #plt.grid(True)
-            #patch.set_facecolor('black')
-            plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-            plt.savefig('./plot/%s.eps'%(nname[ii]), format='eps')
-            plt.close()
-            
-        #plot(x,y,u,20,'name')    
-        
-
-        
-    #save file
-    filepath='./data_file'
-      
-    # ref:[x,y,z,ux,uy,uz,k,ep,nu
-    info=['x, y, p, u, v, coord , info']
-
-    data1 = [x, y, p, u, v, coord, info]
-    #data1 = [myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, nco, myname, info ]
-    with open(filepath+'/cy_40_around.pkl', 'wb') as outfile1:
-        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
-
+        #LinearNDinterpolator
+        pD=np.asarray([x,y]).transpose()
     
-fp.close()        
-fp1.close()
+        #for -u
+        print 'interpolation-1...'      
+        f1u=interpolate.LinearNDInterpolator(pD,u)
+        bu=np.zeros(len(ab))
+        for j in range(len(ab)):
+            bu[j]=f1u(ab[j,0],ab[j,1])
+             
+        #for -v
+        print 'interpolation-1...'      
+        f1v=interpolate.LinearNDInterpolator(pD,v)
+        bv=np.zeros(len(ab))
+        for j in range(len(ab)):
+            bv[j]=f1v(ab[j,0],ab[j,1])
 
+        #for -p
+        print 'interpolation-1...'      
+        f1p=interpolate.LinearNDInterpolator(pD,p)
+        bp=np.zeros(len(ab))
+        for j in range(len(ab)):
+            bp[j]=f1p(ab[j,0],ab[j,1])
+            
+            
+        fp=open('./data_file/af_wall_bc_int_200.dat','w')
+
+        for i in range(len(ab)):
+            fp.write('%f %f %f %f %f\n'%(ab[i,0],ab[i,1],bu[i],bv[i],bp[i]))
+
+        fp.close()        
+            

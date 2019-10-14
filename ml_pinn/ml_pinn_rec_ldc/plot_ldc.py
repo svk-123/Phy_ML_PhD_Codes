@@ -87,9 +87,9 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess:
     
-    
-    new_saver = tf.train.import_meta_graph('./tf_model/model_0.meta')
-    new_saver.restore(sess, tf.train.latest_checkpoint('./tf_model/'))
+    path='./tf_model/case_1_3t_50pts/tf_model/'
+    new_saver = tf.train.import_meta_graph(path + 'model_0.meta')
+    new_saver.restore(sess, tf.train.latest_checkpoint(path))
 
     tf_dict = {'input0:0': xtmp[:,None], 'input1:0': ytmp[:,None]}
     op_to_load = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')    

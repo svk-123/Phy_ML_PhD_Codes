@@ -57,7 +57,7 @@ out_cl=[]
 
 for ii in [1]:
     
-    data_file='./data_file/naca4_clcd_turb_st_3para.pkl'
+    data_file='../data_file/naca4_clcd_turb_st_3para.pkl'
     with open(data_file, 'rb') as infile:
         result = pickle.load(infile)
 
@@ -84,11 +84,10 @@ for ii in [1]:
     
 
 out_cm=np.asarray(out_cm)
-#out_cd=np.asarray(out_cd)/0.25
-#out_cl=np.asarray(out_cl)/0.9
-
 out_cd=np.asarray(out_cd)
 out_cl=np.asarray(out_cl)
+
+clcd=(out_cl/out_cd)/32.0
 
 inp_reno=np.asarray(inp_reno)
 inp_aoa=np.asarray(inp_aoa)
@@ -97,41 +96,46 @@ inp_para=np.asarray(inp_para)/np.array([6,6,30])
 
 # ---------ML PART:-----------#
 #shuffle data
+np.random.seed(123)
 N= len(out_cm)
 print N
 I = np.arange(N)
 np.random.shuffle(I)
-n=N
+n=18000
 
 #normalize
 inp_reno=inp_reno/100000.
 inp_aoa=inp_aoa/14.0
 
 my_inp=np.concatenate((inp_reno[:,None],inp_aoa[:,None],inp_para[:,:]),axis=1)
-my_out=np.concatenate((out_cd[:,None],out_cl[:,None]),axis=1)
+my_out=clcd[:,None]
+
 
 
 ## Training sets
 xtr0= my_inp[I][:n]
 ttr1 = my_out[I][:n]
 
+xts0= my_inp[I][n:]
+tts1 = my_out[I][n:]
+
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(5,))
-xx =Dense(30,  kernel_initializer='random_normal', activation='relu')(aa)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-xx =Dense(30, activation='relu')(xx)
-g =Dense(2, activation='linear')(xx)
+xx =Dense(80,  kernel_initializer='random_normal', activation='tanh')(aa)
+xx =Dense(80, activation='tanh')(xx)
+xx =Dense(80, activation='tanh')(xx)
+xx =Dense(80, activation='tanh')(xx)
+xx =Dense(80, activation='tanh')(xx)
+xx =Dense(80, activation='tanh')(xx)
+g =Dense(1, activation='linear')(xx)
 
 #model = Model(inputs=a, outputs=g)
 model = Model(inputs=[aa], outputs=[g])
 #callbacks
-reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,patience=100, min_lr=1.0e-8)
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min',verbose=1 ,patience=100, min_lr=1.0e-7)
 
-e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-8, patience=200, verbose=1, mode='auto')
+e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-7, patience=200, verbose=1, mode='auto')
 
 filepath="./model/model_sf_{epoch:02d}_{loss:.8f}_{val_loss:.8f}.hdf5"
 
@@ -139,12 +143,12 @@ chkpt= ModelCheckpoint(filepath, monitor='val_loss', verbose=0,\
                                 save_best_only=False, save_weights_only=False, mode='auto', period=100)
 
 # Compile model
-opt = Adam(lr=2.5e-4,decay=1.0e-12)
+opt = Adam(lr=5e-4,decay=1.0e-12)
 
 model.compile(loss= 'mean_squared_error',optimizer= opt)
 
-hist = model.fit([xtr0], [ttr1], validation_split=0.1,\
-                 epochs=10000, batch_size=64,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
+hist = model.fit([xtr0], [ttr1], validation_data=(xts0,tts1),\
+                 epochs=5000, batch_size=64,callbacks=[reduce_lr,e_stop,chkpt],verbose=1,shuffle=False)
 
 #save model
 model.save('./model/final_sf.hdf5') 

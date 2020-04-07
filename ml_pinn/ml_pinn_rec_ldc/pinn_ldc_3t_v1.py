@@ -334,9 +334,18 @@ if __name__ == "__main__":
     out_u=np.asarray(out_u)
     out_v=np.asarray(out_v)
     
-    
-    idx=np.argwhere(inp_y > 0.3)[:,0]
-    
+    idx=[]
+    total_idx=range(len(inp_x))
+    for i in range(len(inp_x)):
+        if(inp_x[i] < 0.1 and inp_y[i] > 0.9):
+            idx.append(i)
+        if(inp_x[i] > 0.9 and inp_y[i] > 0.9):
+            idx.append(i)
+        if(inp_x[i] < 0.1 and inp_y[i] < 0.1):
+            idx.append(i)
+        if(inp_x[i] > 0.9 and inp_y[i] < 0.1):
+            idx.append(i)
+            
     inp_x = inp_x[idx]
     inp_y = inp_y[idx]    
     out_u = out_u[idx]
@@ -394,7 +403,7 @@ if __name__ == "__main__":
     xyu=np.loadtxt('./data_file_st/ldc_bc_50.dat')
     
    
-    N_train=100
+    N_train=200
     
     idx = np.random.choice(len(inp_x), N_train, replace=False)
     
@@ -415,7 +424,7 @@ if __name__ == "__main__":
     ######################## Gov Data ###############################
     ######################################################################
     
-    N_train=500
+    N_train=4000
     
     idx = np.random.choice(len(pinp_x), N_train, replace=False)
     
@@ -427,13 +436,27 @@ if __name__ == "__main__":
 #    xg_train = pinp_x[idx,:]
 #    yg_train = pinp_y[idx,:]
         
-    # Training
-    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train, xb, yb, ub, vb, xg_train, yg_train)
- 
-    model.train(10000,True)  
-       
-    model.save_model(000000)
+#    # Training
+#    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train, xb, yb, ub, vb, xg_train, yg_train)
+# 
+#    model.train(10000,True)  
+#       
+#    model.save_model(000000)
     
   
+plt.figure(figsize=(6, 5), dpi=100)
+plt0, =plt.plot(x_train,y_train,'og',linewidth=0,label='MSE pts-50 (Sampling)',zorder=5)
+plt0, =plt.plot(xg_train,yg_train,'+r',linewidth=0,ms=3,label='Gov Eq. pts-5000 (Residual)')
 
+plt0, =plt.plot(xb,yb,'ok',linewidth=0,ms=4,label='BC pts-200')
+#plt0, =plt.plot(x_hb,y_hb,'ok',linewidth=0,ms=4)
+#plt.legend(fontsize=20)
+plt.xlabel('X',fontsize=20)
+plt.ylabel('Y',fontsize=20)
+#plt.title('%s-u'%(flist[ii]),fontsiuze=16)
+plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
+#plt.xlim(-0.1,1.2)
+#plt.ylim(-0.01,1.4)    
+plt.savefig('./plot/mesh.png', format='png',bbox_inches='tight', dpi=100)
+plt.show()   
 

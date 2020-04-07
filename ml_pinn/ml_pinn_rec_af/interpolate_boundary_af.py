@@ -29,7 +29,7 @@ boundary not loaded: may be required?
 """
 
 
-fname_1=['naca4518']
+fname_1=['naca0012']
 
 fname_1=np.asarray(fname_1)
 fname_1.sort()
@@ -171,7 +171,7 @@ for jj in range(1):
         v = np.array(map(float, v))
         w = np.array(map(float, w))
                
-        ab=np.loadtxt('./data_file/af_inout_xy_200.dat')
+        ab=np.loadtxt('./data_file/af_inout_sq_5556_4s_200.dat')
         
       
         #LinearNDinterpolator
@@ -199,7 +199,7 @@ for jj in range(1):
             bp[j]=f1p(ab[j,0],ab[j,1])
             
             
-        fp=open('./data_file/af_wall_bc_int_200.dat','w')
+        fp=open('./data_file/af_inout_sq_5556_4s_200_intp.dat','w')
 
         for i in range(len(ab)):
             fp.write('%f %f %f %f %f\n'%(ab[i,0],ab[i,1],bu[i],bv[i],bp[i]))

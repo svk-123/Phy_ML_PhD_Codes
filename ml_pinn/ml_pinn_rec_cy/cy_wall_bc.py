@@ -14,12 +14,12 @@ import time
 import pickle
 
 
-theta=np.linspace(0,360,20)*np.pi/180.
+theta=np.linspace(0,360,100)*np.pi/180.
 
 x=0.5*np.cos(theta)
 y=0.5*np.sin(theta)
 
-fp=open('cy_wall_bc_20.dat','w')
+fp=open('cy_wall_bc_100.dat','w')
 
 for i in range(len(x)):
     fp.write('%f %f 1e-12 1e-12 \n'%(x[i],y[i]))

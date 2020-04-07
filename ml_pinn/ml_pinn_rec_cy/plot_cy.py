@@ -47,9 +47,10 @@ u_pred=[]
 v_pred=[]
 
 flist=['re40']
+suff='5555_3s_wake-'
 for ii in range(len(flist)):
     #x,y,Re,u,v
-    with open('./data_file/cy_40_around_5555.pkl', 'rb') as infile:
+    with open('./data_file/cy_40_around_2222.pkl', 'rb') as infile:
         result = pickle.load(infile)
     xtmp.extend(result[0])
     ytmp.extend(result[1])
@@ -80,8 +81,8 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_1_3t_5555_200pts/tf_model/'
-    new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
+    path1='./tf_model/case_2_4s_puv_dp/tf_model/'
+    new_saver1 = tf.train.import_meta_graph( path1 + 'model_67000.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
     tf_dict = {'input0:0': xtmp[:,None], 'input1:0': ytmp[:,None]}
@@ -111,10 +112,10 @@ def con_plot():
     fig = plt.figure(figsize=(10, 12),dpi=100)
     
     
-    l1=-2
-    l2=3
-    h1=-2
-    h2=2
+    l1=-0.6
+    l2=0.6
+    h1=-0.6
+    h2=0.6
     
     lp=np.linspace(p.min(),p.max(),20)    
     lu=np.linspace(u.min(),u.max(),20)      
@@ -123,7 +124,7 @@ def con_plot():
     ax1 = fig.add_subplot(3,2,1)
     cp1 = ax1.tricontourf(xtmp,ytmp,p,levels=lp,cmap=cm.jet,extend ='both')
     ax1.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax1.set_title('p-cfd')
+    ax1.set_title('p-CFD')
     ax1.set_xlabel('X',fontsize=16)
     ax1.set_ylabel('Y',fontsize=16)
     ax1.set_xlim([l1,l2])
@@ -132,13 +133,13 @@ def con_plot():
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar1=plt.colorbar(cp1, cax=cax, orientation='vertical');
     cbar1.ax.tick_params(labelsize=10)
-    plt.subplots_adjust( wspace=0.2,hspace=0.3)
+    #plt.subplots_adjust( wspace=0.2,hspace=0.3)
     ax1.set_aspect(0.9)
     
     ax2 = fig.add_subplot(3,2,2)
     cp2 = ax2.tricontourf(xtmp,ytmp,p_pred,levels=lp,cmap=cm.jet,extend ='both')
     ax2.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax2.set_title('p-NN')
+    ax2.set_title('p-PINN')
     ax2.set_xlabel('X',fontsize=16)
     ax2.set_yticks([])
     ax2.set_xlim([l1,l2])
@@ -152,7 +153,7 @@ def con_plot():
     ax3 = fig.add_subplot(3,2,3)
     cp3 = ax3.tricontourf(xtmp,ytmp,u,levels=lu,cmap=cm.jet,extend ='both')
     ax3.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax3.set_title('u-cfd')
+    ax3.set_title('u-CFD')
     ax3.set_xlabel('X',fontsize=16)
     ax3.set_ylabel('Y',fontsize=16)
     ax3.set_xlim([l1,l2])
@@ -166,7 +167,7 @@ def con_plot():
     ax4 = fig.add_subplot(3,2,4)
     cp4 = ax4.tricontourf(xtmp,ytmp,u_pred,levels=lu,cmap=cm.jet,extend ='both')
     ax4.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax4.set_title('u-NN')
+    ax4.set_title('u-PINN')
     ax4.set_xlabel('X',fontsize=16)
     ax4.set_yticks([])
     ax4.set_xlim([l1,l2])
@@ -180,7 +181,7 @@ def con_plot():
     ax5 = fig.add_subplot(3,2,5)
     cp5 = ax5.tricontourf(xtmp,ytmp,v,levels=lv,cmap=cm.jet,extend ='both')
     ax5.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax5.set_title('v-cfd')
+    ax5.set_title('v-CFD')
     ax5.set_xlabel('X',fontsize=16)
     ax5.set_ylabel('Y',fontsize=16)
     ax5.set_xlim([l1,l2])
@@ -194,7 +195,7 @@ def con_plot():
     ax6 = fig.add_subplot(3,2,6)
     cp6 = ax6.tricontourf(xtmp,ytmp,v_pred,levels=lv,cmap=cm.jet,extend ='both')
     ax6.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax6.set_title('v-NN')
+    ax6.set_title('v-PINN')
     ax6.set_xlabel('X',fontsize=16)
     ax6.set_yticks([])
     ax6.set_xlim([l1,l2])
@@ -207,8 +208,8 @@ def con_plot():
     
     #fig.suptitle(" Re=40 at t=0", fontsize=20)
     
-    plt.subplots_adjust( wspace=0.2,hspace=0.25)       
-    plt.savefig('cy.png',format='png',dpi=300)
+    plt.subplots_adjust(top = 0.98, bottom = 0.05, right = 0.9, left = 0.1, hspace = 0.2, wspace = 0.2)       
+    plt.savefig('./plot/cy_%s.png'%suff,format='png',dpi=300)
     plt.close()
 
 
@@ -255,13 +256,13 @@ def plot_cp():
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(xu,pu1,'og',linewidth=3,markevery=mei,label='CFD')
     #plt.plot(xl,pl1,'ob',linewidth=3,markevery=mei,label='CFD-lower') 
-    plt.plot(xu,pu2,'r',linewidth=3,label='NN')
+    plt.plot(xu,pu2,'r',linewidth=3,label='PINN')
     #plt.plot(xl,pl2,'k',linewidth=3,label='NN-lower')  
     plt.xlabel('X',fontsize=20)
     plt.ylabel('P',fontsize=20)
     plt.title('Pressure Dist. over cylinder')
     plt.legend(fontsize=14)
-    plt.savefig('./cp_re40.png',format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot/cp_%s.png'%suff,format='png',bbox_inches='tight', dpi=100)
     plt.show()
     
 plot_cp()
@@ -286,7 +287,7 @@ def line_plotu_sub(i):
     xc=np.linspace(1,1,50)
     yc=np.linspace(-0,1,50)
 
-    xd=np.linspace(2,2,50)
+    xd=np.linspace(1.5,1.5,50)
     yd=np.linspace(-0,1,50)
         
         
@@ -404,7 +405,7 @@ def line_plotu_sub(i):
     
     plt.figtext(0.4, 0.00, '(a)', wrap=True, horizontalalignment='center', fontsize=24)
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
-    plt.savefig('./plot/u_%s.png'%(i), format='png', bbox_inches='tight',dpi=100)
+    plt.savefig('./plot/u_%s_%s.png'%(i,suff), format='png', bbox_inches='tight',dpi=100)
     plt.show()   
     plt.close()
     
@@ -442,15 +443,11 @@ def line_plotu_sub(i):
        
     plt.figtext(0.4, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
-    plt.savefig('./plot/v_%s.png'%(i), format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot/v_%s_%s.png'%(i,suff), format='png',bbox_inches='tight', dpi=100)
     plt.show() 
     plt.close()    
     
 line_plotu_sub(j)
-
-
-
-
 
 
 

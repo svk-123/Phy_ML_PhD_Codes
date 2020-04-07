@@ -35,16 +35,12 @@ tf.set_random_seed(1234)
 
 class PhysicsInformedNN:
     # Initialize the class
-    def __init__(self, x, y, r, u, v, p,rst=False):
+    def __init__(self, x, y,rst=False):
         
           
         self.x = x
         self.y = y
-        self.r = r
-        
-        self.u = u
-        self.v = v
-        self.p = p
+
         
         # Initialize parameters
         self.nu = tf.constant([0.0001], dtype=tf.float32)
@@ -55,26 +51,14 @@ class PhysicsInformedNN:
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
                                                      log_device_placement=True))
         
-        self.x_tf = tf.placeholder(tf.float32, shape=[None, self.x.shape[1]],name='input0')
-        self.y_tf = tf.placeholder(tf.float32, shape=[None, self.y.shape[1]],name='input1')
-        self.r_tf = tf.placeholder(tf.float32, shape=[None, self.r.shape[1]],name='input2')
-        
-        self.u_tf = tf.placeholder(tf.float32, shape=[None, self.u.shape[1]])
-        self.v_tf = tf.placeholder(tf.float32, shape=[None, self.v.shape[1]])
-        self.p_tf = tf.placeholder(tf.float32, shape=[None, self.p.shape[1]])
+        self.x_tf = tf.placeholder(tf.float32, shape=[None, self.x.shape[1],self.x.shape[2],self.x.shape[3]],name='input')
+        self.y_tf = tf.placeholder(tf.float32, shape=[None, self.y.shape[1]],name='output')
          
-        self.u_pred, self.v_pred, self.p_pred = self.net_NS(self.x_tf, self.y_tf, self.r_tf)
+        self.y_pred = self.net_NS(self.x_tf)
         
-#        self.loss = tf.reduce_sum(tf.square(self.u_tf - self.u_pred)) + \
-#                    tf.reduce_sum(tf.square(self.v_tf - self.v_pred)) + \
-#                    tf.reduce_sum(tf.square(self.p_tf - self.p_pred)) + \
-#                    tf.reduce_sum(tf.square(self.f_c_pred)) + \
-#                    tf.reduce_sum(tf.square(self.f_u_pred)) + \
-#                    tf.reduce_sum(tf.square(self.f_v_pred))
                     
-        self.loss_1 = tf.reduce_mean(tf.square(self.u_tf - self.u_pred)) + \
-                    tf.reduce_mean(tf.square(self.v_tf - self.v_pred)) + \
-                    tf.reduce_mean(tf.square(self.p_tf - self.p_pred))
+        self.loss_1 = tf.reduce_mean(tf.square(self.y_tf - self.y_pred))
+
                     
         self.loss_2 = 0.0
 
@@ -82,8 +66,8 @@ class PhysicsInformedNN:
             
         self.optimizer = tf.contrib.opt.ScipyOptimizerInterface(self.loss, 
                                                                 method = 'L-BFGS-B', 
-                                                                options = {'maxiter': 100000,
-                                                                           'maxfun': 100000,
+                                                                options = {'maxiter': 50000,
+                                                                           'maxfun': 50000,
                                                                            'maxcor': 100,
                                                                            'maxls': 100,
                                                                            'ftol' : 1.0 * np.finfo(float).eps})        
@@ -103,45 +87,45 @@ class PhysicsInformedNN:
     def neural_net(self, X):
 
         #create model
-        l1 = tf.layers.dense(X,  100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        Y  = tf.layers.dense(l1,3,activation=None,name='prediction')
-        
-        
+        conv1 = tf.layers.conv2d(X, 32, 8, activation=tf.nn.tanh)
+        pool1 = tf.layers.max_pooling2d(conv1, 3, 3)
+        conv2 = tf.layers.conv2d(pool1, 64, 6, activation=tf.nn.tanh)
+        pool2= tf.layers.max_pooling2d(conv2, 3, 3)        
+        conv3 = tf.layers.conv2d(pool2, 64, 4, activation=tf.nn.tanh)
+        pool3= tf.layers.max_pooling2d(conv3, 2, 2)          
+        conv4 = tf.layers.conv2d(pool3, 128, 2, activation=tf.nn.tanh)
+        pool4= tf.layers.max_pooling2d(conv4, 2, 2)         
+             
+        flat1 = tf.contrib.layers.flatten(pool4)
+        fc1= tf.layers.dense(flat1, 100, activation=tf.nn.tanh)
+        fc2= tf.layers.dense(fc1, 100, activation=tf.nn.tanh)        
+        fc3= tf.layers.dense(fc2, 100, activation=tf.nn.tanh)        
+        fc4= tf.layers.dense(fc3, 8, activation=tf.nn.tanh, name='para')        
+        fc5= tf.layers.dense(fc4, 100, activation=tf.nn.tanh)        
+        fc6= tf.layers.dense(fc5, 100, activation=tf.nn.tanh)
+        fc7= tf.layers.dense(fc6, 100, activation=tf.nn.tanh)
+        Y = tf.layers.dense(fc7, 70,name='prediction')
+                
         return Y
         
-    def net_NS(self, x, y, r):
+    def net_NS(self, x):
 
-        uvp = self.neural_net(tf.concat([x,y,r], 1))
-        
-        u = uvp[:,0:1]
-        v = uvp[:,1:2]
-        p = uvp[:,2:3]
-      
-
-        
-        return u, v, p
+        uvp = self.neural_net(x)
+                
+        return uvp
     
     def callback(self, loss):
         print('Loss: %.6e 00 00 \n' % (loss))       
         self.fp.write('00, %.6e, 00, 00 \n'% (loss)) 
         
     def get_batch(self,idx,bs,tb):
-        
-        return self.x[idx*bs:(idx+1)*bs],self.y[idx*bs:(idx+1)*bs],self.r[idx*bs:(idx+1)*bs],\
-                self.u[idx*bs:(idx+1)*bs],self.v[idx*bs:(idx+1)*bs],self.p[idx*bs:(idx+1)*bs]
-      
+        return self.x[idx*bs:(idx+1)*bs],self.y[idx*bs:(idx+1)*bs]
+    
     def train(self, nIter, lbfgs=False): 
         
         self.fp=open('./tf_model/conv.dat','w')
         
-        batch_size=50
+        batch_size=20
         total_batch= self.x.shape[0] / batch_size
         if(self.x.shape[0] % batch_size != 0):
             total_batch = total_batch +1
@@ -150,12 +134,12 @@ class PhysicsInformedNN:
         lr=0.0001
         min_lr=1e-7
         #reduce lr iter(patience)
-        rli=500
+        rli=100
         l_eps=1e-6
         #numbers to avg
         L=30
         #early stop wait
-        estop=1000
+        estop=500
         e_eps=1e-7
         
         start_time = time.time()
@@ -175,10 +159,9 @@ class PhysicsInformedNN:
             #batch training
             for i in range(total_batch):
             
-                batch_x, batch_y, batch_r, batch_u, batch_v, batch_p = self.get_batch(i,batch_size,total_batch)
+                batch_x, batch_y = self.get_batch(i,batch_size,total_batch)
                 
-                tf_dict = {self.x_tf: batch_x, self.y_tf: batch_y, self.r_tf: batch_r,
-                   self.u_tf: batch_u, self.v_tf: batch_v, self.p_tf: batch_p, self.tf_lr:lr}
+                tf_dict = {self.x_tf: batch_x, self.y_tf: batch_y, self.tf_lr:lr}
             
                 _,loss_value=self.sess.run([self.train_op_Adam,self.loss], tf_dict)
                 avg_loss += loss_value / total_batch
@@ -212,7 +195,7 @@ class PhysicsInformedNN:
             start_time = time.time()
             
             #save model
-            if ((count % 1000) ==0):
+            if ((count % 100) ==0):
                 model.save_model(count,avg_loss)
         #last inter
         model.save_model(count,avg_loss)
@@ -220,8 +203,7 @@ class PhysicsInformedNN:
         #final_optimization using lbfgsb
         if (lbfgs==True):
                     
-            tf_dict = {self.x_tf: self.x, self.y_tf: self.y, self.r_tf: self.r,
-                       self.u_tf: self.u, self.v_tf: self.v, self.p_tf: self.p}            
+            tf_dict = {self.x_tf: self.x, self.y_tf: self.y }            
                 
             self.optimizer.minimize(self.sess,
                                     feed_dict = tf_dict,
@@ -260,54 +242,24 @@ if __name__ == "__main__":
     vtmp=[]
     ptmp=[]
     
-    relist=[100,200,400,600,1000,2000,4000,6000,8000,9000]
-    for ii in range(len(relist)):
+    for ii in range(1):
         #x,y,Re,u,v
-        with open('./data_file_ldc_ust/cavity_Re%s.pkl'%relist[ii], 'rb') as infile:
+        with open('../ml_airfoil_para/data_file/foil_param_216_no_aug_tr.pkl', 'rb') as infile:
             result = pickle.load(infile)
-        xtmp.extend(result[0])
-        ytmp.extend(result[1])
-        reytmp.extend(result[2])
-        utmp.extend(result[3])
-        vtmp.extend(result[4])
-        ptmp.extend(result[5])   
-        
-    xtmp=np.asarray(xtmp)
-    ytmp=np.asarray(ytmp)
-    utmp=np.asarray(utmp)
-    vtmp=np.asarray(vtmp)
-    ptmp=np.asarray(ptmp) 
-    reytmp=np.asarray(reytmp)/10000.    
-       
-    x = xtmp[:,None] # NT x 1
-    y = ytmp[:,None] # NT x 1
-    
-    u = utmp[:,None] # NT x 1
-    v = vtmp[:,None] # NT x 1
-    p = ptmp[:,None] # NT x 1
-    r = reytmp[:,None]    
-    
-    ######################################################################
-    ######################## Noiseles Data ###############################
-    ######################################################################
-    # Training Data    
-    
-    N_train=1000
-    
-    idx = np.random.choice(len(xtmp), N_train, replace=False)
-    x_train = x[idx,:]
-    y_train = y[idx,:]
-    r_train = r[idx,:]
-    
-    u_train = u[idx,:]
-    v_train = v[idx,:]
-    p_train = p[idx,:]
+        my_inp=result[0]
+        my_out=result[1]
+        xx=result[2]
 
-    
+
+    my_inp=np.asarray(my_inp)
+    my_out=np.asarray(my_out)
+    my_inp=my_inp[:,:,:,None]    
+    my_out=my_out    
+
     # Training
-    model = PhysicsInformedNN(x_train, y_train, r_train, u_train, v_train, p_train,False)
+    model = PhysicsInformedNN(my_inp,my_out,False)
  
-    model.train(100000,True)  
+    model.train(2000,True)  
        
     
 

@@ -57,19 +57,19 @@ out_cl=[]
 
 for ii in [1]:
     
-    data_file='./data_file/naca4_clcd_turb_st_8para.pkl'
-    with open(data_file, 'rb') as infile:
-        result = pickle.load(infile)
-
-	out_cm.extend(result[0])   
-	out_cd.extend(result[1])
-    	out_cl.extend(result[2])
-
-    	inp_reno.extend(result[3])
-	inp_aoa.extend(result[4])
-	inp_para.extend(result[5])
+#    data_file='./data_file/naca4_clcd_turb_st_8para.pkl'
+#    with open(data_file, 'rb') as infile:
+#        result = pickle.load(infile)
+#
+#	out_cm.extend(result[0])   
+#	out_cd.extend(result[1])
+#    	out_cl.extend(result[2])
+#
+#    	inp_reno.extend(result[3])
+#	inp_aoa.extend(result[4])
+#	inp_para.extend(result[5])
     
-    data_file='./data_file/gen_clcd_turb_st_8para.pkl'
+    data_file='./data_file/gen_gan_clcd_turb_RS_0p02_0p001_8para.pkl'
     with open(data_file, 'rb') as infile:
         result = pickle.load(infile)
 
@@ -84,8 +84,8 @@ for ii in [1]:
     
 
 out_cm=np.asarray(out_cm)
-out_cd=np.asarray(out_cd)/0.33
-out_cl=np.asarray(out_cl)/2.04
+out_cd=np.asarray(out_cd) 
+out_cl=np.asarray(out_cl)
 
 inp_reno=np.asarray(inp_reno)
 inp_aoa=np.asarray(inp_aoa)
@@ -101,6 +101,8 @@ np.random.shuffle(I)
 n=N
 
 #normalize
+out_cd=out_cd/0.33
+out_cl=out_cl /2.04
 inp_reno=inp_reno/100000.
 inp_aoa=inp_aoa/14.0
 
@@ -115,12 +117,12 @@ ttr1 = my_out[I][:n]
 # Multilayer Perceptron
 # create model
 aa=Input(shape=(10,))
-xx =Dense(50,  kernel_initializer='random_normal', activation='relu')(aa)
-xx =Dense(50, activation='relu')(xx)
-xx =Dense(50, activation='relu')(xx)
-xx =Dense(50, activation='relu')(xx)
-xx =Dense(50, activation='relu')(xx)
-xx =Dense(50, activation='relu')(xx)
+xx =Dense(50,  kernel_initializer='random_normal', activation='tanh')(aa)
+xx =Dense(50, activation='tanh')(xx)
+xx =Dense(50, activation='tanh')(xx)
+xx =Dense(50, activation='tanh')(xx)
+xx =Dense(50, activation='tanh')(xx)
+xx =Dense(50, activation='tanh')(xx)
 g =Dense(2, activation='linear')(xx)
 
 #model = Model(inputs=a, outputs=g)

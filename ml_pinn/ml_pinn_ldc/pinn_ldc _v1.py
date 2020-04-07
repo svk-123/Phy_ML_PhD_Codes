@@ -1,11 +1,9 @@
 """
-@author: Maziar Raissi
+@author: Originally written Maziar Raissi
+@modified by Vinoth.
+
 """
-'''
-this is to make prediction using
-p u v instead of original psi_p work
-lamda fixed
-'''
+
 
 
 import sys

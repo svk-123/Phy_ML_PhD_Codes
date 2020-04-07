@@ -30,7 +30,7 @@ boundary not loaded: may be required?
 
 # ref:[data,name]
 path='./data_file/'
-data_file='param_gen_tanh_8_v1.pkl'
+data_file='param_gan_uiuc_RS_8.pkl'
 # ['[para_scaled,name,para(unscaled),mm_scaler,info]']
 with open(path + data_file, 'rb') as infile:
     result1 = pickle.load(infile)
@@ -40,12 +40,12 @@ mm_scaler=result1[3]
 name=np.asarray(name)
 
 #del result1
-
+fp=open('removed.dat','w')
 path='./data_file/'
 for ii in [1]:
     
-    data_file='gen_clcd_turb_st_all_0para.pkl'
-    with open(path + data_file, 'rb') as infile:
+    data_file='./data_file_to_combine/clcd_pkls_cl_0p02_cd_0p001/gen_clcd_turb_st_all_0para.pkl'
+    with open( data_file, 'rb') as infile:
         result = pickle.load(infile)
     
     myinp_cm=result[0]
@@ -59,23 +59,46 @@ for ii in [1]:
     myname=np.asarray(myname)
     
     #del result
-
     new_para=[]
+    new_myinp_cm=[]
+    new_myinp_cd=[]
+    new_myinp_cl=[]
+    new_myinp_reno=[]
+    new_myinp_aoa=[]
+    new_myinp_para=[]
+    new_myname=[]
+    
     for j in range(len(myinp_cm)):
         if myname[j] in name:
             ind=np.argwhere(myname[j]==name)
             new_para.append(para[int(ind)])
-
+            
+            new_myinp_cm.append(myinp_cm[j])
+            new_myinp_cd.append(myinp_cd[j])
+            new_myinp_cl.append(myinp_cl[j])
+            new_myinp_reno.append(myinp_reno[j])
+            new_myinp_aoa.append(myinp_aoa[j])
+            new_myinp_para.append(myinp_para[j])            
+            new_myname.append(myname[j])   
+            
         else:
             print('not in pname %s'%myname[j])
+            fp.write('not in pname %s\n'%myname[j])
             
 new_para=np.asarray(new_para)
+new_myinp_cm=np.asarray(new_myinp_cm)
+new_myinp_cd=np.asarray(new_myinp_cd)
+new_myinp_cl=np.asarray(new_myinp_cl)
+new_myinp_reno=np.asarray(new_myinp_reno)
+new_myinp_aoa=np.asarray(new_myinp_aoa)
+new_myinp_para=np.asarray(new_myinp_para)
+new_myname=np.asarray(new_myname)
 
-info= '[cm, cd, cl, reno, aoa, para_scaled, name,scaler, info]'
+info= '[cm, cd, cl, reno, aoa, para_scaled, name,scaler, info:cl_0p02_cd_0p001]'
 
-data1 = [myinp_cm, myinp_cd, myinp_cl, myinp_reno, myinp_aoa, new_para, myname, mm_scaler, info ]
+data1 = [new_myinp_cm, new_myinp_cd, new_myinp_cl, new_myinp_reno, new_myinp_aoa, new_para, new_myname, mm_scaler, info ]
 
-with open(path+'/gen_clcd_turb_st_8para.pkl', 'wb') as outfile1:
+with open(path+'/gen_gan_clcd_turb_RS_0p02_0p001_8para.pkl', 'wb') as outfile1:
     pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
-
+fp.close()

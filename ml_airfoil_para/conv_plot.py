@@ -69,8 +69,8 @@ with open(path + data_file, 'rb') as infile:
 h=result[0]
 #hist
 plt.figure(figsize=(6,5))
-plt.plot(range(len(h['loss'])),h['loss'],'r',marker='o', mfc='None',mew=1.5,ms=12,markevery=150,lw=3,label='training_error')
-plt.plot(range(len(h['val_loss'])),h['val_loss'],'b',marker='s', mfc='None',mew=1.5,ms=12,markevery=150,lw=3,label='validation_error')
+plt.plot(range(len(h['loss'])),h['loss'],'r',lw=3,label='training_error')
+plt.plot(range(len(h['val_loss'])),h['val_loss'],'b',lw=3,label='validation_error')
 plt.legend(fontsize=20)
 plt.xlabel('Training Epochs',fontsize=20)
 plt.ylabel('MSE',fontsize=20)

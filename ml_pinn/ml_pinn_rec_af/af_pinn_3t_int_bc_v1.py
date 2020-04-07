@@ -32,7 +32,7 @@ tf.set_random_seed(1234)
 
 class PhysicsInformedNN:
     # Initialize the class
-    def __init__(self, x, y, u, v, p, xb, yb, ub, vb, xg, yg):
+    def __init__(self, x, y, u, v, p, xb, yb, ub, vb, xg, yg, rst=False):
                   
         self.x = x
         self.y = y
@@ -52,7 +52,7 @@ class PhysicsInformedNN:
         
         
         # Initialize parameters (1/200)
-        self.nu = tf.constant([0.005], dtype=tf.float32)
+        self.nu = tf.constant([0.01], dtype=tf.float32)
         
         self.tf_lr = tf.placeholder(tf.float32, shape=[])
         
@@ -120,7 +120,12 @@ class PhysicsInformedNN:
         init = tf.global_variables_initializer()
         self.sess.run(init)
         self.saver = tf.train.Saver()
-    
+        
+        if(rst == True):
+            self.saver.restore(self.sess, tf.train.latest_checkpoint('./tf_model_1/'))       
+            
+        self.lb_count=0
+        
     def neural_net(self, X):
 
         #create model
@@ -192,6 +197,10 @@ class PhysicsInformedNN:
         print('Loss: %.6e %.6e %.6e %.6e \n' % (loss,loss_1,loss_2, loss_3))       
         self.fp.write('00, %.6e, %.6e, %.6e %.6e \n'% (loss,loss_1,loss_2, loss_3)) 
         
+        self.lb_count=self.lb_count+1
+        
+        if(self.lb_count % 20000 ==0):
+      	    self.save_model(self.lb_count)
       
     def train(self, nIter, lbfgs=False): 
         
@@ -319,7 +328,7 @@ if __name__ == "__main__":
     
     for ii in range(1):
         #x,y,Re,u,v
-        with open('./data_file/naca4518_200_14_wake.pkl', 'rb') as infile:
+        with open('./data_file/naca0012_100_00_sq_wake_50x5.pkl', 'rb') as infile:
             result = pickle.load(infile)
         inp_x.extend(result[0])   
         inp_y.extend(result[1])
@@ -354,7 +363,7 @@ if __name__ == "__main__":
     pout_v=[]
     for ii in range(1):
         #x,y,Re,u,v
-        with open('./data_file/naca4518_200_14_all5.pkl', 'rb') as infile:
+        with open('./data_file/naca0012_100_0_around_5556.pkl', 'rb') as infile:
             result = pickle.load(infile)
         pinp_x.extend(result[0])   
         pinp_y.extend(result[1])
@@ -383,13 +392,13 @@ if __name__ == "__main__":
     ######################################################################
     # Training Data    
     
-    #import wall bc
-    xyu=np.loadtxt('./data_file/af_wall_bc_100.dat')
+    #import airfoil wall bc
+    xyu=np.loadtxt('./data_file/af_wall_bc_200.dat')
     
-    #uvp
-    xyu_io=np.loadtxt('./data_file/af_wall_bc_int_200.dat')
+    #uvp inout
+    xyu_io=np.loadtxt('./data_file/af_inout_sq_5556_4s_200_intp.dat')
     
-    N_train=500
+    N_train=len(inp_x)
     
     idx = np.random.choice(len(inp_x), N_train, replace=False)
     
@@ -408,17 +417,17 @@ if __name__ == "__main__":
     v_train = np.concatenate((v_train, xyu_io[:,3:4]),axis=0)    
     p_train = np.concatenate((p_train, xyu_io[:,4:5]),axis=0) 
     
-#    # only wall BC
-    xb_train =  xyu_io[:,0:1]
-    yb_train =  xyu_io[:,1:2]
-    ub_train =  xyu_io[:,2:3]
-    vb_train =  xyu_io[:,3:4]
+    ## only wall BC
+    xb_train =  xyu[:,0:1]
+    yb_train =  xyu[:,1:2]
+    ub_train =  xyu[:,2:3]
+    vb_train =  xyu[:,3:4]
     
     ######################################################################
     ######################## Gov Data ###############################
     ######################################################################
     
-    N_train=6000
+    N_train=12000
     
     idx = np.random.choice(len(pinp_x), N_train, replace=False)
 
@@ -431,12 +440,12 @@ if __name__ == "__main__":
 #    xg_train = np.concatenate((x_train[:,:],xb_train[:,:],pinp_x[idx,:]),axis=0)
 #    yg_train = np.concatenate((y_train[:,:],yb_train[:,:],pinp_y[idx,:]),axis=0)
         
-    # Training
-    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train, xb_train, yb_train, ub_train, vb_train, xg_train, yg_train)
- 
-    model.train(50000,True)  
-       
-    model.save_model(000000)
+#    # Training
+#    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train, xb_train, yb_train, ub_train, vb_train, xg_train, yg_train, False)
+# 
+#    model.train(50000,True)  
+#       
+#    model.save_model(000000)
 
 
 #plt.figure(figsize=(6, 5), dpi=100)
@@ -454,18 +463,18 @@ if __name__ == "__main__":
 #plt.savefig('./plot/mesh.png', format='png',bbox_inches='tight', dpi=100)
 #plt.show()
 #
-#
-#plt.figure(figsize=(6, 5), dpi=100)
-#plt0, =plt.plot(x_train,y_train,'og',linewidth=0,ms=3,label='MSE pts-200 (Sampling)',zorder=5)
-#plt0, =plt.plot(xg_train,yg_train,'+r',linewidth=0,ms=2,label='Gov Eq. pts-8000 (Residual)',zorder=0)
-#plt0, =plt.plot(xb_train,yb_train,'ok',linewidth=0,ms=3,label='BC pts-350',zorder=1)
-#
-##plt.legend(fontsize=20)
-#plt.xlabel('X',fontsize=20)
-#plt.ylabel('Y',fontsize=20)
-##plt.title('%s-u'%(flist[ii]),fontsiuze=16)
-#plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
-#plt.xlim(-0.5,2)
-#plt.ylim(-0.5,1)    
-#plt.savefig('./plot/mesh1.png', format='png',bbox_inches='tight', dpi=100)
-#plt.show()
+
+plt.figure(figsize=(6, 5), dpi=100)
+plt0, =plt.plot(x_train,y_train,'og',linewidth=0,ms=3,label='MSE pts-200 (Sampling)',zorder=5)
+plt0, =plt.plot(xg_train,yg_train,'+r',linewidth=0,ms=2,label='Gov Eq. pts-12000 (Residual)',zorder=0)
+plt0, =plt.plot(xb_train,yb_train,'ok',linewidth=0,ms=3,label='BC pts-400',zorder=1)
+
+#plt.legend(fontsize=20)
+plt.xlabel('X',fontsize=20)
+plt.ylabel('Y',fontsize=20)
+#plt.title('%s-u'%(flist[ii]),fontsiuze=16)
+plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
+plt.xlim(-1,2)
+plt.ylim(-1,1)    
+plt.savefig('./plot/mesh2_zoom.png', format='png',bbox_inches='tight', dpi=100)
+plt.show()

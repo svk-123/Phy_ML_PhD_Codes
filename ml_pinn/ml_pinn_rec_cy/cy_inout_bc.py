@@ -14,39 +14,38 @@ import time
 import pickle
 
 
-
-
-fp=open('./data_file/cy_inout_20.dat','w')
+plt.figure()
+fp=open('./data_file/cy_inout_2222_3s_60.dat','w')
 
 N=20
+a=2
 
-x=np.linspace(-5,-5,N)
-y=np.linspace(-5,5,N)
+x=np.linspace(-a,-a,N)
+y=np.linspace(-a,a,N)
+plt.plot(x,y)
 
 for i in range(len(x)):
     fp.write('%f %f 1.0 1e-12 \n'%(x[i],y[i]))
 
-
-#x=np.linspace(5,5,N)
-#y=np.linspace(-3,3,N)
-#
+#x=np.linspace(a,a,N)
+#y=np.linspace(-a,a,N)
+#plt.plot(x,y)
 #for i in range(len(x)):
 #    fp.write('%f %f 1.0 1e-12 \n'%(x[i],y[i]))
 
-x=np.linspace(-5,5,N)
-y=np.linspace(-5,-5,N)
+x=np.linspace(-a,a,N)
+y=np.linspace(-a,-a,N)
+plt.plot(x,y)
 
 for i in range(len(x)):
     fp.write('%f %f 1.0 1e-12 \n'%(x[i],y[i]))
 
-
-x=np.linspace(-5,5,N)
-y=np.linspace(5,5,N)
+x=np.linspace(-a,a,N)
+y=np.linspace(a,a,N)
+plt.plot(x,y)
+plt.show()
 
 for i in range(len(x)):
     fp.write('%f %f 1.0 1e-12 \n'%(x[i],y[i]))
-
-
-        
 fp.close()    
     

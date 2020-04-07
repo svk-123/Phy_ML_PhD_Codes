@@ -108,8 +108,8 @@ class PhysicsInformedNN:
                     
         self.optimizer = tf.contrib.opt.ScipyOptimizerInterface(self.loss, 
                                                                 method = 'L-BFGS-B', 
-                                                                options = {'maxiter': 50000,
-                                                                           'maxfun': 50000,
+                                                                options = {'maxiter': 1000,
+                                                                           'maxfun': 10000,
                                                                            'maxcor': 100,
                                                                            'maxls': 100,
                                                                            'ftol' : 1.0 * np.finfo(float).eps})        
@@ -120,7 +120,8 @@ class PhysicsInformedNN:
         init = tf.global_variables_initializer()
         self.sess.run(init)
         self.saver = tf.train.Saver()
-    
+        self.lb_count=0
+        
     def neural_net(self, X):
 
         #create model
@@ -191,7 +192,10 @@ class PhysicsInformedNN:
     def callback(self, loss, loss_1, loss_2, loss_3):
         print('Loss: %.6e %.6e %.6e %.6e \n' % (loss,loss_1,loss_2, loss_3))       
         self.fp.write('00, %.6e, %.6e, %.6e %.6e \n'% (loss,loss_1,loss_2, loss_3)) 
-        
+        self.lb_count=self.lb_count+1
+        if(self.lb_count % 100 ==0):
+            self.save_model(self.lb_count)
+            
       
     def train(self, nIter, lbfgs=False): 
         
@@ -272,7 +276,7 @@ class PhysicsInformedNN:
             
             #save model
             if ((count % 5000) ==0):
-                model.save_model(count)
+                self.save_model(count)
                 
        
         #final_optimization using lbfgsb
@@ -410,7 +414,7 @@ if __name__ == "__main__":
     ######################## Gov Data ###############################
     ######################################################################
     
-    N_train=8000
+    N_train=12000
     
     idx = np.random.choice(len(pinp_x), N_train, replace=False)
     
@@ -418,12 +422,12 @@ if __name__ == "__main__":
     xg_train = np.concatenate((x_train[:,:],xb_train[:,:],pinp_x[idx,:]),axis=0)
     yg_train = np.concatenate((y_train[:,:],yb_train[:,:],pinp_y[idx,:]),axis=0)
         
-#    # Training
-#    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train, xb_train, yb_train, ub_train, vb_train, xg_train, yg_train)
-# 
-#    model.train(10000,True)  
-#       
-#    model.save_model(000000)
+    # Training
+    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train, xb_train, yb_train, ub_train, vb_train, xg_train, yg_train)
+ 
+    model.train(1,True)  
+       
+    model.save_model(000000)
     
 #    # Prediction
 #    u_pred, v_pred, p_pred = model.predict(pinp_x, pinp_y)
@@ -445,9 +449,13 @@ if __name__ == "__main__":
 
 
 plt.figure(figsize=(6, 5), dpi=100)
-plt0, =plt.plot(x_train,y_train,'og',linewidth=0,ms=5,label='MSE pts-200 (Sampling)',zorder=5)
-plt0, =plt.plot(xg_train,yg_train,'+r',linewidth=0,ms=3,label='Gov Eq. pts-8000 (Residual)',zorder=0)
+plt0, =plt.plot(x_train,y_train,'og',linewidth=0,ms=5,label='MSE pts-100 (Sampling)',zorder=5)
+plt0, =plt.plot(xg_train,yg_train,'+r',linewidth=0,ms=3,label='Gov Eq. pts-2000 (Residual)',zorder=0)
 plt0, =plt.plot(xb_train,yb_train,'ok',linewidth=0,ms=4,label='BC pts-80',zorder=1)
+
+#plt0, =plt.plot([0,0],[0.5,1],'r',linewidth=2)
+#plt0, =plt.plot([1,1],[0,1],'r',linewidth=2)
+#plt0, =plt.plot([2,2],[0,1],'r',linewidth=2)
 
 #plt.legend(fontsize=20)
 plt.xlabel('X',fontsize=20)
@@ -456,5 +464,5 @@ plt.ylabel('Y',fontsize=20)
 plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
 #plt.xlim(-0.1,1.2)
 #plt.ylim(-0.01,1.4)    
-plt.savefig('./plot/mesh.png', format='png',bbox_inches='tight', dpi=100)
+plt.savefig('./plot/mesh_1.png', format='png',bbox_inches='tight', dpi=100)
 plt.show()

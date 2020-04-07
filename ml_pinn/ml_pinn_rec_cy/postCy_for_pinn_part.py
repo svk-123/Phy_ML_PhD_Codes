@@ -83,8 +83,6 @@ aoa = np.array(map(float, aoa))
 st= [0]
 end=[1]
 
-fp=open('foil_error.dat','w+')
-fp1=open('foil_details.dat','w+')
 
 '''np.random.seed(1234534)
 mylist=np.random.randint(0,4500,100)
@@ -121,9 +119,6 @@ for jj in range(1):
         yname=yname[:-3].astype(np.int) 
         ymax=int(yname.max())
 
-        fp1.write('%s-%s\n'%(ii,casedir))  
-        fp1.write('	yname:%s\n'%(yname))
-        fp1.write('	ymax:%s\n'%(ymax)) 
 
         x=[]
         with open(casedir +'/%s/ccx'%ymax, 'r') as infile:
@@ -174,12 +169,23 @@ for jj in range(1):
         v = np.array(map(float, v))
         w = np.array(map(float, w))
                
-        #filter within xlim,ylim
+        #around
         I=[]
         for i in range(len(x)):
-            if (x[i]<=4.5 and x[i]>=-4.5 and y[i]<=4.5 and y[i]>=-4.5 ):
+            if (x[i]<=2.95 and x[i]>=-2.95 and y[i]<=2.95 and y[i]>=-2.95 ):
                 I.append(i)
+        
+#        #front        
+#        I=[]
+#        for i in range(len(x)):
+#            if (x[i]<=-0.5 and x[i]>=-1.0 and y[i]<=0.5 and y[i]>=-0.5 ):
+#                I.append(i)        
                 
+#        #top       
+#        I=[]
+#        for i in range(len(x)):
+#            if (x[i]<=0.5 and x[i]>=-0.5 and y[i]<=1.0 and y[i]>=0.5 ):
+#                I.append(i)                   
                 
         x=x[I]
         y=y[I]
@@ -208,25 +214,30 @@ for jj in range(1):
             #plt.grid(True)
             #patch.set_facecolor('black')
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-            plt.savefig('./plot/%s.eps'%(nname[ii]), format='eps')
+            #plt.savefig('./plot/%s.eps', format='eps')
+            plt.show()
             plt.close()
             
-        #plot(x,y,u,20,'name')    
+        plot(x,y,u,20,'name')    
         
 
         
     #save file
     filepath='./data_file'
       
-    # ref:[x,y,z,ux,uy,uz,k,ep,nu
-    info=['x, y, p, u, v, coord , info= < 4.5']
+#    # ref:[x,y,z,ux,uy,uz,k,ep,nu
+#    info=['x, y, p, u, v, coord , info= < ']
+#
+#    data1 = [x, y, p, u, v, coord, info]
+#    #data1 = [myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, nco, myname, info ]
+#    with open(filepath+'/cy_40_around_5555.pkl', 'wb') as outfile1:
+#        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
-    data1 = [x, y, p, u, v, coord, info]
-    #data1 = [myinp_x, myinp_y, myinp_para, myinp_re, myinp_aoa, myout_p, myout_u, myout_v, nco, myname, info ]
-    with open(filepath+'/cy_40_around_5555.pkl', 'wb') as outfile1:
-        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
+fp=open('./data_file/cy_internal_3333.dat','w')
+fp.write('x y p u v \n')
+for i in range(len(p)):
+    fp.write('%f %f %f %f %f \n'%(x[i], y[i], p[i], u[i], v[i]))
+fp.close()
 
-    
-fp.close()        
-fp1.close()
+
 

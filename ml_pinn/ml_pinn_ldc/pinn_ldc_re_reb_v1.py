@@ -1,13 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Jul 17 20:49:13 2019
-
-@author: vino
-"""
 
 """
-@author: Maziar Raissi
+@author: Originally written by Maziar Raissi
+modified by Vinoth.
 """
 '''
 this is to make prediction using

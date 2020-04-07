@@ -52,7 +52,7 @@ reytmp=[]
 utmp=[]
 vtmp=[]
 ptmp=[]
-flist=['re100']    
+flist=['re1000']    
 for ii in range(1):
     #x,y,Re,u,v
     with open('./data_file_st/cavity_Re1000.pkl', 'rb') as infile:
@@ -87,7 +87,7 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess:
     
-    path='./tf_model/case_1_3t_50pts/tf_model/'
+    path='./tf_model/case_pinn_1_3t_200pts_corner/tf_model/'
     new_saver = tf.train.import_meta_graph(path + 'model_0.meta')
     new_saver.restore(sess, tf.train.latest_checkpoint(path))
 

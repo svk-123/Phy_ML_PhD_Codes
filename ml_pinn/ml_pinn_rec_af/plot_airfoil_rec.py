@@ -45,39 +45,17 @@ import tensorflow as tf
 matplotlib.rc('xtick', labelsize=18) 
 matplotlib.rc('ytick', labelsize=18) 
 
-
 #1,12,19,20,23
-A=3
-for ii in range(1):
-    xtmp=[]
-    ytmp=[]
-    reytmp=[]
-    utmp=[]
-    vtmp=[]
-    ptmp=[]
-    aoatmp=[]
-                     
-    with open('./data_file/naca4518_200_14_all5.pkl', 'rb') as infile:
-        result = pickle.load(infile)
-    xtmp.extend(result[0])
-    ytmp.extend(result[1])
-    ptmp.extend(result[2])
-    utmp.extend(result[3])
-    vtmp.extend(result[4])  
+xy=np.loadtxt('./data_file/af_internal_21p511.dat',skiprows=1)
 
+val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
+val_out=np.concatenate((xy[:,3:4],xy[:,4:5],xy[:,2:3]),axis=1)    
 
-    xtmp=np.asarray(xtmp)
-    ytmp=np.asarray(ytmp)
-    ptmp=np.asarray(ptmp)
-    utmp=np.asarray(utmp)
-    vtmp=np.asarray(vtmp)
- 
-
-    val_inp=np.concatenate((xtmp[:,None],ytmp[:,None]),axis=1)
-    val_out=np.concatenate((utmp[:,None],vtmp[:,None],ptmp[:,None]),axis=1)
-    
-
-
+xtmp=xy[:,0]
+ytmp=xy[:,1]
+ptmp=xy[:,2]
+utmp=xy[:,3]
+vtmp=xy[:,4]
 
 #load model
 #session-run
@@ -86,7 +64,7 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_1_re200_naca4518_int_bc/tf_model/'
+    path1='./tf_model/case_3_puv_wake_20x5_dp_wall/tf_model/'
     #path1='./tf_model/'
     new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
@@ -99,9 +77,8 @@ with tf.Session() as sess1:
 
 sess1.close()
 
-kout=val_out
 
-co=np.loadtxt('./data_file/naca4518.dat',skiprows=1)  
+co=np.loadtxt('./data_file/naca0012_200_cos.dat',skiprows=1)  
 i=1
 j=1
   
@@ -113,10 +90,11 @@ def find_nearest(array, value):
 
 #plot
 def con_plot(i):
-    l1=-5
-    l2=5
-    h1=-5
-    h2=5
+    l1=-1
+    l2=2
+    h1=-1
+    h2=1
+    
     fig = plt.figure(figsize=(10, 12),dpi=100)
         
     ax1 = fig.add_subplot(3,2,1)
@@ -252,15 +230,15 @@ def plot_cp(i):
        pl2[j]=f2p(xl[j],yl[j])    
 
 
-    print ('interpolation-2...')      
-    f3p=interpolate.LinearNDInterpolator(pD,kout[:,2])
-      
-    pu3=np.zeros(len(xu))
-    for j in range(len(xu)):
-        pu3[j]=f3p(xu[j],yu[j])
-    pl3=np.zeros(len(xl))
-    for j in range(len(xl)):
-       pl3[j]=f3p(xl[j],yl[j])  
+#    print ('interpolation-2...')      
+#    f3p=interpolate.LinearNDInterpolator(pD,kout[:,2])
+#      
+#    pu3=np.zeros(len(xu))
+#    for j in range(len(xu)):
+#        pu3[j]=f3p(xu[j],yu[j])
+#    pl3=np.zeros(len(xl))
+#    for j in range(len(xl)):
+#       pl3[j]=f3p(xl[j],yl[j])  
 
     
     mei=5       
@@ -279,9 +257,6 @@ def plot_cp(i):
     plt.show()
     
 plot_cp(j)  
-
-
-
     
 #plot
 def line_plotu_sub(i):
@@ -338,18 +313,18 @@ def line_plotu_sub(i):
         u2c[j]=f2u(xc[j],yc[j])
         u2d[j]=f2u(xd[j],yd[j])
 
-    print 'interpolation-2...'      
-    f3u=interpolate.LinearNDInterpolator(pD,kout[:,0])
-        
-    u3a=np.zeros((len(ya)))
-    u3b=np.zeros((len(ya)))
-    u3c=np.zeros((len(ya)))
-    u3d=np.zeros((len(ya)))
-    for j in range(len(ya)):
-        u3a[j]=f3u(xa[j],ya[j])
-        u3b[j]=f3u(xb[j],yb[j])
-        u3c[j]=f3u(xc[j],yc[j])
-        u3d[j]=f3u(xd[j],yd[j])
+#    print 'interpolation-2...'      
+#    f3u=interpolate.LinearNDInterpolator(pD,kout[:,0])
+#        
+#    u3a=np.zeros((len(ya)))
+#    u3b=np.zeros((len(ya)))
+#    u3c=np.zeros((len(ya)))
+#    u3d=np.zeros((len(ya)))
+#    for j in range(len(ya)):
+#        u3a[j]=f3u(xa[j],ya[j])
+#        u3b[j]=f3u(xb[j],yb[j])
+#        u3c[j]=f3u(xc[j],yc[j])
+#        u3d[j]=f3u(xd[j],yd[j])
 
 
     #for -v
@@ -379,18 +354,18 @@ def line_plotu_sub(i):
         v2c[j]=f2v(xc[j],yc[j])
         v2d[j]=f2v(xd[j],yd[j])
 
-    print 'interpolation-2...'      
-    f3v=interpolate.LinearNDInterpolator(pD,kout[:,1])
-   
-    v3a=np.zeros((len(ya)))
-    v3b=np.zeros((len(ya)))
-    v3c=np.zeros((len(ya)))
-    v3d=np.zeros((len(ya)))
-    for j in range(len(ya)):
-        v3a[j]=f3v(xa[j],ya[j])
-        v3b[j]=f3v(xb[j],yb[j])
-        v3c[j]=f3v(xc[j],yc[j])
-        v3d[j]=f3v(xd[j],yd[j])
+#    print 'interpolation-2...'      
+#    f3v=interpolate.LinearNDInterpolator(pD,kout[:,1])
+#   
+#    v3a=np.zeros((len(ya)))
+#    v3b=np.zeros((len(ya)))
+#    v3c=np.zeros((len(ya)))
+#    v3d=np.zeros((len(ya)))
+#    for j in range(len(ya)):
+#        v3a[j]=f3v(xa[j],ya[j])
+#        v3b[j]=f3v(xb[j],yb[j])
+#        v3c[j]=f3v(xc[j],yc[j])
+#        v3d[j]=f3v(xd[j],yd[j])
   
     mei=2
     
@@ -437,7 +412,7 @@ def line_plotu_sub(i):
     #plt.plot(v3a,ya,'r',linewidth=3)
     #plt.legend(fontsize=14)
     plt.ylabel('Y',fontsize=20)
-    plt.xlim(-0.1,1.0)
+    plt.xlim(-0.1,0.5)
     
     plt.subplot(1,3,2)
     plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
@@ -445,7 +420,7 @@ def line_plotu_sub(i):
     #plt.plot(v3b,yb,'r',linewidth=3)
     plt.xlabel('v-velocity',fontsize=20)
     plt.yticks([])
-    plt.xlim(-0.1,0.5)
+    plt.xlim(-0.1,0.2)
     
     
     plt.subplot(1,3,3)
@@ -455,7 +430,7 @@ def line_plotu_sub(i):
     plt.yticks([])  
     plt.legend(loc="upper left", bbox_to_anchor=[0.19, 0.5], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
 
-    plt.xlim(-0.3,0.5)
+    plt.xlim(-0.15,0.2)
        
     plt.figtext(0.4, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0, hspace = 0, wspace = 0.1)

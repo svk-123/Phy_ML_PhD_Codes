@@ -69,8 +69,8 @@ import matplotlib
 #u=np.asarray(u)
 #v=np.asarray(v)
 
-Re=100
-suff='re%s_nodp_nodv_x8_50'%Re    
+Re=1000
+suff='re%s_nodp_nodv_x8'%Re    
 xy=np.loadtxt('./data_file/Re%s/bl_internal_combined.dat'%Re,skiprows=1)
 
 val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
@@ -89,7 +89,7 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8_nn50x8/tf_model/'%Re
+    path1='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8/tf_model/'%Re
     new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
@@ -114,12 +114,19 @@ j=1
 #plot
 def con_plot():
     
+    nu_=1.0/float(Re)
+    x1=5
+    Rex1=x1/nu_
+    d5=4.91*x1/np.sqrt(Rex1)
+
+
+    
     fig = plt.figure(figsize=(8, 8),dpi=100)
     
     l1=0
     l2=5
     h1=0
-    h2=0.2
+    h2=d5
     AR=2.0/h2
 
     
@@ -283,27 +290,47 @@ def plot_cp():
     
     return pu1
 
-plot_cp()
+#plot_cp()
 
 
     
 #plot
 def line_plotu_sub(i):
 
+    ######-BL thickness--######
+    ########################
+    
+    nu_=1.0/float(Re)
+    x1=1
+    x2=2
+    x3=3
+    
+    Rex1=x1/nu_
+    d1=4.91*x1/np.sqrt(Rex1)
+
+    Rex2=x2/nu_
+    d2=4.91*x2/np.sqrt(Rex2)
+
+    Rex3=x3/nu_
+    d3=4.91*x3/np.sqrt(Rex3)
+    
+    print (d1,d2,d3)
+        
     #LinearNDinterpolator
     pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
-    yl=1
-    xa=np.linspace(1,1,50)
-    ya=np.linspace(0,yl,50)
+    
+    
+    xa=np.linspace(1,1,50)#not used
+    ya=np.linspace(0,1,50)
 
-    xb=np.linspace(2,2,50)
-    yb=np.linspace(0,yl,50)
+    xb=np.linspace(1,1,50)
+    yb=np.linspace(0,d1,50)
 
-    xc=np.linspace(3,3,50)
-    yc=np.linspace(0,yl,50)
+    xc=np.linspace(2,2,50)
+    yc=np.linspace(0,d2,50)
 
-    xd=np.linspace(3.5,3.5,50)
-    yd=np.linspace(0,yl,50)
+    xd=np.linspace(3,3,50)
+    yd=np.linspace(0,d3,50)
         
         
     # for u    
@@ -392,26 +419,26 @@ def line_plotu_sub(i):
     plt.figure(figsize=(6, 4), dpi=100)
     
     plt.subplot(1,3,1)
-    plt.plot(u1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
-    plt.plot(u2b,yb,'g',linewidth=3,label='PINN')
+    plt.plot(u1b,yb/d1,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(u2b,yb/d1,'g',linewidth=3,label='PINN')
     #plt.plot(u3a,ya,'r',linewidth=3,label='NN')
     #plt.legend(fontsize=14)
-    plt.ylabel('Y',fontsize=20)
+    plt.ylabel('y/$\delta$(x)',fontsize=20)
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.05,1.05)    
     
     plt.subplot(1,3,2)
-    plt.plot(u1c,yc,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
-    plt.plot(u2c,yc,'g',linewidth=3)
+    plt.plot(u1c,yc/d2,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(u2c,yc/d2,'g',linewidth=3)
     #plt.plot(u3b,yb,'r',linewidth=3)
-    plt.xlabel('u-velocity',fontsize=20)
+    plt.xlabel('u/U$_\inf$',fontsize=20)
     plt.yticks([])
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.05,1.05)    
         
     plt.subplot(1,3,3)
-    plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
-    plt.plot(u2d,yd,'g',linewidth=3,label='PINN')
+    plt.plot(u1d,yd/d3,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(u2d,yd/d3,'g',linewidth=3,label='PINN')
     #plt.plot(u3d,yd,'r',linewidth=3,label='NN')
     plt.legend(loc="upper left", bbox_to_anchor=[-0.02, 0.9], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
     plt.yticks([])    
@@ -430,26 +457,26 @@ def line_plotu_sub(i):
     plt.figure(figsize=(6, 4), dpi=100)
     
     plt.subplot(1,3,1)
-    plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
-    plt.plot(v2b,yb,'g',linewidth=3)
+    plt.plot(v1b,yb/d1,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(v2b,yb/d1,'g',linewidth=3)
     #plt.plot(v3a,ya,'r',linewidth=3)
     #plt.legend(fontsize=14)
-    plt.ylabel('Y',fontsize=20)
+    plt.ylabel('y/$\delta$(x)',fontsize=20)
     #plt.xlim(-0.1,1.0)
     #plt.ylim(-0.05,1.05)    
     
     plt.subplot(1,3,2)
-    plt.plot(v1c,yc,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
-    plt.plot(v2c,yc,'g',linewidth=3)
+    plt.plot(v1c,yc/d2,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(v2c,yc/d2,'g',linewidth=3)
     #plt.plot(v3b,yb,'r',linewidth=3)
-    plt.xlabel('v-velocity',fontsize=20)
+    plt.xlabel('v/U$_\inf$',fontsize=20)
     plt.yticks([])
     #plt.xlim(-0.1,0.5)
     #plt.ylim(-0.05,1.05)        
     
     plt.subplot(1,3,3)
-    plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
-    plt.plot(v2d,yd,'g',linewidth=3,label='PINN')
+    plt.plot(v1d,yd/d3,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(v2d,yd/d3,'g',linewidth=3,label='PINN')
     #plt.plot(v3d,yd,'r',linewidth=3,label='NN')
     plt.yticks([])  
     plt.legend(loc="upper left", bbox_to_anchor=[0.19, 0.5], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')

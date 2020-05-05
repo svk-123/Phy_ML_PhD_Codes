@@ -32,27 +32,29 @@ tf.set_random_seed(1234)
 
 class PhysicsInformedNN:
     # Initialize the class
-    def __init__(self, x, y, u, v, p, xb, yb, ub, vb, xg, yg, rst=False):
+    def __init__(self, x, y, t, u, v, p, xb, yb, tb, ub, vb, xg, yg, tg):
                   
         self.x = x
         self.y = y
-
+        self.t = t
+        
         self.u = u
         self.v = v
         self.p = p
 
         self.xb = xb
         self.yb = yb
-
+        self.tb = tb
+        
         self.ub = ub
         self.vb = vb
         
         self.xg = xg
         self.yg = yg
+        self.tg = tg        
         
-        
-        # Initialize parameters (1/200)
-        self.nu = tf.constant([0.025], dtype=tf.float32)
+        # Initialize parameters (1/2000)
+        self.nu = tf.constant([0.01], dtype=tf.float32)
         
         self.tf_lr = tf.placeholder(tf.float32, shape=[])
         
@@ -62,6 +64,7 @@ class PhysicsInformedNN:
         
         self.x_tf = tf.placeholder(tf.float32, shape=[None, self.x.shape[1]],name='input0')
         self.y_tf = tf.placeholder(tf.float32, shape=[None, self.y.shape[1]],name='input1')
+        self.t_tf = tf.placeholder(tf.float32, shape=[None, self.y.shape[1]],name='input2')
         
         self.u_tf = tf.placeholder(tf.float32, shape=[None, self.u.shape[1]])
         self.v_tf = tf.placeholder(tf.float32, shape=[None, self.v.shape[1]])
@@ -69,6 +72,7 @@ class PhysicsInformedNN:
         
         self.xb_tf = tf.placeholder(tf.float32, shape=[None, self.xb.shape[1]])
         self.yb_tf = tf.placeholder(tf.float32, shape=[None, self.yb.shape[1]])
+        self.tb_tf = tf.placeholder(tf.float32, shape=[None, self.yb.shape[1]])
         
         self.ub_tf = tf.placeholder(tf.float32, shape=[None, self.ub.shape[1]])
         self.vb_tf = tf.placeholder(tf.float32, shape=[None, self.vb.shape[1]]) 
@@ -76,12 +80,13 @@ class PhysicsInformedNN:
        
         self.xg_tf = tf.placeholder(tf.float32, shape=[None, self.xg.shape[1]])
         self.yg_tf = tf.placeholder(tf.float32, shape=[None, self.yg.shape[1]])
+        self.tg_tf = tf.placeholder(tf.float32, shape=[None, self.yg.shape[1]])
         
-        self.u_pred, self.v_pred, self.p_pred  = self.net_NS1(self.x_tf, self.y_tf)
+        self.u_pred, self.v_pred, self.p_pred  = self.net_NS1(self.x_tf, self.y_tf, self.t_tf)
         
-        self.ub_pred, self.vb_pred, _ = self.net_NS2(self.xb_tf, self.yb_tf)
+        self.ub_pred, self.vb_pred, _ = self.net_NS2(self.xb_tf, self.yb_tf, self.tb_tf)
         
-        self.f_c_pred, self.f_u_pred, self.f_v_pred = self.net_NS3(self.xg_tf, self.yg_tf)
+        self.f_c_pred, self.f_u_pred, self.f_v_pred = self.net_NS3(self.xg_tf, self.yg_tf, self.tg_tf)
 
         
 #        self.loss = tf.reduce_sum(tf.square(self.u_tf - self.u_pred)) + \
@@ -120,31 +125,28 @@ class PhysicsInformedNN:
         init = tf.global_variables_initializer()
         self.sess.run(init)
         self.saver = tf.train.Saver()
-        
-        if(rst == True):
-            self.saver.restore(self.sess, tf.train.latest_checkpoint('./tf_model_1/'))       
-            
-        self.lb_count=0
-        
+    
     def neural_net(self, X):
 
         #create model
-        l1 = tf.layers.dense(X,  100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(X,  120, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 120, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 120, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 120, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 120, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 120, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 120, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 120, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 120, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 120, activation=tf.nn.tanh)
         Y  = tf.layers.dense(l1,3,activation=None,name='prediction')
                 
         return Y
         
-    def net_NS1(self, x, y):
+    def net_NS1(self, x, y, t):
         
         with tf.variable_scope("NS1"):
-            uvp = self.neural_net(tf.concat([x,y], 1))
+            uvp = self.neural_net(tf.concat([x,y,t], 1))
         
         u = uvp[:,0:1]
         v = uvp[:,1:2]
@@ -153,10 +155,10 @@ class PhysicsInformedNN:
         
         return u, v, p
 
-    def net_NS2(self, x, y):
+    def net_NS2(self, x, y, t):
         
         with tf.variable_scope("NS1",reuse=True):
-            uvp = self.neural_net(tf.concat([x,y], 1))
+            uvp = self.neural_net(tf.concat([x,y,t], 1))
         
         u = uvp[:,0:1]
         v = uvp[:,1:2]
@@ -165,20 +167,22 @@ class PhysicsInformedNN:
         
         return u, v, p    
     
-    def net_NS3(self, x, y):
+    def net_NS3(self, x, y, t):
         
         with tf.variable_scope("NS1",reuse=True):
-            uvp = self.neural_net(tf.concat([x,y], 1))
+            uvp = self.neural_net(tf.concat([x,y,t], 1))
         
         u = uvp[:,0:1]
         v = uvp[:,1:2]
         p = uvp[:,2:3]
       
+        u_t = tf.gradients(u, t)[0]        
         u_x = tf.gradients(u, x)[0]
         u_y = tf.gradients(u, y)[0]
         u_xx = tf.gradients(u_x, x)[0]
         u_yy = tf.gradients(u_y, y)[0]
         
+        v_t = tf.gradients(v, t)[0]        
         v_x = tf.gradients(v, x)[0]
         v_y = tf.gradients(v, y)[0]
         v_xx = tf.gradients(v_x, x)[0]
@@ -188,8 +192,8 @@ class PhysicsInformedNN:
         p_y = tf.gradients(p, y)[0]
 
         f_c =  u_x + v_y
-        f_u =  (u*u_x + v*u_y) + p_x - (self.nu)*(u_xx + u_yy) 
-        f_v =  (u*v_x + v*v_y) + p_y - (self.nu)*(v_xx + v_yy)
+        f_u =  u_t + (u*u_x + v*u_y) + p_x - (self.nu)*(u_xx + u_yy) 
+        f_v =  v_t + (u*v_x + v*v_y) + p_y - (self.nu)*(v_xx + v_yy)
         
         return  f_c, f_u, f_v
     
@@ -197,10 +201,6 @@ class PhysicsInformedNN:
         print('Loss: %.6e %.6e %.6e %.6e \n' % (loss,loss_1,loss_2, loss_3))       
         self.fp.write('00, %.6e, %.6e, %.6e %.6e \n'% (loss,loss_1,loss_2, loss_3)) 
         
-        self.lb_count=self.lb_count+1
-        
-        if(self.lb_count % 20000 ==0):
-      	    self.save_model(self.lb_count)
       
     def train(self, nIter, lbfgs=False): 
         
@@ -212,17 +212,17 @@ class PhysicsInformedNN:
 
         
         lr=0.001
-        min_lr=1e-8
+        min_lr=1e-7
         #reduce lr iter(patience)
-        rli=500
+        rli=1000
         #numbers to avg
         L=30
         #lr eps
-        l_eps=1e-8
+        l_eps=1e-7
         
         #early stop wait
-        estop=1000
-        e_eps=1e-8
+        estop=1500
+        e_eps=1e-7
         
         start_time = time.time()
         
@@ -242,9 +242,9 @@ class PhysicsInformedNN:
             for i in range(1):
                             
                 
-                tf_dict = {self.x_tf: self.x, self.y_tf: self.y, self.u_tf: self.u, self.v_tf: self.v, self.p_tf: self.p, \
-                           self.xb_tf: self.xb, self.yb_tf: self.yb, self.ub_tf: self.ub, self.vb_tf: self.vb, \
-                           self.tf_lr:lr, self.xg_tf: self.xg, self.yg_tf: self.yg}
+                tf_dict = {self.x_tf: self.x, self.y_tf: self.y, self.t_tf: self.t, self.u_tf: self.u, self.v_tf: self.v, self.p_tf: self.p, \
+                           self.xb_tf: self.xb, self.yb_tf: self.yb, self.tb_tf: self.tb, self.ub_tf: self.ub, self.vb_tf: self.vb, \
+                           self.tf_lr:lr, self.xg_tf: self.xg, self.yg_tf: self.yg,  self.tg_tf: self.tg}
             
                 _,loss_value,lv_1,lv_2,lv_3=self.sess.run([self.train_op_Adam,self.loss,self.loss_1,self.loss_2,self.loss_3], tf_dict)
                 avg_loss += loss_value / total_batch
@@ -280,16 +280,16 @@ class PhysicsInformedNN:
             start_time = time.time()
             
             #save model
-            if ((count % 1000) ==0):
+            if ((count % 2000) ==0):
                 model.save_model(count)
                 
        
         #final_optimization using lbfgsb
         if (lbfgs==True):
                     
-            tf_dict = {self.x_tf: self.x, self.y_tf: self.y, self.u_tf: self.u, self.v_tf: self.v, self.p_tf: self.p, \
-                           self.xb_tf: self.xb, self.yb_tf: self.yb, self.ub_tf: self.ub, self.vb_tf: self.vb, \
-                           self.tf_lr:lr, self.xg_tf: self.xg, self.yg_tf: self.yg}        
+            tf_dict = {self.x_tf: self.x, self.y_tf: self.y, self.t_tf: self.t, self.u_tf: self.u, self.v_tf: self.v, self.p_tf: self.p, \
+                           self.xb_tf: self.xb, self.yb_tf: self.yb, self.tb_tf: self.tb, self.ub_tf: self.ub, self.vb_tf: self.vb, \
+                           self.tf_lr:lr, self.xg_tf: self.xg, self.yg_tf: self.yg,  self.tg_tf: self.tg}       
                 
             self.optimizer.minimize(self.sess,
                                     feed_dict = tf_dict,
@@ -313,93 +313,90 @@ class PhysicsInformedNN:
         self.saver.save(self.sess,'./tf_model/model_%d'%count)        
         
 if __name__ == "__main__": 
-           
-    path='./data_file/'  
+    ######################################################################
+    ######################## MSE Data ####################################
+    ######################################################################
+    path='../data_file/'  
     
-    #import inout
+    #import io
     #x,y,p,u,v
-    xyu_io=np.loadtxt(path + 'cy_outer_4s_3334_cfd_intp.dat',skiprows=1)
+    xyu_io=np.loadtxt(path + 'cy_inout_interp_4s_3222.dat',skiprows=1)
     
-    x_io = xyu_io[:,0:1]
-    y_io = xyu_io[:,1:2]
-    p_io = xyu_io[:,2:3]
-    u_io = xyu_io[:,3:4]
-    v_io = xyu_io[:,4:5]
+    xyu_wall=np.loadtxt(path + 'cy_wall_bc_40_t.dat',skiprows=1)
 
-
-    # wall
-    xyu_wall=np.loadtxt(path + 'cy_wall_bc_80.dat',skiprows=1)
-    xb_train = xyu_wall[:,0:1]
-    yb_train = xyu_wall[:,1:2]
-    pb_train = xyu_wall[:,2:3]
-    ub_train = xyu_wall[:,3:4]
-    vb_train = xyu_wall[:,4:5]   
-
-
-    #sampling
-    xyu_s=np.loadtxt(path + 'cy_40_around_80x5.dat',skiprows=1)
+    xyu_s=np.loadtxt(path + 'cy_wake_20x5.dat',skiprows=1)
     
-    idx = np.random.choice(len(xyu_s), len(xyu_s), replace=False)
-    x_s = xyu_s[idx,0:1]
-    y_s = xyu_s[idx,1:2]
-    p_s = xyu_s[idx,2:3]
-    u_s = xyu_s[idx,3:4]
-    v_s = xyu_s[idx,4:5] 
+    x_train = np.concatenate((xyu_io[:,0:1], xyu_s[:,0:1]),axis=0)
+    y_train = np.concatenate((xyu_io[:,1:2], xyu_s[:,1:2]),axis=0)
+    t_train = np.concatenate((xyu_io[:,2:3], xyu_s[:,2:3]),axis=0)
+    p_train = np.concatenate((xyu_io[:,3:4], xyu_s[:,3:4]),axis=0)
+    u_train = np.concatenate((xyu_io[:,4:5], xyu_s[:,4:5]),axis=0)
+    v_train = np.concatenate((xyu_io[:,5:6], xyu_s[:,5:6]),axis=0)    
     
-    # MSE points
-    x_train = np.concatenate((xyu_io[:,0:1],xyu_s[:,0:1]),axis=0)
-    y_train = np.concatenate((xyu_io[:,1:2],xyu_s[:,1:2]),axis=0)
-    p_train = np.concatenate((xyu_io[:,2:3],xyu_s[:,2:3]),axis=0)
-    u_train = np.concatenate((xyu_io[:,3:4],xyu_s[:,3:4]),axis=0)    
-    v_train = np.concatenate((xyu_io[:,4:5],xyu_s[:,4:5]),axis=0)  
+    xb_train = xyu_wall[:,0:1]    
+    yb_train = xyu_wall[:,1:2]  
+    tb_train = xyu_wall[:,2:3]  
+    pb_train = xyu_wall[:,3:4]  
+    ub_train = xyu_wall[:,4:5]  
+    vb_train = xyu_wall[:,5:6]  
     
     ######################################################################
-    ######################## Gov Data ####################################
-    ######################################################################    
+    ######################## Gov Data ###############################
+    ######################################################################
     
-    xyu_int=np.loadtxt(path + 'cy_internal_3334.dat',skiprows=1)    
-                
+    N_train=30000
+    
+    xyu_internal=np.loadtxt(path + 'cy_internal_3222.dat',skiprows=1)
+    
+    idx = np.random.choice(len(xyu_internal), N_train, replace=False)
+    
     # internal points with wall BC
-    xg_train = np.concatenate((xyu_io[:,0:1],xyu_wall[:,0:1],xyu_int[:,0:1]),axis=0)
-    yg_train = np.concatenate((xyu_io[:,1:2],xyu_wall[:,1:2],xyu_int[:,1:2]),axis=0)
+    xg_train = np.concatenate((x_train[:,:],xb_train[:,:],xyu_internal[idx,0:1]),axis=0)
+    yg_train = np.concatenate((y_train[:,:],yb_train[:,:],xyu_internal[idx,1:2]),axis=0)    
+    tg_train = np.concatenate((t_train[:,:],tb_train[:,:],xyu_internal[idx,2:3]),axis=0)    
     
-        
     # Training
-    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train, xb_train, yb_train, ub_train, vb_train, xg_train, yg_train, False)
+    model = PhysicsInformedNN(x_train, y_train, t_train,  u_train, v_train, p_train, xb_train, yb_train, tb_train, ub_train, vb_train, xg_train, yg_train, tg_train)
  
-    model.train(50000,True)  
+    model.train(50000, True)  
        
     model.save_model(000000)
+    
+#    # Prediction
+#    u_pred, v_pred, p_pred = model.predict(pinp_x, pinp_y)
+#    
+#    print("--- %s seconds ---" % (time.time() - start_time))
+#    
+#  
+#    plt.figure(figsize=(6,5),dpi=100)
+#    plt.plot(inp_x[idx,:],inp_y[idx,:],'o')
+#    plt.plot(xyu[:,0],xyu[:,1],'k')    
+#    plt.savefig('cy_points.png',format='png',dpi=300)
+#    plt.show()
+#             
+#    plt.figure(figsize=(6,5),dpi=100)
+#    plt.contourf(pinp_x[:,0],pinp_y[:,0],u_pred[:,0])
+#    #plt.plot(xyu[:,0],xyu[:,1],'k')    
+#    plt.savefig('contour.png',format='png',dpi=300)
+#    plt.show()    
 
 
-#plt.figure(figsize=(6, 5), dpi=100)
-#plt0, =plt.plot(x_train,y_train,'og',linewidth=0,ms=1,label='MSE pts-200 (Sampling)',zorder=5)
-#plt0, =plt.plot(xg_train,yg_train,'+r',linewidth=0,ms=2,label='Gov Eq. pts-8000 (Residual)',zorder=0)
-#plt0, =plt.plot(xb_train,yb_train,'ok',linewidth=0,ms=1,label='BC pts-350',zorder=1)
-#
+'''
+plt.figure(figsize=(6, 5), dpi=100)
+plt0, =plt.plot(x_train,y_train,'og',linewidth=0,ms=5,label='MSE pts- 50 x 32 (Sampling)',zorder=5)
+plt0, =plt.plot(pinp_x,pinp_y,'+r',linewidth=0,ms=3,label='Gov Eq. pts- 15000 (Residual)',zorder=0)
+plt0, =plt.plot(xyu_io[:,0],xyu_io[:,1],'ok',linewidth=0,ms=4,label='MSE BC pts- 80 x 32',zorder=1)
+
+#plt0, =plt.plot([0,0],[0.5,1],'r',linewidth=2)
+#plt0, =plt.plot([1,1],[0,1],'r',linewidth=2)
+#plt0, =plt.plot([2,2],[0,1],'r',linewidth=2)
+
 #plt.legend(fontsize=20)
-#plt.xlabel('X',fontsize=20)
-#plt.ylabel('Y',fontsize=20)
-##plt.title('%s-u'%(flist[ii]),fontsiuze=16)
-#plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
-##plt.xlim(-0.1,1.2)
-##plt.ylim(-0.01,1.4)    
-#plt.savefig('./plot/mesh.png', format='png',bbox_inches='tight', dpi=100)
-#plt.show()
-#
-
-#plt.figure(figsize=(6, 5), dpi=100)
-#plt0, =plt.plot(x_train,y_train,'og',linewidth=0,ms=3,label='MSE internal pts: 80 ',zorder=2)
-#plt0, =plt.plot(xb_train,yb_train,'ok',linewidth=0,ms=3,label='MSE BC pts: 300',zorder=5)
-#plt0, =plt.plot(xg_train,yg_train,'+r',linewidth=0,ms=2,label='Gov Eq. Res. pts: 10000 ',zorder=0)
-#
-#plt0, =plt.plot(xyu_io[:,0],xyu_io[:,1],'ok',linewidth=0,ms=3)
-##plt.legend(fontsize=20)
-#plt.xlabel('X',fontsize=20)
-#plt.ylabel('Y',fontsize=20)
-##plt.title('%s-u'%(flist[ii]),fontsiuze=16)
-#plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
-##plt.xlim(-0.5,2)
-##plt.ylim(-0.5,1)    
-#plt.savefig('./plot/mesh_ppt1.png', format='png',bbox_inches='tight', dpi=100)
-#plt.show()
+plt.xlabel('X',fontsize=20)
+plt.ylabel('Y',fontsize=20)
+#plt.title('%s-u'%(flist[ii]),fontsiuze=16)
+plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
+#plt.xlim(-0.1,1.2)
+#plt.ylim(-0.01,1.4)    
+plt.savefig('./plot/mesh_4.png', format='png',bbox_inches='tight', dpi=100)
+plt.show()'''

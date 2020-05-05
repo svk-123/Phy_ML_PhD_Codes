@@ -63,7 +63,8 @@ class PhysicsInformedNN:
         self.yg = yg
                 
         # Initialize parameters (1/100)
-        self.nu = tf.constant([0.00005], dtype=tf.float32)
+        #self.nu = tf.constant([0.0], dtype=tf.float32)
+        self.nu = tf.Variable([0.0], dtype=tf.float32)
         
         self.tf_lr = tf.placeholder(tf.float32, shape=[])
         
@@ -191,7 +192,7 @@ class PhysicsInformedNN:
 
    
     def net_NS3(self, x, y):
-        
+                
         with tf.variable_scope("NS1",reuse=True):
             uvp = self.neural_net(tf.concat([x,y], 1))
         
@@ -230,9 +231,9 @@ class PhysicsInformedNN:
         
         return u, v, p
     
-    def callback(self, loss, loss_1, loss_2, loss_3):
-        print('Loss: %.6e %.6e %.6e %.6e \n' % (loss,loss_1,loss_2, loss_3))       
-        self.fp.write('00, %.6e, %.6e, %.6e %.6e \n'% (loss,loss_1,loss_2, loss_3)) 
+    def callback(self, loss, loss_1, loss_2, loss_3, nu):
+        print('Loss: %.6e %.6e %.6e %.6e %.6e\n' % (loss,loss_1,loss_2, loss_3, nu))       
+        self.fp.write('00, %.6e, %.6e, %.6e %.6e %.6e\n'% (loss,loss_1,loss_2, loss_3, nu)) 
         
       
     def train(self, nIter, lbfgs=False): 
@@ -280,7 +281,7 @@ class PhysicsInformedNN:
                            self.x_oo_tf: self.x_oo, self.y_oo_tf: self.y_oo, self.p_oo_tf: self.p_oo,\
                            self.tf_lr:lr, self.xg_tf: self.xg, self.yg_tf: self.yg}
             
-                _,loss_value,lv_1,lv_2,lv_3=self.sess.run([self.train_op_Adam,self.loss,self.loss_1,self.loss_2,self.loss_3], tf_dict)
+                _,loss_value,lv_1,lv_2,lv_3,mynu=self.sess.run([self.train_op_Adam,self.loss,self.loss_1,self.loss_2,self.loss_3,self.nu], tf_dict)
                 avg_loss += loss_value / total_batch
                 avg_lv_1 += lv_1 / total_batch
                 avg_lv_2 += lv_2 / total_batch   
@@ -306,11 +307,11 @@ class PhysicsInformedNN:
                     
             #print
             elapsed = time.time() - start_time
-            print('It: %d, Loss: %.6e, Loss-1:%0.6e, Loss-2:%0.6e, Loss-2:%0.6e, lr:%0.6f, Time: %.2f \n' \
-                          %(count, avg_loss,avg_lv_1, avg_lv_2, avg_lv_3, lr, elapsed))
+            print('It: %d, Loss: %.6e, Loss-1:%0.6e, Loss-2:%0.6e, Loss-2:%0.6e, lr:%0.6f, Time: %.2f , nu: %.2f \n' \
+                          %(count, avg_loss,avg_lv_1, avg_lv_2, avg_lv_3, lr, elapsed, mynu))
             
-            self.fp.write('%d, %.6e, %0.6e, %0.6e, %0.6e, %0.6e, %.2f \n' \
-                          %(count, avg_loss,avg_lv_1, avg_lv_2, avg_lv_3, lr, elapsed))    
+            self.fp.write('%d, %.6e, %0.6e, %0.6e, %0.6e, %0.6e, %.2f %.6f \n' \
+                          %(count, avg_loss,avg_lv_1, avg_lv_2, avg_lv_3, lr, elapsed, mynu))    
             start_time = time.time()
             
             #save model
@@ -328,7 +329,7 @@ class PhysicsInformedNN:
                 
             self.optimizer.minimize(self.sess,
                                     feed_dict = tf_dict,
-                                    fetches = [self.loss,self.loss_1,self.loss_2,self.loss_3],
+                                    fetches = [self.loss,self.loss_1,self.loss_2,self.loss_3,self.nu],
                                     loss_callback = self.callback)
  
 
@@ -449,16 +450,18 @@ if __name__ == "__main__":
     xg_train = np.concatenate((xyu_inlet[:,0:1],xyu_wall[:,0:1],xyu_outlet_t[:,0:1],xyu_outlet_r[:,0:1],xyu_int[:,0:1]),axis=0)
     yg_train = np.concatenate((xyu_inlet[:,1:2],xyu_wall[:,1:2],xyu_outlet_t[:,1:2],xyu_outlet_r[:,1:2],xyu_int[:,1:2]),axis=0)
         
-#    # Training
-#    model = PhysicsInformedNN(x_train, y_train, p_train, u_train, v_train, \
-#                              x_iw, y_iw, p_iw, u_iw, v_iw, nx_iw, ny_iw, \
-#                              x_oo, y_oo, p_oo, u_oo, v_oo, nx_oo, ny_oo, \
-#                              xg_train, yg_train)
-# 
-#    model.train(50000,True)  
-#       
-#    model.save_model(000000)
+    # Training
+    model = PhysicsInformedNN(x_train, y_train, p_train, u_train, v_train, \
+                              x_iw, y_iw, p_iw, u_iw, v_iw, nx_iw, ny_iw, \
+                              x_oo, y_oo, p_oo, u_oo, v_oo, nx_oo, ny_oo, \
+                              xg_train, yg_train)
+ 
+    model.train(50000,True)  
+       
+    model.save_model(000000)
 
+
+'''
 ######-BL thickness--######
 ########################
 
@@ -506,4 +509,4 @@ plt.xlim(-1,6)
 plt.ylim(-1,4)    
 plt.savefig('./plot/mesh9.png', format='png',bbox_inches='tight', dpi=200)
 plt.show()
-
+'''

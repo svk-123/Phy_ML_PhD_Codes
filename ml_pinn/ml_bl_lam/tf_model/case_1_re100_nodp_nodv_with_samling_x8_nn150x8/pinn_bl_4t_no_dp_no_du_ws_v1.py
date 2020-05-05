@@ -63,7 +63,7 @@ class PhysicsInformedNN:
         self.yg = yg
                 
         # Initialize parameters (1/100)
-        self.nu = tf.constant([0.00005], dtype=tf.float32)
+        self.nu = tf.constant([1./100.], dtype=tf.float32)
         
         self.tf_lr = tf.placeholder(tf.float32, shape=[])
         
@@ -147,14 +147,14 @@ class PhysicsInformedNN:
     def neural_net(self, X):
 
         #create model
-        l1 = tf.layers.dense(X,  100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
-        l1 = tf.layers.dense(l1, 100, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(X,  150, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 150, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 150, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 150, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 150, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 150, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 150, activation=tf.nn.tanh)
+        l1 = tf.layers.dense(l1, 150, activation=tf.nn.tanh)
         Y  = tf.layers.dense(l1,3,activation=None,name='prediction')
                 
         return Y
@@ -353,7 +353,7 @@ if __name__ == "__main__":
     ######################## MSE Data ####################################
     ######################################################################
     
-    path='./data_file/Re100/'  
+    path='../data_file/Re100/'  
     #import wall bc
     #x,y,p,u,v
     xyu_inlet=np.loadtxt(path + 'bl_inlet.dat',skiprows=1)
@@ -417,7 +417,7 @@ if __name__ == "__main__":
     ny_oo = np.concatenate((xyu_outlet_t[:,6:7], xyu_outlet_r[:,6:7]),axis=0) 
 
     #sampling
-    xyu_s=np.loadtxt(path + 'bl_sample_x8_away.dat',skiprows=1)
+    xyu_s=np.loadtxt(path + 'bl_sample_x8.dat',skiprows=1)
     
     idx = np.random.choice(len(xyu_s), len(xyu_s), replace=False)
     x_s = xyu_s[idx,0:1]
@@ -449,61 +449,32 @@ if __name__ == "__main__":
     xg_train = np.concatenate((xyu_inlet[:,0:1],xyu_wall[:,0:1],xyu_outlet_t[:,0:1],xyu_outlet_r[:,0:1],xyu_int[:,0:1]),axis=0)
     yg_train = np.concatenate((xyu_inlet[:,1:2],xyu_wall[:,1:2],xyu_outlet_t[:,1:2],xyu_outlet_r[:,1:2],xyu_int[:,1:2]),axis=0)
         
-#    # Training
-#    model = PhysicsInformedNN(x_train, y_train, p_train, u_train, v_train, \
-#                              x_iw, y_iw, p_iw, u_iw, v_iw, nx_iw, ny_iw, \
-#                              x_oo, y_oo, p_oo, u_oo, v_oo, nx_oo, ny_oo, \
-#                              xg_train, yg_train)
-# 
-#    model.train(50000,True)  
-#       
-#    model.save_model(000000)
-
-######-BL thickness--######
-########################
-
-nu_=1.0/100.
-x_=np.linspace(1e-12,5,100)
-Rex_=x_/nu_
-d_=x_/np.sqrt(Rex_)
-d_=4.91*d_
-############################
+    # Training
+    model = PhysicsInformedNN(x_train, y_train, p_train, u_train, v_train, \
+                              x_iw, y_iw, p_iw, u_iw, v_iw, nx_iw, ny_iw, \
+                              x_oo, y_oo, p_oo, u_oo, v_oo, nx_oo, ny_oo, \
+                              xg_train, yg_train)
  
-plt.figure(figsize=(6, 4), dpi=100)
-#plt0, =plt.plot(x_s,y_s,'og',linewidth=0,ms=4,label='MSE internal pts: 54 ',zorder=8)
+    model.train(50000,True)  
+       
+    model.save_model(000000)
+    
+  
+'''plt.figure(figsize=(6, 4), dpi=100)
+plt0, =plt.plot(x_s,y_s,'og',linewidth=0,ms=3,label='MSE internal pts: 5600 ',zorder=2)
 plt0, =plt.plot(xyu_wall[:,0:1],xyu_wall[:,1:2],'ok',linewidth=0,ms=3,label='MSE BC pts: 800',zorder=5)
 plt0, =plt.plot(xyu_outlet_r[:,0:1]-5,xyu_outlet_r[:,1:2],'ok',linewidth=0,ms=3,zorder=5)
 plt0, =plt.plot(xyu_outlet_t[:,0:1],xyu_outlet_t[:,1:2],'ok',linewidth=0,ms=3,zorder=5)
 plt0, =plt.plot(xyu_outlet_r[:,0:1],xyu_outlet_r[:,1:2],'ok',linewidth=0,ms=3,zorder=5)
 plt0, =plt.plot(xyu_int[:,0:1],xyu_int[:,1:2],'+r',linewidth=0,ms=2,label='Gov Eq. Res. pts: 20000 ',zorder=4)
-plt0, =plt.plot(x_, d_,'b',lw=2, label='BL', zorder=6)
-
-
-
-##text-1
-plt.text(2.5, -0.3, "Wall: u=0", horizontalalignment='center', verticalalignment='center')
-plt.text(2.5, 3.3, "Outlet: p=0", horizontalalignment='center', verticalalignment='center')
-plt.text(-0.3, 1.5, "Inlet: u-specified", horizontalalignment='center', verticalalignment='center',rotation=90)
-
-
-
-##text-2
-#plt.text(2.5, -0.3, "Wall: u=0,dp=0", horizontalalignment='center', verticalalignment='center')
-#plt.text(2.5, 3.3, "Outlet: p=0,du=0", horizontalalignment='center', verticalalignment='center')
-#plt.text(-0.3, 1.5, "Inlet: u-specified, dp=0", horizontalalignment='center', verticalalignment='center',rotation=90)
-
-##text-2
-#plt.text(2.5, -0.3, "Wall: u=0,p-specified", horizontalalignment='center', verticalalignment='center')
-#plt.text(2.5, 3.3, "Outlet: p=0,u-specified", horizontalalignment='center', verticalalignment='center')
-#plt.text(-0.3, 1.5, "Inlet: u, p-specified", horizontalalignment='center', verticalalignment='center',rotation=90)
 
 #plt.legend(fontsize=20)
 plt.xlabel('X',fontsize=20)
 plt.ylabel('Y',fontsize=20)
 #plt.title('%s-u'%(flist[ii]),fontsiuze=16)
 plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
-plt.xlim(-1,6)
-plt.ylim(-1,4)    
-plt.savefig('./plot/mesh9.png', format='png',bbox_inches='tight', dpi=200)
-plt.show()
+#plt.xlim(-0.5,2)
+#plt.ylim(-0.5,1)    
+plt.savefig('./plot/mesh2.png', format='png',bbox_inches='tight', dpi=100)
+plt.show()'''
 

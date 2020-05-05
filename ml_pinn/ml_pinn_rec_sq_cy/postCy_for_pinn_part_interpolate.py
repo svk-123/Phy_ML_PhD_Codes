@@ -70,21 +70,26 @@ coord=[]
 # 
 
 ###---around,wake,top,front--------------
-L=50
+L=20
 W=20
 
 new_coord=[]
-x1=np.linspace(-3,4,L)
-y1=np.linspace(3,3,L)
 
-x2=np.linspace(-3,-3,W)
-y2=np.linspace(-2.95,2.95,W)
+#top
+x1=np.linspace(-1,1,L)
+y1=np.linspace(0.95,0.95,L)
 
-x3=np.linspace(-3,4,L)
-y3=np.linspace(-3,-3,L)
+#front
+x2=np.linspace(-1,-1,W)
+y2=np.linspace(-0.95,0.95,W)
 
+#bottom
+x3=np.linspace(-1,1,L)
+y3=np.linspace(-0.95,-0.95,L)
+
+#right
 x4=np.linspace(1,1,W)
-y4=np.linspace(-1.95,1.95,W)
+y4=np.linspace(-0.95,0.95,W)
 
 
 tx=0.0
@@ -93,13 +98,13 @@ fx=-0.05
 fy=0.0
 bx=-0.0
 by=-0.05
-wx=0.1
+wx=0.05
 wy=0.0
 
 for i in range(5):
-    #new_coord.extend(np.asarray([x1+tx*i,y1+ty*i]).transpose())
-    #new_coord.extend(np.asarray([x2+fx*i,y2+fy*i]).transpose())
-    #new_coord.extend(np.asarray([x3+bx*i,y3+by*i]).transpose())
+    new_coord.extend(np.asarray([x1+tx*i,y1+ty*i]).transpose())
+    new_coord.extend(np.asarray([x2+fx*i,y2+fy*i]).transpose())
+    new_coord.extend(np.asarray([x3+bx*i,y3+by*i]).transpose())
     new_coord.extend(np.asarray([x4+wx*i,y4+wy*i]).transpose())
     
 new_coord=np.asarray(new_coord)
@@ -289,12 +294,10 @@ for jj in range(1):
     #save file
     filepath='./data_file'
       
-fp=open('./data_file/cy_40_wake_20x5.dat','w')
+fp=open('./data_file/cy_40_around_80x5.dat','w')
 fp.write('x y p u v \n')
 for i in range(len(pi)):
     fp.write('%f %f %f %f %f \n'%(new_coord[i,0], new_coord[i,1], pi[i], ui[i], vi[i]))
 fp.close()
     
-
-
 

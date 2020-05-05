@@ -31,7 +31,7 @@ boundary not loaded: may be required?
 """
 
 
-fname_1=['bl']
+fname_1=['bfs']
 
 fname_1=np.asarray(fname_1)
 fname_1.sort()
@@ -53,9 +53,9 @@ indir = path
 #    tmp=[f for f in listdir(dir2) if isdir(join(dir2, f))]
 #    fname_2.append(tmp)
 Re=100
-suff='nodp_nodv_ws_x8_150'    
+suff=''    
 
-fname_2=np.asarray([['bl_%s_0'%Re]])
+fname_2=np.asarray([['bfs_%s_0'%Re]])
 
 tmp=[]
 foil=[]
@@ -180,7 +180,7 @@ for jj in range(1):
         #filter within xlim,ylim
         I=[]
         for i in range(len(x)):
-            if (x[i]<=5 and x[i]>=0 and y[i]<=3 and y[i]>=0 ):
+            if (x[i]<=4 and x[i]>=-1 and y[i]<=3 and y[i]>=0 ):
                 I.append(i)
         xl=x[I]
         yl=y[I]
@@ -193,7 +193,7 @@ for jj in range(1):
         #load model
         with tf.Session() as sess1:
             
-            path1='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8_nn150x8/tf_model/'%Re
+            path1='./tf_model/case_1_20kpts/tf_model/'
             new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
             new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
@@ -222,7 +222,7 @@ for jj in range(1):
         p[I]=out[:,2]
         
                 
-        dst2='./bl_ml/%s_%s'%(tmp[ii],suff)
+        dst2='./bfs_ml/%s_%s'%(tmp[ii],suff)
         
         if os.path.exists(dst2):
             shutil.rmtree(dst2)

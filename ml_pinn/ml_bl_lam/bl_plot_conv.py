@@ -42,10 +42,10 @@ plt.rc('font', family='serif')
     >>>data=[x,tb,y,coord,k,ep,rans_bij,tkedns,I]"""
 """------------------------------------"""
 
-Re=5000
-path='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8/tf_model/'%Re
+Re=100
+path='./tf_model/case_re%s_4s_puv/tf_model/'%Re
 
-suff='Re%s_nodp_nodv_sampling_x8'%Re
+suff='Re%s_4s_puv'%Re
 
 data=[]
 for i in range(1):

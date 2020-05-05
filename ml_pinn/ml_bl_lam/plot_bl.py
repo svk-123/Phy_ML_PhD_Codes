@@ -64,8 +64,8 @@ import matplotlib
 #p=np.asarray(p)
 #u=np.asarray(u)
 #v=np.asarray(v)
-suff='re1000'    
-xy=np.loadtxt('./data_file/Re1000/bl_internal.dat',skiprows=1)
+suff='re100'    
+xy=np.loadtxt('./data_file/Re100/bl_internal_combined.dat',skiprows=1)
 
 val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
 val_out=np.concatenate((xy[:,3:4],xy[:,4:5],xy[:,2:3]),axis=1)    
@@ -83,7 +83,7 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_2_re1000_pb/tf_model/'
+    path1='./tf_model/case_re100_4s_puv/tf_model/'
     new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 

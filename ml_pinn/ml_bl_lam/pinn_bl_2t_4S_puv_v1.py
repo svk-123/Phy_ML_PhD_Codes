@@ -9,6 +9,9 @@ Created on Mon Aug 26 14:35:28 2019
 """
 @author: originnaly written by Maziar Raissi
 Further modified by Vinothkumar S.
+
+all side puv specified
+
 """
 '''
 
@@ -32,7 +35,7 @@ tf.set_random_seed(1234)
 
 class PhysicsInformedNN:
     # Initialize the class
-    def __init__(self, x, y, u, v, p, xb, yb, ub, vb, xg, yg, rst=False):
+    def __init__(self, x, y, u, v, p, xg, yg):
                   
         self.x = x
         self.y = y
@@ -41,18 +44,14 @@ class PhysicsInformedNN:
         self.v = v
         self.p = p
 
-        self.xb = xb
-        self.yb = yb
-
-        self.ub = ub
-        self.vb = vb
+            
         
         self.xg = xg
         self.yg = yg
         
         
-        # Initialize parameters (1/200)
-        self.nu = tf.constant([0.025], dtype=tf.float32)
+        # Initialize parameters (1/100)
+        self.nu = tf.constant([0.01], dtype=tf.float32)
         
         self.tf_lr = tf.placeholder(tf.float32, shape=[])
         
@@ -67,21 +66,16 @@ class PhysicsInformedNN:
         self.v_tf = tf.placeholder(tf.float32, shape=[None, self.v.shape[1]])
         self.p_tf = tf.placeholder(tf.float32, shape=[None, self.u.shape[1]])
         
-        self.xb_tf = tf.placeholder(tf.float32, shape=[None, self.xb.shape[1]])
-        self.yb_tf = tf.placeholder(tf.float32, shape=[None, self.yb.shape[1]])
-        
-        self.ub_tf = tf.placeholder(tf.float32, shape=[None, self.ub.shape[1]])
-        self.vb_tf = tf.placeholder(tf.float32, shape=[None, self.vb.shape[1]]) 
 
        
         self.xg_tf = tf.placeholder(tf.float32, shape=[None, self.xg.shape[1]])
         self.yg_tf = tf.placeholder(tf.float32, shape=[None, self.yg.shape[1]])
         
+        #MSE
         self.u_pred, self.v_pred, self.p_pred  = self.net_NS1(self.x_tf, self.y_tf)
-        
-        self.ub_pred, self.vb_pred, _ = self.net_NS2(self.xb_tf, self.yb_tf)
-        
-        self.f_c_pred, self.f_u_pred, self.f_v_pred = self.net_NS3(self.xg_tf, self.yg_tf)
+
+        #gov Eqn
+        self.f_c_pred, self.f_u_pred, self.f_v_pred = self.net_NS2(self.xg_tf, self.yg_tf)
 
         
 #        self.loss = tf.reduce_sum(tf.square(self.u_tf - self.u_pred)) + \
@@ -95,16 +89,14 @@ class PhysicsInformedNN:
                     tf.reduce_mean(tf.square(self.v_tf - self.v_pred)) + \
                     tf.reduce_mean(tf.square(self.p_tf - self.p_pred)) 
 
-
-        self.loss_2 = tf.reduce_mean(tf.square(self.ub_tf - self.ub_pred)) + \
-                    tf.reduce_mean(tf.square(self.vb_tf - self.vb_pred)) 
-
-                    
-        self.loss_3 = tf.reduce_mean(tf.square(self.f_c_pred)) + \
+                                                           
+        self.loss_2 = tf.reduce_mean(tf.square(self.f_c_pred)) + \
                     tf.reduce_mean(tf.square(self.f_u_pred)) + \
                     tf.reduce_mean(tf.square(self.f_v_pred))
                     
-        self.loss = self.loss_1 + self.loss_2 + self.loss_3
+        self.loss_3 = self.loss_2            
+                    
+        self.loss = self.loss_1 + self.loss_2
                     
         self.optimizer = tf.contrib.opt.ScipyOptimizerInterface(self.loss, 
                                                                 method = 'L-BFGS-B', 
@@ -120,12 +112,7 @@ class PhysicsInformedNN:
         init = tf.global_variables_initializer()
         self.sess.run(init)
         self.saver = tf.train.Saver()
-        
-        if(rst == True):
-            self.saver.restore(self.sess, tf.train.latest_checkpoint('./tf_model_1/'))       
-            
-        self.lb_count=0
-        
+    
     def neural_net(self, X):
 
         #create model
@@ -153,19 +140,8 @@ class PhysicsInformedNN:
         
         return u, v, p
 
+   
     def net_NS2(self, x, y):
-        
-        with tf.variable_scope("NS1",reuse=True):
-            uvp = self.neural_net(tf.concat([x,y], 1))
-        
-        u = uvp[:,0:1]
-        v = uvp[:,1:2]
-        p = uvp[:,2:3]
-      
-        
-        return u, v, p    
-    
-    def net_NS3(self, x, y):
         
         with tf.variable_scope("NS1",reuse=True):
             uvp = self.neural_net(tf.concat([x,y], 1))
@@ -197,10 +173,6 @@ class PhysicsInformedNN:
         print('Loss: %.6e %.6e %.6e %.6e \n' % (loss,loss_1,loss_2, loss_3))       
         self.fp.write('00, %.6e, %.6e, %.6e %.6e \n'% (loss,loss_1,loss_2, loss_3)) 
         
-        self.lb_count=self.lb_count+1
-        
-        if(self.lb_count % 20000 ==0):
-      	    self.save_model(self.lb_count)
       
     def train(self, nIter, lbfgs=False): 
         
@@ -212,17 +184,17 @@ class PhysicsInformedNN:
 
         
         lr=0.001
-        min_lr=1e-8
+        min_lr=1e-7
         #reduce lr iter(patience)
-        rli=500
+        rli=2000
         #numbers to avg
         L=30
         #lr eps
-        l_eps=1e-8
+        l_eps=1e-7
         
         #early stop wait
-        estop=1000
-        e_eps=1e-8
+        estop=3000
+        e_eps=1e-7
         
         start_time = time.time()
         
@@ -243,7 +215,6 @@ class PhysicsInformedNN:
                             
                 
                 tf_dict = {self.x_tf: self.x, self.y_tf: self.y, self.u_tf: self.u, self.v_tf: self.v, self.p_tf: self.p, \
-                           self.xb_tf: self.xb, self.yb_tf: self.yb, self.ub_tf: self.ub, self.vb_tf: self.vb, \
                            self.tf_lr:lr, self.xg_tf: self.xg, self.yg_tf: self.yg}
             
                 _,loss_value,lv_1,lv_2,lv_3=self.sess.run([self.train_op_Adam,self.loss,self.loss_1,self.loss_2,self.loss_3], tf_dict)
@@ -257,7 +228,7 @@ class PhysicsInformedNN:
             #reduce lr
             if(len(my_hist) > rli  and lr > min_lr):
                 if ((sum(my_hist[-rli:-rli+L]) - sum(my_hist[-L-1:-1])) < (l_eps*L) ):
-                    lr=lr*0.5
+                    lr=lr*0.33
                     print('Reduce Learning rate',lr,len(my_hist[-L-1:-1]),len(my_hist[-rli:-rli+L]))
                     my_hist=[]
                     
@@ -280,7 +251,7 @@ class PhysicsInformedNN:
             start_time = time.time()
             
             #save model
-            if ((count % 1000) ==0):
+            if ((count % 5000) ==0):
                 model.save_model(count)
                 
        
@@ -288,8 +259,7 @@ class PhysicsInformedNN:
         if (lbfgs==True):
                     
             tf_dict = {self.x_tf: self.x, self.y_tf: self.y, self.u_tf: self.u, self.v_tf: self.v, self.p_tf: self.p, \
-                           self.xb_tf: self.xb, self.yb_tf: self.yb, self.ub_tf: self.ub, self.vb_tf: self.vb, \
-                           self.tf_lr:lr, self.xg_tf: self.xg, self.yg_tf: self.yg}        
+                           self.tf_lr:lr, self.xg_tf: self.xg, self.yg_tf: self.yg}    
                 
             self.optimizer.minimize(self.sess,
                                     feed_dict = tf_dict,
@@ -314,86 +284,50 @@ class PhysicsInformedNN:
         
 if __name__ == "__main__": 
            
-    path='./data_file/'  
-    
-    #import inout
-    #x,y,p,u,v
-    xyu_io=np.loadtxt(path + 'cy_outer_4s_3334_cfd_intp.dat',skiprows=1)
-    
-    x_io = xyu_io[:,0:1]
-    y_io = xyu_io[:,1:2]
-    p_io = xyu_io[:,2:3]
-    u_io = xyu_io[:,3:4]
-    v_io = xyu_io[:,4:5]
-
-
-    # wall
-    xyu_wall=np.loadtxt(path + 'cy_wall_bc_80.dat',skiprows=1)
-    xb_train = xyu_wall[:,0:1]
-    yb_train = xyu_wall[:,1:2]
-    pb_train = xyu_wall[:,2:3]
-    ub_train = xyu_wall[:,3:4]
-    vb_train = xyu_wall[:,4:5]   
-
-
-    #sampling
-    xyu_s=np.loadtxt(path + 'cy_40_around_80x5.dat',skiprows=1)
-    
-    idx = np.random.choice(len(xyu_s), len(xyu_s), replace=False)
-    x_s = xyu_s[idx,0:1]
-    y_s = xyu_s[idx,1:2]
-    p_s = xyu_s[idx,2:3]
-    u_s = xyu_s[idx,3:4]
-    v_s = xyu_s[idx,4:5] 
-    
-    # MSE points
-    x_train = np.concatenate((xyu_io[:,0:1],xyu_s[:,0:1]),axis=0)
-    y_train = np.concatenate((xyu_io[:,1:2],xyu_s[:,1:2]),axis=0)
-    p_train = np.concatenate((xyu_io[:,2:3],xyu_s[:,2:3]),axis=0)
-    u_train = np.concatenate((xyu_io[:,3:4],xyu_s[:,3:4]),axis=0)    
-    v_train = np.concatenate((xyu_io[:,4:5],xyu_s[:,4:5]),axis=0)  
     
     ######################################################################
-    ######################## Gov Data ####################################
+    ######################## MSE Data ###############################
+    ######################################################################
+    # Training Data    
+    path='./data_file/Re100/'  
+    #import wall bc
+    #x,y,p,u,v
+    xyu_io=np.loadtxt(path + 'bl_4s_puv.dat',skiprows=1)
+    
+    #internal points
+    x_train = xyu_io[:,0:1]
+    y_train = xyu_io[:,1:2]
+    p_train = xyu_io[:,2:3]
+    u_train = xyu_io[:,3:4]
+    v_train = xyu_io[:,4:5]
+
+    
+    ######################################################################
+    ######################## Gov Data ###############################
     ######################################################################    
     
-    xyu_int=np.loadtxt(path + 'cy_internal_3334.dat',skiprows=1)    
+    xyu_in=np.loadtxt( path + 'bl_internal.dat',skiprows=1)    
                 
     # internal points with wall BC
-    xg_train = np.concatenate((xyu_io[:,0:1],xyu_wall[:,0:1],xyu_int[:,0:1]),axis=0)
-    yg_train = np.concatenate((xyu_io[:,1:2],xyu_wall[:,1:2],xyu_int[:,1:2]),axis=0)
-    
+    xg_train = np.concatenate((xyu_io[:,0:1],xyu_in[:,0:1]),axis=0)
+    yg_train = np.concatenate((xyu_io[:,1:2],xyu_in[:,1:2]),axis=0)
+
+
         
     # Training
-    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train, xb_train, yb_train, ub_train, vb_train, xg_train, yg_train, False)
+    model = PhysicsInformedNN(x_train, y_train, u_train, v_train, p_train, xg_train, yg_train)
  
     model.train(50000,True)  
        
     model.save_model(000000)
-
-
-#plt.figure(figsize=(6, 5), dpi=100)
-#plt0, =plt.plot(x_train,y_train,'og',linewidth=0,ms=1,label='MSE pts-200 (Sampling)',zorder=5)
-#plt0, =plt.plot(xg_train,yg_train,'+r',linewidth=0,ms=2,label='Gov Eq. pts-8000 (Residual)',zorder=0)
-#plt0, =plt.plot(xb_train,yb_train,'ok',linewidth=0,ms=1,label='BC pts-350',zorder=1)
-#
-#plt.legend(fontsize=20)
-#plt.xlabel('X',fontsize=20)
-#plt.ylabel('Y',fontsize=20)
-##plt.title('%s-u'%(flist[ii]),fontsiuze=16)
-#plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
-##plt.xlim(-0.1,1.2)
-##plt.ylim(-0.01,1.4)    
-#plt.savefig('./plot/mesh.png', format='png',bbox_inches='tight', dpi=100)
-#plt.show()
-#
-
+    
+  
 #plt.figure(figsize=(6, 5), dpi=100)
 #plt0, =plt.plot(x_train,y_train,'og',linewidth=0,ms=3,label='MSE internal pts: 80 ',zorder=2)
-#plt0, =plt.plot(xb_train,yb_train,'ok',linewidth=0,ms=3,label='MSE BC pts: 300',zorder=5)
+#plt0, =plt.plot(xyu_w[:,0:1],xyu_w[:,1:2],'ok',linewidth=0,ms=3,label='MSE BC pts: 300',zorder=5)
 #plt0, =plt.plot(xg_train,yg_train,'+r',linewidth=0,ms=2,label='Gov Eq. Res. pts: 10000 ',zorder=0)
 #
-#plt0, =plt.plot(xyu_io[:,0],xyu_io[:,1],'ok',linewidth=0,ms=3)
+#plt0, =plt.plot(xyu[:,0],xyu[:,1],'ok',linewidth=0,ms=3)
 ##plt.legend(fontsize=20)
 #plt.xlabel('X',fontsize=20)
 #plt.ylabel('Y',fontsize=20)
@@ -401,5 +335,6 @@ if __name__ == "__main__":
 #plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
 ##plt.xlim(-0.5,2)
 ##plt.ylim(-0.5,1)    
-#plt.savefig('./plot/mesh_ppt1.png', format='png',bbox_inches='tight', dpi=100)
+#plt.savefig('./plot/mesh.png', format='png',bbox_inches='tight', dpi=100)
 #plt.show()
+

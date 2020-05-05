@@ -314,7 +314,7 @@ class PhysicsInformedNN:
         
 if __name__ == "__main__": 
            
-    path='./data_file/'  
+    path='../data_file/'  
     
     #import inout
     #x,y,p,u,v

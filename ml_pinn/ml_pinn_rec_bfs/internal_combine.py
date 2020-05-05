@@ -29,29 +29,28 @@ boundary not loaded: may be required?
 """
 
 # read data from below dir...
-path='./data_file/Re1000/'
+path='./data_file/Re100/'
 
-
-fp=open( path + 'bl_internal_combined.dat','w')
+fp=open( path + 'bfs_internal_combined.dat','w')
 fp.write('x y p u v\n')
 
-xy=np.loadtxt(path + 'bl_internal.dat',skiprows=1)
+xy=np.loadtxt(path + 'bfs_internal.dat',skiprows=1)
 for i in range(len(xy)):
     fp.write('%f %f %f %f %f %f %f\n' %(xy[i,0],xy[i,1],xy[i,2],xy[i,3],xy[i,4], 0, 1))
     
-xy=np.loadtxt(path + 'bl_inlet.dat',skiprows=1)
+xy=np.loadtxt(path + 'bfs_inlet.dat',skiprows=1)
 for i in range(len(xy)):
     fp.write('%f %f %f %f %f %f %f\n' %(xy[i,0],xy[i,1],xy[i,2],xy[i,3],xy[i,4], 0, 1))    
         
-xy=np.loadtxt(path + 'bl_outlet_r.dat',skiprows=1)
+xy=np.loadtxt(path + 'bfs_outlet.dat',skiprows=1)
 for i in range(len(xy)):
     fp.write('%f %f %f %f %f %f %f\n' %(xy[i,0],xy[i,1],xy[i,2],xy[i,3],xy[i,4], 0, 1))
 
-xy=np.loadtxt(path + 'bl_outlet_t.dat',skiprows=1)
+xy=np.loadtxt(path + 'bfs_lowerwall.dat',skiprows=1)
 for i in range(len(xy)):
     fp.write('%f %f %f %f %f %f %f\n' %(xy[i,0],xy[i,1],xy[i,2],xy[i,3],xy[i,4], 0, 1))
 
-xy=np.loadtxt(path + 'bl_wall.dat',skiprows=1)
+xy=np.loadtxt(path + 'bfs_upperwall.dat',skiprows=1)
 for i in range(len(xy)):
     fp.write('%f %f %f %f %f %f %f\n' %(xy[i,0],xy[i,1],xy[i,2],xy[i,3],xy[i,4], 0, 1))    
     

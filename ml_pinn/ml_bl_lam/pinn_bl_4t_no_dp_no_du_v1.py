@@ -423,15 +423,15 @@ if __name__ == "__main__":
     xg_train = np.concatenate((xyu_inlet[:,0:1],xyu_wall[:,0:1],xyu_outlet_t[:,0:1],xyu_outlet_r[:,0:1],xyu_int[:,0:1]),axis=0)
     yg_train = np.concatenate((xyu_inlet[:,1:2],xyu_wall[:,1:2],xyu_outlet_t[:,1:2],xyu_outlet_r[:,1:2],xyu_int[:,1:2]),axis=0)
         
-    # Training
-    model = PhysicsInformedNN(x_train, y_train, p_train, u_train, v_train, \
-                              x_iw, y_iw, p_iw, u_iw, v_iw, nx_iw, ny_iw, \
-                              x_oo, y_oo, p_oo, u_oo, v_oo, nx_oo, ny_oo, \
-                              xg_train, yg_train)
- 
-    model.train(50000,True)  
-       
-    model.save_model(000000)
+#    # Training
+#    model = PhysicsInformedNN(x_train, y_train, p_train, u_train, v_train, \
+#                              x_iw, y_iw, p_iw, u_iw, v_iw, nx_iw, ny_iw, \
+#                              x_oo, y_oo, p_oo, u_oo, v_oo, nx_oo, ny_oo, \
+#                              xg_train, yg_train)
+# 
+#    model.train(50000,True)  
+#       
+#    model.save_model(000000)
     
   
 '''plt.figure(figsize=(6, 4), dpi=100)

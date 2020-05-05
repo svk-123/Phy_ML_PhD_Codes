@@ -70,8 +70,8 @@ import matplotlib
 #v=np.asarray(v)
 
 Re=100
-suff='re%s_nodp_nodv_x8_50'%Re    
-xy=np.loadtxt('./data_file/Re%s/bl_internal_combined.dat'%Re,skiprows=1)
+suff='re%s_nodp_nodv_f3'%Re    
+xy=np.loadtxt('./data_file/Re%s/bfs_internal.dat'%Re,skiprows=1)
 
 val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
 val_out=np.concatenate((xy[:,3:4],xy[:,4:5],xy[:,2:3]),axis=1)    
@@ -89,7 +89,7 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8_nn50x8/tf_model/'%Re
+    path1='./tf_model/case_1_Re100_nodp_npdv_30k_f3/tf_model/'
     new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
@@ -116,20 +116,20 @@ def con_plot():
     
     fig = plt.figure(figsize=(8, 8),dpi=100)
     
-    l1=0
-    l2=5
+    l1=-1
+    l2=7
     h1=0
-    h2=0.2
-    AR=2.0/h2
+    h2=3
+    AR=0.8
 
     
     lp=np.linspace(p.min(),p.max(),20)    
     lu=np.linspace(u.min(),u.max(),20)      
     lv=np.linspace(v.min(),v.max(),20)   
     
-    lpa=np.linspace(p.min(),p.max(),30)    
-    lua=np.linspace(u.min(),u.max(),30)      
-    lva=np.linspace(v.min(),v.max(),30)     
+    lpa=np.linspace(p.min(),p.max(),20)    
+    lua=np.linspace(u.min(),u.max(),20)      
+    lva=np.linspace(v.min(),v.max(),20)     
     
     ax1 = fig.add_subplot(3,2,1)
     cp1a = ax1.tricontour(xtmp,ytmp,p,levels=lpa,linewidths=0.4,colors='k',zorder=5)
@@ -283,7 +283,7 @@ def plot_cp():
     
     return pu1
 
-plot_cp()
+#plot_cp()
 
 
     
@@ -292,17 +292,17 @@ def line_plotu_sub(i):
 
     #LinearNDinterpolator
     pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
-    yl=1
-    xa=np.linspace(1,1,50)
+    yl=3
+    xa=np.linspace(0.5,0.5,50)
     ya=np.linspace(0,yl,50)
 
-    xb=np.linspace(2,2,50)
+    xb=np.linspace(0.2,0.2,50)
     yb=np.linspace(0,yl,50)
 
-    xc=np.linspace(3,3,50)
+    xc=np.linspace(0.5,0.5,50)
     yc=np.linspace(0,yl,50)
 
-    xd=np.linspace(3.5,3.5,50)
+    xd=np.linspace(3,3,50)
     yd=np.linspace(0,yl,50)
         
         

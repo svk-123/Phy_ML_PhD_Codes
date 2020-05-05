@@ -20,8 +20,6 @@ from scipy import interpolate
 from os import listdir
 from os.path import isfile,isdir, join
 import cPickle as pickle
-import tensorflow as tf
-import shutil
 
 """
 load x y z
@@ -31,7 +29,7 @@ boundary not loaded: may be required?
 """
 
 
-fname_1=['bl']
+fname_1=['bfs']
 
 fname_1=np.asarray(fname_1)
 fname_1.sort()
@@ -52,10 +50,11 @@ indir = path
 #    dir2=indir + '/%s'%fname_1[i]
 #    tmp=[f for f in listdir(dir2) if isdir(join(dir2, f))]
 #    fname_2.append(tmp)
-Re=100
-suff='nodp_nodv_ws_x8_150'    
+#fname_2=np.asarray(fname_2)
+#fname_2.sort()    
 
-fname_2=np.asarray([['bl_%s_0'%Re]])
+Re=100
+fname_2=[['bfs_%s_0'%Re]]
 
 tmp=[]
 foil=[]
@@ -65,6 +64,7 @@ for i in range(len(fname_1)):
         foil.append(fname_2[i][j].split('_')[0])
 tmp=np.asarray(tmp)    
 foil=np.asarray(foil)
+
        
 coord=[]
 #for nn in range(len(foil)):
@@ -115,7 +115,7 @@ for jj in range(1):
     for ii in range(st[jj],end[jj]):
         print (ii)
         
-        casedir= path +'/%s/%s'%(foil[ii],tmp[ii])
+        casedir= path +'%s/%s'%(foil[ii],tmp[ii])
                 
         #need to find max time later....
         yname = [f for f in listdir(casedir) if isdir(join(casedir, f))]
@@ -177,96 +177,62 @@ for jj in range(1):
         v = np.array(map(float, v))
         w = np.array(map(float, w))
                
-        #filter within xlim,ylim
+        #around
         I=[]
         for i in range(len(x)):
-            if (x[i]<=5 and x[i]>=0 and y[i]<=3 and y[i]>=0 ):
+            if (x[i]<=6.999 and x[i]>=-0.999 and y[i]<=3 and y[i]>=0.0 ):
                 I.append(i)
-        xl=x[I]
-        yl=y[I]
-        zl=z[I]
         
-        #load model
-        #session-run
-        tf.reset_default_graph    
-        graph = tf.get_default_graph() 
-        #load model
-        with tf.Session() as sess1:
-            
-            path1='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8_nn150x8/tf_model/'%Re
-            new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
-            new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
-
-           # tf_dict = {'input0:0': xl[:,None], 'input1:0': yl[:,None] }
-
-            tf_dict = {'input1a:0': xl[:,None], 'input1b:0': yl[:,None], \
-                       'input1c:0': yl[:,None]/yl.max(), 'input1d:0': yl[:,None]/yl.max() }
-
-            op_to_load1 = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')     
-            
-            #uvp
-            out = sess1.run(op_to_load1, tf_dict)
-        
-        sess1.close()
-        
-        # p- write
-        p=[]
-        with open(casedir +'/%s/p'%ymax, 'r') as infile:
-            data0=infile.readlines()
-            npt=int(data0[20])
-            for line in data0[22:22+npt]:
-                p.append(line)
-        p = np.array(map(float, p))
-        
-        pl=p[I].copy()
-        p[I]=out[:,2]
-        
+#        #top        
+#        I=[]
+#        for i in range(len(x)):
+#            if (x[i]<=4.9 and x[i]>=0.005 and y[i]<=2.9 and y[i]>=0.6 ):
+#                I.append(i)        
                 
-        dst2='./bl_ml/%s_%s'%(tmp[ii],suff)
+                
+                
+        x=x[I]
+        y=y[I]
+        z=z[I]
+        u=u[I]
+        v=v[I]
+        w=w[I]
+        p=p[I]        
         
-        if os.path.exists(dst2):
-            shutil.rmtree(dst2)
-                    
-        shutil.copytree(casedir,dst2)
-        
-        print 'writing-p'
-        fp= open(dst2 +'/%s/p'%ymax, 'w+')
-        
-        for i in range(22):
-            fp.write("%s"%(data0[i]))
-        for i in range(npt):
-            fp.write("%f\n"%(p[i]))
-        for i in range((22+npt),len(data0)):    
-            fp.write("%s"%(data0[i]))        
-        fp.close() 
              
-
-        # load velocity
-        u=[]
-        v=[]
-        with open(casedir +'/%s/U'%ymax, 'r') as infile:
-            data0=infile.readlines()
-            npt=int(data0[20])
-            for line in data0[22:22+npt]:
-                line=line.replace("(","")
-                line=line.replace(")","")        
-                a, b, c = (item.strip() for item in line.split(' ', 3))
-                u.append(a), v.append(b)
-        u = np.array(map(float, u))
-        v = np.array(map(float, v))
-
-        u[I]=out[:,0]
-        v[I]=out[:,1]                      
+        #plot
+        def plot(xp,yp,zp,nc,name):
+            plt.figure(figsize=(3, 4))
+            #cp = pyplot.tricontour(ys, zs, pp,nc)
+            cp = plt.tricontourf(xp,yp,zp,nc,cmap=cm.jet)
+            #cp=pyplot.tricontourf(x1,y1,z1)
+            #cp=pyplot.tricontourf(x2,y2,z2)   
+            
+            #cp = pyplot.tripcolor(xp, yp, zp)
+            #cp = pyplot.scatter(ys, zs, pp)
+            #pyplot.clabel(cp, inline=False,fontsize=8)
+            #plt.xlim(-1,2)
+            #plt.ylim(-1,1)    
+            #plt.axis('off')
+            #plt.grid(True)
+            #patch.set_facecolor('black')
+            plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
+            #plt.savefig('./plot/%s.eps', format='eps')
+            plt.show()
+            plt.close()
+            
+        plot(x,y,p,20,'name')    
         
-
-        print 'writing-U'
-        fp= open(dst2 +'/%s/U'%ymax, 'w+')
         
-        for i in range(22):
-            fp.write("%s"%(data0[i]))
-        for i in range(npt):
-            fp.write("(%f %f 0.0)\n"%(u[i],v[i]))
-        for i in range((22+npt),len(data0)):    
-            fp.write("%s"%(data0[i]))        
-        fp.close() 
+#save file
+filepath='./data_file'
+      
+fp=open('./data_file/Re%s/bfs_internal.dat'%Re,'w')
+fp.write('x y p u v : (x[i]<=7 and x[i]>=-1 and y[i]<=3 and y[i]>=1.0 ) \n')
+for i in range(len(x)):
+    fp.write('%f %f %f %f %f \n'%(x[i],y[i], p[i], u[i], v[i]))
+fp.close()
+
+    
+
 

@@ -74,18 +74,25 @@ L=50
 W=50
 
 new_coord=[]
+#top
 x1=np.linspace(-3,3,L)
 y1=np.linspace(3,3,L)
 
+#front
 x2=np.linspace(-3,-3,W)
 y2=np.linspace(-2.95,2.95,W)
 
+#bot
 x3=np.linspace(-3,3,L)
 y3=np.linspace(-3,-3,L)
 
-x4=np.linspace(3,3,W)
-y4=np.linspace(-2.95,2.95,W)
+##back-wake - outlet
+#x4=np.linspace(3,3,W)
+#y4=np.linspace(-2.95,2.95,W)
 
+#back-wake - sampling
+x4=np.linspace(1,1,10)
+y4=np.linspace(-1,1,10)
 
 tx=0.0
 ty=0.05
@@ -96,10 +103,10 @@ by=-0.05
 wx=0.1
 wy=0.0
 
-for i in range(1):
-    new_coord.extend(np.asarray([x1+tx*i,y1+ty*i]).transpose())
-    new_coord.extend(np.asarray([x2+fx*i,y2+fy*i]).transpose())
-    new_coord.extend(np.asarray([x3+bx*i,y3+by*i]).transpose())
+for i in range(5):
+    #new_coord.extend(np.asarray([x1+tx*i,y1+ty*i]).transpose())
+    #new_coord.extend(np.asarray([x2+fx*i,y2+fy*i]).transpose())
+    #new_coord.extend(np.asarray([x3+bx*i,y3+by*i]).transpose())
     new_coord.extend(np.asarray([x4+wx*i,y4+wy*i]).transpose())
     
 new_coord=np.asarray(new_coord)
@@ -292,8 +299,8 @@ for jj in range(1):
     #save file
     filepath='./data_file'
       
-fp=open('./data_file/cy_outer_4s_3333_cfd_intp.dat','w')
-fp.write('x y p u v \n')
+fp=open('./data_file/cy_sample_x5_10.dat','w')
+fp.write('x y p u v :outlet1 - 1 side inlet\n' )
 for i in range(len(pi)):
     fp.write('%f %f %f %f %f \n'%(new_coord[i,0], new_coord[i,1], pi[i], ui[i], vi[i]))
 fp.close()

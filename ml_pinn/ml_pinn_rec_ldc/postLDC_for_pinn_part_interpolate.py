@@ -51,7 +51,7 @@ indir = path
 #    tmp=[f for f in listdir(dir2) if isdir(join(dir2, f))]
 #    fname_2.append(tmp)
 
-Re=1000
+Re=100
     
 fname_2=[['ldc_%s_0'%Re]]
 
@@ -72,15 +72,15 @@ coord=[]
 # 
 
 ###---around,wake,top,front--------------
-L=5
-W=5
+L=15
+W=15
 
 new_coord=[]
-x1=np.linspace(0.1,0.9,L)
-y1=np.linspace(0.4,0.4,L)
+x1=np.linspace(0.0,0.1,L)
+y1=np.linspace(0.1,0.1,L)
 
-x2=np.linspace(0.0,0.0,W)
-y2=np.linspace(0.001,2.9,W)
+x2=np.linspace(0.1,0.1,W)
+y2=np.linspace(0.0,0.1,W)
 
 x3=np.linspace(4.9,4.9,L)
 y3=np.linspace(0.001,2.9,L)
@@ -88,10 +88,16 @@ y3=np.linspace(0.001,2.9,L)
 x4=np.linspace(0,4.9,W)
 y4=np.linspace(2.9,2.9,W)
 
+#corner-left
+x1=np.linspace(0.02,0.02,1)
+y1=np.linspace(0.02,0.02,1)
 
+#corner-right
+x2=np.linspace(0.98,0.98,1)
+y2=np.linspace(0.02,0.02,1)
 
-tx=0.0
-ty=0.05
+tx=0.02
+ty=0.02
 
 fx=-0.05
 fy=0.0
@@ -100,12 +106,14 @@ by=-0.05
 wx=0.1
 wy=0.0
 
-for i in range(5):
+
+for i in range(4):
     new_coord.extend(np.asarray([x1+tx*i,y1+ty*i]).transpose())
-    #new_coord.extend(np.asarray([x2+fx*i,y2+fy*i]).transpose())
+    new_coord.extend(np.asarray([x2-tx*i,y2+ty*i]).transpose())
     #new_coord.extend(np.asarray([x3+bx*i,y3+by*i]).transpose())
     #new_coord.extend(np.asarray([x4+wx*i,y4+wy*i]).transpose())'''
 
+    
 new_coord=np.asarray(new_coord)
     
 plt.figure()
@@ -286,7 +294,7 @@ for jj in range(1):
 #    with open(filepath+'/BL_inlet.pkl', 'wb') as outfile1:
 #        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
     
-fp=open('./data_file/Re%s/ldc_sample_x5_5.dat'%Re,'w')
+fp=open('./data_file/Re%s/ldc_sample_cor_8.dat'%Re,'w')
 
 fp.write('x y p u v @ x= 5x5 \n')
 for i in range(len(pi)):

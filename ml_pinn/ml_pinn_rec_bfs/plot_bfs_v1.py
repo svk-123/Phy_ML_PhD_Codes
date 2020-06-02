@@ -71,7 +71,7 @@ import matplotlib
 
 Re=100
 suff='re%s_nodp_nodv_f3'%Re    
-xy=np.loadtxt('./data_file/Re%s/bfs_internal.dat'%Re,skiprows=1)
+xy=np.loadtxt('./data_file/Re%s/bfs_internal_combined.dat'%Re,skiprows=1)
 
 val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
 val_out=np.concatenate((xy[:,3:4],xy[:,4:5],xy[:,2:3]),axis=1)    
@@ -89,7 +89,7 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_1_Re100_nodp_npdv_30k_f3/tf_model/'
+    path1='./tf_model/case_1_Re100_nodp_npdv_15k_f3/tf_model/'
     new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
@@ -110,7 +110,7 @@ v_pred=tout[:,1]
 kout=val_out
 i=1
 j=1    
-   
+
 #plot
 def con_plot():
     
@@ -122,6 +122,7 @@ def con_plot():
     h2=3
     AR=0.8
 
+    co=np.loadtxt('bfs_sq_co.dat')
     
     lp=np.linspace(p.min(),p.max(),20)    
     lu=np.linspace(u.min(),u.max(),20)      
@@ -136,7 +137,7 @@ def con_plot():
     cp1 = ax1.tricontourf(xtmp,ytmp,p,levels=lp,cmap=cm.jet,extend ='both')
 
     
-    #ax1.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
+    ax1.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
     ax1.set_title('p-CFD')
     ax1.set_xlabel('X',fontsize=16)
     ax1.set_ylabel('Y',fontsize=16)
@@ -152,7 +153,7 @@ def con_plot():
     ax2 = fig.add_subplot(3,2,2)
     cp2a = ax2.tricontour(xtmp,ytmp,p_pred,levels=lpa,linewidths=0.4,colors='k',zorder=5)
     cp2 = ax2.tricontourf(xtmp,ytmp,p_pred,levels=lp,cmap=cm.jet,extend ='both')
-    #ax2.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
+    ax2.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
     ax2.set_title('p-PINN')
     ax2.set_xlabel('X',fontsize=16)
     ax2.set_yticks([])
@@ -167,7 +168,7 @@ def con_plot():
     ax3 = fig.add_subplot(3,2,3)
     cp3a = ax3.tricontour(xtmp,ytmp,u,levels=lua,linewidths=0.4,colors='k',zorder=5)    
     cp3 = ax3.tricontourf(xtmp,ytmp,u,levels=lu,cmap=cm.jet,extend ='both')
-    #ax3.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
+    ax3.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
     ax3.set_title('u-CFD')
     ax3.set_xlabel('X',fontsize=16)
     ax3.set_ylabel('Y',fontsize=16)
@@ -182,7 +183,7 @@ def con_plot():
     ax4 = fig.add_subplot(3,2,4)
     cp4a = ax4.tricontour(xtmp,ytmp,u_pred,levels=lua,linewidths=0.4,colors='k',zorder=5)    
     cp4 = ax4.tricontourf(xtmp,ytmp,u_pred,levels=lu,cmap=cm.jet,extend ='both')
-    #ax4.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
+    ax4.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
     ax4.set_title('u-PINN')
     ax4.set_xlabel('X',fontsize=16)
     ax4.set_yticks([])
@@ -197,7 +198,7 @@ def con_plot():
     ax5 = fig.add_subplot(3,2,5)
     cp5a = ax5.tricontour(xtmp,ytmp,v,levels=lva,linewidths=0.4,colors='k',zorder=5)      
     cp5 = ax5.tricontourf(xtmp,ytmp,v,levels=lv,cmap=cm.jet,extend ='both')
-    #ax5.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
+    ax5.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
     ax5.set_title('v-CFD')
     ax5.set_xlabel('X',fontsize=16)
     ax5.set_ylabel('Y',fontsize=16)
@@ -212,7 +213,7 @@ def con_plot():
     ax6 = fig.add_subplot(3,2,6)
     cp6a = ax6.tricontour(xtmp,ytmp,v_pred,levels=lva,linewidths=0.4,colors='k',zorder=5)      
     cp6 = ax6.tricontourf(xtmp,ytmp,v_pred,levels=lv,cmap=cm.jet,extend ='both')
-    #ax6.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
+    ax6.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
     ax6.set_title('v-PINN')
     ax6.set_xlabel('X',fontsize=16)
     ax6.set_yticks([])
@@ -296,13 +297,13 @@ def line_plotu_sub(i):
     xa=np.linspace(0.5,0.5,50)
     ya=np.linspace(0,yl,50)
 
-    xb=np.linspace(0.2,0.2,50)
+    xb=np.linspace(0.5,0.5,50)
     yb=np.linspace(0,yl,50)
 
-    xc=np.linspace(0.5,0.5,50)
+    xc=np.linspace(1,1,50)
     yc=np.linspace(0,yl,50)
 
-    xd=np.linspace(3,3,50)
+    xd=np.linspace(1.5,1.5,50)
     yd=np.linspace(0,yl,50)
         
         

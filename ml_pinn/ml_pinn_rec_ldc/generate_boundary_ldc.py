@@ -12,8 +12,9 @@ import pandas
 from os import listdir
 from os.path import isfile, join
 
-N=50
 
+'''
+N=50
 xl=np.linspace(0,0,50)
 xr=np.linspace(1,1,50)
 xt=np.linspace(0,1,50)
@@ -47,5 +48,29 @@ fp=open('ldc_bc_50.dat','w')
 
 for i in range(len(X)):
     fp.write("%f %f %f %f \n"%(X[i],Y[i],U[i],V[i]))
+
+fp.close()
+'''
+
+N=15
+xl=np.linspace(0,0,15)
+xb=np.linspace(0,0.1,15)
+
+yl=np.linspace(0,0.1,15)
+yb=np.linspace(0,0,15)
+
+
+X=np.concatenate((xl,xb),axis=0)
+Y=np.concatenate((yl,yb),axis=0)
+
+
+plt.figure()
+plt.plot(X,Y,'o')
+plt.show()
+
+fp=open('ldc_fwall_cor.dat','w')
+fp.write("x y p u v \n")
+for i in range(len(X)):
+    fp.write("%f %f %f %f %f\n"%(X[i],Y[i],0.0,1e-12,1e-12))
 
 fp.close()

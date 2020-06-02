@@ -172,7 +172,7 @@ for jj in range(1):
         #around
         I=[]
         for i in range(len(x)):
-            if (x[i]<=2.95 and x[i]>=-2.95 and y[i]<=2.95 and y[i]>=-2.95 ):
+            if (x[i]<=2.98 and x[i]>=-2.98 and y[i]<=2.98 and y[i]>=-2.98 ):
                 I.append(i)
         
 #        #front        

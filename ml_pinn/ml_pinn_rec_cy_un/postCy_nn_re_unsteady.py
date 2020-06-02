@@ -86,29 +86,29 @@ for jj in range(1):
         yname.sort()
         yname=yname[:-3].astype(np.float) 
                 
-        xx=np.loadtxt(casedir+'/postProcessing/forceCoeffs/1/forceCoeffs.dat', skiprows=10)
+        xx=np.loadtxt(casedir+'/postProcessing/forceCoeffs/0/forceCoeffs.dat', skiprows=10)
         xx=xx[::2,:]
         xx=xx[-60:]
-        xx=xx[xx[:,3].argsort()]
+        #xx=xx[xx[:,3].argsort()]
         
-#       plt.figure(figsize=(10, 4))
-#       plt.plot(xx[:,0],xx[:,3],'ob')
-#       plt.plot([t1,t10],[xx[:,3].mean(),xx[:,3].mean()],'or')
-#       plt.savefig('./plots/%s.png'%ii,format='png',dpi=100)
-#       plt.close()
+#        plt.figure(figsize=(10, 4))
+#        plt.plot(xx[:,0],xx[:,3],'ob')
+#        plt.plot([t1,t10],[xx[:,3].mean(),xx[:,3].mean()],'or')
+#        plt.savefig('./plots/%s.png'%ii,format='png',dpi=100)
+#        plt.close()
             
-        t1=xx[0,0]
-        t2=xx[1,0]
+        t1=193
+        t2=195
         
-        if (abs(xx[0,0]-xx[1,0]) > 6):
-            t2=xx[2,0]
-            
-        if (t1 > t2):
-            tmp1= t1
-            t1 =t2
-            t2 = tmp1
+#        if (abs(xx[0,0]-xx[1,0]) > 6):
+#            t2=xx[2,0]
+#            
+#        if (t1 > t2):
+#            tmp1= t1
+#            t1 =t2
+#            t2 = tmp1
    
-        tt = np.linspace(t1,t2,int (round((t2-t1)/0.2)+1) )
+        tt = np.linspace(t1,t2,int (round((t2-t1)/0.1)+1) )
          
     
         mytt = tt-t1
@@ -262,7 +262,7 @@ for jj in range(1):
 
 
 fp=open('./data_file/cy_internal_3222.dat','w')
-fp.write('x y t p u v\n')
+fp.write('x y t p u v: 193-195: 0.1 dt\n')
 for i in range(len(myinp_x)):
     fp.write('%f %f %f %f %f %f\n'%(myinp_x[i], myinp_y[i], myinp_t[i], myout_p[i], myout_u[i], myout_v[i]))
 fp.close()

@@ -118,8 +118,8 @@ for k in [0]:
 #    plt.show()    
     
     
-'''
 
+'''
 #calculate error norm
 train_l2=[]
 train_l1=[]
@@ -164,8 +164,8 @@ plt.xlim([-0.05,1.3])
 plt.xticks([0,0.5,1.])
 plt.savefig('ts_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
-
 '''
+
 
 
 

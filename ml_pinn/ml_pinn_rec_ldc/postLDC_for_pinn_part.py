@@ -53,7 +53,7 @@ indir = path
 #fname_2=np.asarray(fname_2)
 #fname_2.sort()    
 
-Re=1000
+Re=100
 fname_2=[['ldc_%s_0'%Re]]
 
 tmp=[]
@@ -180,9 +180,13 @@ for jj in range(1):
         #around
         I=[]
         for i in range(len(x)):
-            if (x[i]<=5 and x[i]>=-5.0 and y[i]<=3 and y[i]>=-3):
+            if (x[i]<=0.095 and x[i]>=0 and y[i]<=0.095 and y[i]>=0):
                 I.append(i)
-        
+#
+#        #I=[]
+#        for i in range(len(x)):
+#            if (x[i]<=1 and x[i]>=0.86 and y[i]<=0.15 and y[i]>=0):
+#                I.append(i)        
 #        #top        
 #        I=[]
 #        for i in range(len(x)):
@@ -227,8 +231,8 @@ for jj in range(1):
 #save file
 filepath='./data_file'
       
-fp=open('./data_file/Re%s/bl_internal.dat'%Re,'w')
-fp.write('x y p u v : (all) \n')
+fp=open('./data_file/Re%s/ldc_corner_left.dat'%Re,'w')
+fp.write('x y p u v : xy: 0.095 \n')
 for i in range(len(x)):
     fp.write('%f %f %f %f %f \n'%(x[i],y[i], p[i], u[i], v[i]))
 fp.close()

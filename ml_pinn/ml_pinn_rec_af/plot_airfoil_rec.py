@@ -46,7 +46,7 @@ matplotlib.rc('xtick', labelsize=18)
 matplotlib.rc('ytick', labelsize=18) 
 
 #1,12,19,20,23
-xy=np.loadtxt('./data_file/af_internal_21p511.dat',skiprows=1)
+xy=np.loadtxt('./data_file/naca4412_internal_combined_1211.dat',skiprows=1)
 
 val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
 val_out=np.concatenate((xy[:,3:4],xy[:,4:5],xy[:,2:3]),axis=1)    
@@ -64,12 +64,14 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_3_puv_wake_20x5_dp_wall/tf_model/'
+    path1='./tf_model/case_1_naca4412_Re100_aoa20_nodp_nodv_ws_ar_30x2/tf_model/'
     #path1='./tf_model/'
-    new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
+    new_saver1 = tf.train.import_meta_graph( path1 + 'model_50000.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
-    tf_dict = {'input0:0': xtmp[:,None], 'input1:0': ytmp[:,None]}
+    tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
+               'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }
+    
     op_to_load1 = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')    
     
     #uvp
@@ -78,7 +80,7 @@ with tf.Session() as sess1:
 sess1.close()
 
 
-co=np.loadtxt('./data_file/naca0012_200_cos.dat',skiprows=1)  
+co=np.loadtxt('./data_file/naca4412_200_cos.dat',skiprows=1)  
 i=1
 j=1
   
@@ -412,7 +414,7 @@ def line_plotu_sub(i):
     #plt.plot(v3a,ya,'r',linewidth=3)
     #plt.legend(fontsize=14)
     plt.ylabel('Y',fontsize=20)
-    plt.xlim(-0.1,0.5)
+    plt.xlim(-0.1,1)
     
     plt.subplot(1,3,2)
     plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
@@ -420,7 +422,7 @@ def line_plotu_sub(i):
     #plt.plot(v3b,yb,'r',linewidth=3)
     plt.xlabel('v-velocity',fontsize=20)
     plt.yticks([])
-    plt.xlim(-0.1,0.2)
+    plt.xlim(-0.1,0.5)
     
     
     plt.subplot(1,3,3)
@@ -430,7 +432,7 @@ def line_plotu_sub(i):
     plt.yticks([])  
     plt.legend(loc="upper left", bbox_to_anchor=[0.19, 0.5], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
 
-    plt.xlim(-0.15,0.2)
+    plt.xlim(-0.15,0.5)
        
     plt.figtext(0.4, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0, hspace = 0, wspace = 0.1)

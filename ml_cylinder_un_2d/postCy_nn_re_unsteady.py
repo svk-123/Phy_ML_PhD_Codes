@@ -29,7 +29,7 @@ boundary not loaded: may be required?
 """
 
 # read data from below dir...
-path='./post'
+path='./cases'
 #path='./cut_from_case_naca_turb'
 indir = path
 
@@ -58,6 +58,10 @@ reno = reno.astype(np.float)
 st= [0]
 end=[1]
 
+
+np.random.seed(123)
+K=np.random.randint(0,3091,500)
+
 for jj in range(1):
 
     myinp_x=[]
@@ -73,7 +77,7 @@ for jj in range(1):
     otime=[]
     para=[]
     
-    for ii in range(8):
+    for ii in range(1):
         
         print ( ii)
         
@@ -87,40 +91,43 @@ for jj in range(1):
                 
         xx=np.loadtxt(casedir+'/postProcessing/forceCoeffs/1/forceCoeffs.dat', skiprows=10)
         xx=xx[::2,:]
-        xx=xx[-500:]
-#        xx=xx[xx[:,3].argsort()]
+        #xx=xx[-500:]
+        #xx=xx[xx[:,3].argsort()]
         
-#       plt.figure(figsize=(10, 4))
-#       plt.plot(xx[:,0],xx[:,3],'ob')
-#       plt.plot([t1,t10],[xx[:,3].mean(),xx[:,3].mean()],'or')
-#       plt.savefig('./plots/%s.png'%ii,format='png',dpi=100)
-#       plt.close()
-            
-        t1=xx[0,0]
-        t2=xx[1,0]
+        plt.figure(figsize=(10, 4))
+        plt.plot(xx[:,0],xx[:,3],'ob')
+        #plt.plot([t1,t10],[xx[:,3].mean(),xx[:,3].mean()],'or')
+        plt.xlim([135,141])
+        plt.savefig('./plots/%s.png'%ii,format='png',dpi=100)
+        plt.show()
+        plt.close()
+       
+          
+        t1=135.4
+        t2=141.8 
         
-        if (abs(xx[0,0]-xx[1,0]) > 6):
-            t2=xx[2,0]
-            
-        if (t1 > t2):
-            tmp1= t1
-            t1 =t2
-            t2 = tmp1
+#        if (abs(xx[0,0]-xx[1,0]) > 6):
+#            t2=xx[2,0]
+#            
+#        if (t1 > t2):
+#            tmp1= t1
+#            t1 =t2
+#            t2 = tmp1
    
         tt = np.linspace(t1,t2,int (round((t2-t1)/0.2)+1) )
          
         tt=tt[:-1]
         mytt = tt-t1
-        mytt = mytt/mytt.max()
+        #mytt = mytt/mytt.max()
                    
         plt.figure(figsize=(3, 4))
-        plt.plot(xx[:,0],xx[:,3],'-b')
+        plt.plot(xx[:,0],xx[:,3],'o')
         #plt.plot([t1,t2],[xx[:,3].mean(),xx[:,3].mean()],'or')
         plt.savefig('./plots/%s.png'%fname_2[ii],format='png',dpi=100)
         plt.close()
                
         
-        '''for kk in range(len(tt)):  
+        for kk in range(len(tt)):  
             
             ymax=round(tt[kk],2)
             if((ymax%1) == 0):
@@ -187,7 +194,7 @@ for jj in range(1):
             #filter within xlim,ylim
             I=[]
             for i in range(len(x)):
-                if (x[i]<=8 and x[i]>=-3.1 and y[i]<=3.1 and y[i]>=-3.1 ):
+                if (x[i]<=2 and x[i]>=-1 and y[i]<=1 and y[i]>=-1 ):
                     I.append(i)
                                 
             x=x[I]
@@ -197,6 +204,15 @@ for jj in range(1):
             v=v[I]
             w=w[I]
             p=p[I]
+            
+            x=x[K]
+            y=y[K]
+            z=z[K]
+            u=u[K]
+            v=v[K]
+            w=w[K]
+            p=p[K]            
+            
             
             if (p.max() > 5):
                 print (tmp[ii])
@@ -259,6 +275,6 @@ for jj in range(1):
 
     data1 = [myinp_x, myinp_y, myinp_re, myinp_t, myout_p, myout_u, myout_v, otime, para, info ]
 
-    with open(filepath+'/cy_un_lam_tr_%s.pkl'%(jj+1), 'wb') as outfile1:
-        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)'''
+    with open(filepath+'/cy_un_lam_tr_%s_1112.pkl'%(jj+1), 'wb') as outfile1:
+        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 

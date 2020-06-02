@@ -56,7 +56,7 @@ plt.rc('font', family='serif')
 # ref:[data,name]
 path='./airfoil_1600_1aoa_1re/'
 
-data_file='data_144_1600_ts.pkl'
+data_file='data_144_1600_tr.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -91,12 +91,12 @@ model_test=load_model('./hyper_selected/case144/case_2/final_enc_cnn.hdf5')
 out2=model_test.predict([xtr1])
 out2=out2*0.18'''
 
-model_test=load_model('./hyper_selected/case144/case_3/final_enc_cnn.hdf5')   
+model_test=load_model('./hyper_selected_v0/case144/case_3/final_enc_cnn.hdf5')   
 out=model_test.predict([xtr1])
 out=out*0.18
 
 #plot one CNN
-for k in range(0):
+for k in range(30):
    
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(xx,my_out[k][0:35],'o',mfc='grey',mec='grey',ms=10,label='true')
@@ -122,7 +122,7 @@ for k in range(0):
     plt.ylabel('Y',fontsize=24)  
     #plt.axis('off')
     plt.tight_layout()
-    plt.savefig('./plot/tr_%s_%s.eps'%(k,name[k]), format='eps', bbox_inches='tight',dpi=100)
+    plt.savefig('./plot/tr_%s_%s.tiff'%(k,name[k]), format='tiff', bbox_inches='tight',dpi=200)
     plt.show()
     
 

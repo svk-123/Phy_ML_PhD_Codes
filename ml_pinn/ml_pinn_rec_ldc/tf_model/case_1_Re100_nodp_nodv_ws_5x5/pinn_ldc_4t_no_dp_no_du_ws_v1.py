@@ -312,7 +312,7 @@ class PhysicsInformedNN:
                 
             self.optimizer.minimize(self.sess,
                                     feed_dict = tf_dict,
-                                    fetches = [self.loss,self.loss_1,self.loss_2,self.loss_3],
+                                    fetches = [self.loss,self.loss_0,self.loss_1,self.loss_2],
                                     loss_callback = self.callback)
  
 

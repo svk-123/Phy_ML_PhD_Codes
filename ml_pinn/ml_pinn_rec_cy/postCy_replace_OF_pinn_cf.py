@@ -179,7 +179,7 @@ for jj in range(1):
         #filter within xlim,ylim
         I=[]
         for i in range(len(x)):
-            if (x[i]<=2 and x[i]>=-2 and y[i]<=2 and y[i]>=-2 ):
+            if (x[i]<=3 and x[i]>=-3 and y[i]<=3 and y[i]>=-3 ):
                 I.append(i)
         xl=x[I]
         yl=y[I]
@@ -192,11 +192,12 @@ for jj in range(1):
         #load model
         with tf.Session() as sess1:
             
-            path1='./tf_model/case_2_4s_puv_dp/tf_model/'
-            new_saver1 = tf.train.import_meta_graph( path1 + 'model_67000.meta')
+            path1='./tf_model/case_1_Re40_3333_nodp_nodv_ws_x5_10/tf_model/'
+            new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
             new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
         
-            tf_dict = {'input0:0': xl[:,None], 'input1:0': yl[:,None]}
+            tf_dict = {'input1a:0': xl[:,None], 'input1b:0': yl[:,None], \
+                       'input1c:0': yl[:,None]/yl.max(), 'input1d:0': yl[:,None]/yl.max() }
         
             op_to_load1 = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')    
             
@@ -218,7 +219,7 @@ for jj in range(1):
         p[I]=out[:,2]
         
                 
-        dst2='./cy_ml/%s_pinn_dp'%(tmp[ii])
+        dst2='./cy_ml/%s_pinn_nodp_nodv_3333'%(tmp[ii])
         
         if os.path.exists(dst2):
             shutil.rmtree(dst2)

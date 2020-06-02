@@ -73,22 +73,22 @@ c=['g','b','r','c','r','m','darkorange','lime','pink','purple','peru','gold','ol
 L=50000
 plt.figure(figsize=(6,5),dpi=100)
 for i in range(1):
-    
+#    
     #total loss
     plt.plot(data1[i][:L,0], data1[i][:L,1] ,'%s'%c[0],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-1')
     plt.plot(data2[i][:L,0], data2[i][:L,1] ,'%s'%c[1],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-2')
     plt.plot(data3[i][:L,0], data3[i][:L,1] ,'%s'%c[2],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-3')
     
 #    #MSE loss = total - gov
-#    plt.plot(data1[i][:L,0], data1[i][:L,1]-data1[i][:L,3] ,'%s'%c[0],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='1')
-#    plt.plot(data2[i][:L,0], data2[i][:L,1]-data2[i][:L,3] ,'%s'%c[1],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='2')
-#    plt.plot(data3[i][:L,0], data3[i][:L,1]-data3[i][:L,3]  ,'%s'%c[2],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-3')
+#    plt.plot(data1[i][:L,0], data1[i][:L,1]-data1[i][:L,4] ,'%s'%c[0],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-1')
+#    plt.plot(data2[i][:L,0], data2[i][:L,1]-data2[i][:L,4] ,'%s'%c[1],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-2')
+#    plt.plot(data3[i][:L,0], data3[i][:L,1]-data3[i][:L,4]  ,'%s'%c[2],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-3')
 
 #    #gov loss
-#    plt.plot(data1[i][:L,0], data1[i][:L,3] ,'%s'%c[0],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-1')
-#    plt.plot(data2[i][:L,0], data2[i][:L,3] ,'%s'%c[1],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-2')
-#    plt.plot(data3[i][:L,0], data3[i][:L,3] ,'%s'%c[2],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-3')
-        
+#    plt.plot(data1[i][:L,0], data1[i][:L,4] ,'%s'%c[0],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-1')
+#    plt.plot(data2[i][:L,0], data2[i][:L,4] ,'%s'%c[1],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-2')
+#    plt.plot(data3[i][:L,0], data3[i][:L,4] ,'%s'%c[2],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='BC-3')
+#        
 plt.legend(loc="upper left", bbox_to_anchor=[0.5, 1], ncol=1, fontsize=18, frameon=False, shadow=False, fancybox=False,title='')
 plt.xlabel('Training Epochs',fontsize=20)
 plt.ylabel('Total Loss',fontsize=20)
@@ -98,6 +98,6 @@ plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0
 #plt.xticks(range(0,2001,500))
 #plt.xlim([-50,6000])
 #plt.ylim([5e-6,1e-3])    
-plt.savefig('./plot/gov_loss_%s.png'%suff, format='png', bbox_inches='tight',dpi=300)
+plt.savefig('./plot/tot_loss_%s.png'%suff, format='png', bbox_inches='tight',dpi=300)
 plt.show()
 #------------------------------------------------------------------------------------------------------------------

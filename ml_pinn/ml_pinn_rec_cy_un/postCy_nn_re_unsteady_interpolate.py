@@ -60,9 +60,8 @@ st= [0]
 end=[1]
 
 
-
-
-'''###---inout--------------
+'''
+###---inout--------------
 L=50
 W=50
 
@@ -92,15 +91,15 @@ for i in range(1):
     new_coord.extend(np.asarray([x1+tx*i,y1+ty*i]).transpose())
     new_coord.extend(np.asarray([x2+fx*i,y2+fy*i]).transpose())
     new_coord.extend(np.asarray([x3+bx*i,y3+by*i]).transpose())
-    new_coord.extend(np.asarray([x4+wx*i,y4+wy*i]).transpose())
+#    new_coord.extend(np.asarray([x4+wx*i,y4+wy*i]).transpose())
     
-new_coord=np.asarray(new_coord)'''
-
+new_coord=np.asarray(new_coord)
+'''
 ####-----------------------------------------------------
 ###---------------wake/around-----------------------------
-'''
-L=20
-W=20
+
+L=10
+W=10
 
 new_coord=[]
 x1=np.linspace(-1,1,L)
@@ -131,7 +130,7 @@ for i in range(2):
     new_coord.extend(np.asarray([x4+wx*i,y4+wy*i]).transpose())
 
 new_coord=np.asarray(new_coord)
-'''
+
 ###############################
 
 ###---- On cy wall--------####
@@ -142,7 +141,7 @@ for i in range(len(theta)):
     co[i,0]=0.5*np.cos(theta[i])
     co[i,1]=0.5*np.sin(theta[i])
     
-new_coord=co
+#new_coord=co
 ######---------------------------------------------------------
 
 plt.figure()
@@ -200,29 +199,29 @@ for jj in range(1):
         yname.sort()
         yname=yname[:-3].astype(np.float) 
                 
-        xx=np.loadtxt(casedir+'/postProcessing/forceCoeffs/1/forceCoeffs.dat', skiprows=10)
+        xx=np.loadtxt(casedir+'/postProcessing/forceCoeffs/0/forceCoeffs.dat', skiprows=10)
         xx=xx[::2,:]
         xx=xx[-60:]
-        xx=xx[xx[:,3].argsort()]
+        #xx=xx[xx[:,3].argsort()]
         
-#       plt.figure(figsize=(10, 4))
-#       plt.plot(xx[:,0],xx[:,3],'ob')
-#       plt.plot([t1,t10],[xx[:,3].mean(),xx[:,3].mean()],'or')
-#       plt.savefig('./plots/%s.png'%ii,format='png',dpi=100)
-#       plt.close()
+#        plt.figure(figsize=(10, 4))
+#        plt.plot(xx[:,0],xx[:,3],'ob')
+#        plt.plot([t1,t10],[xx[:,3].mean(),xx[:,3].mean()],'or')
+#        plt.savefig('./plots/%s.png'%ii,format='png',dpi=100)
+#        plt.close()
             
-        t1=xx[0,0]
-        t2=xx[1,0]
+        t1=193
+        t2=195
         
-        if (abs(xx[0,0]-xx[1,0]) > 6):
-            t2=xx[2,0]
-            
-        if (t1 > t2):
-            tmp1= t1
-            t1 =t2
-            t2 = tmp1
+#        if (abs(xx[0,0]-xx[1,0]) > 6):
+#            t2=xx[2,0]
+#            
+#        if (t1 > t2):
+#            tmp1= t1
+#            t1 =t2
+#            t2 = tmp1
    
-        tt = np.linspace(t1,t2,int (round((t2-t1)/0.2)+1) )
+        tt = np.linspace(t1,t2,int (round((t2-t1)/0.1)+1) )
          
     
         mytt = tt-t1
@@ -382,18 +381,18 @@ for jj in range(1):
 
 
 
-#fp=open('./data_file/cy_wall_bc_40.dat','w')
-#fp.write('x y t p u v\n')
-#for i in range(len(myinp_x)):
-#    fp.write('%f %f %f %f %f %f\n'%(myinp_x[i], myinp_y[i], myinp_t[i], myout_p[i], myout_u[i], myout_v[i]))
-#fp.close()
-
-#only-for wall bc
-fp=open('./data_file/cy_wall_bc_40.dat','w')
+fp=open('./data_file/cy_sample_ar_10x2.dat','w')
 fp.write('x y t p u v\n')
 for i in range(len(myinp_x)):
-    fp.write('%f %f %f %f 1e-12 1e-12\n'%(myinp_x[i], myinp_y[i], myinp_t[i], myout_p[i]))
+    fp.write('%f %f %f %f %f %f\n'%(myinp_x[i], myinp_y[i], myinp_t[i], myout_p[i], myout_u[i], myout_v[i]))
 fp.close()
+
+##only-for wall bc
+#fp=open('./data_file/cy_xxx.dat','w')
+#fp.write('x y t p u v\n')
+#for i in range(len(myinp_x)):
+#    fp.write('%f %f %f %f 1e-12 1e-12\n'%(myinp_x[i], myinp_y[i], myinp_t[i], myout_p[i]))
+#fp.close()
 
         
 #    #save file

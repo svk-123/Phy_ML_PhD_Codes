@@ -133,12 +133,12 @@ plt.show()'''
 
 
 
-
+'''
 l1=50
 l2=50
 l3=50
 
-'''#CNN1,2,3
+#CNN1,2,3
 plt.figure(figsize=(6,5),dpi=100)
 path='./hyper_selected/'
 
@@ -186,12 +186,12 @@ plt.yscale('log')
 plt.xlim([-10,500])
 #plt.ylim([4e-4,1e-3])   
 
-plt.savefig('ts_cnns.eps', format='eps', bbox_inches='tight',dpi=200)
+plt.savefig('ts_cnns.tiff', format='tiff', bbox_inches='tight',dpi=200)
 plt.show()'''
 
 
 
-'''#input size
+#input size
 plt.figure(figsize=(6,5),dpi=100)
 path='./hyper_selected/'
 
@@ -235,8 +235,8 @@ plt.yscale('log')
 
 plt.xlim([-10,500])
 #plt.ylim([-0.2,0.2])    
-plt.savefig('conv_input.eps', format='eps', bbox_inches='tight',dpi=200)
-plt.show()'''
+plt.savefig('conv_input.tiff', format='tiff', bbox_inches='tight',dpi=200)
+plt.show()
 
 
 
@@ -286,7 +286,7 @@ plt.savefig('mbs.eps', format='eps', bbox_inches='tight',dpi=200)
 plt.show()'''
 
 
-
+'''
 #CNN1- fc layers
 plt.figure(figsize=(6,5),dpi=100)
 path='./hyper_selected/'
@@ -332,6 +332,7 @@ plt.xlim([-10,500])
 #plt.ylim([-0.2,0.2])    
 plt.savefig('fc.eps', format='eps', bbox_inches='tight',dpi=200)
 plt.show()
+'''
 
 
 '''#CNN1- filter size 32,64,128

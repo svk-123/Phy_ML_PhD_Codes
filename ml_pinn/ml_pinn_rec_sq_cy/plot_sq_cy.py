@@ -66,11 +66,11 @@ u=np.asarray(u)
 v=np.asarray(v)
 
 #coord
-co=np.zeros((80,2))
+co=np.zeros((180,2))
 x1=np.linspace(-0.5,-0.5,20)
 y1=np.linspace(-0.5,0.5,20)
-x2=np.linspace(-0.5,0.5,20)
-y2=np.linspace(0.5,0.5,20)
+x2=np.linspace(-0.5,0.5,120)
+y2=np.linspace(0.5,0.5,120)
 x3=np.linspace(0.5,0.5,20)
 y3=np.linspace(-0.5,0.5,20)
 x4=np.linspace(-0.5,0.5,20)
@@ -89,7 +89,7 @@ graph = tf.get_default_graph()
 with tf.Session() as sess1:
     
     path1='./tf_model/case_1_4s_around_no_dp/tf_model/'
-    new_saver1 = tf.train.import_meta_graph( path1 + 'model_40000.meta')
+    new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
     tf_dict = {'input0:0': xtmp[:,None], 'input1:0': ytmp[:,None]}
@@ -225,13 +225,13 @@ def plot_cp():
     #LinearNDinterpolator
     pD=np.asarray([xtmp,ytmp]).transpose()
 
-    a0=50
+    a0=40
     
-    xu=co[:a0+1,0]
-    yu=co[:a0+1,1]
+    xu=co[20:140,0]
+    yu=co[20:140,1]
         
-    xl=co[a0:,0]
-    yl=co[a0:,1]
+    xl=co[60:80,0]
+    yl=co[60:80,1]
 
     #for -p
     print ('interpolation-1...')      
@@ -254,7 +254,7 @@ def plot_cp():
     for j in range(len(xl)):
        pl2[j]=f2p(xl[j],yl[j])    
     
-    mei=2       
+    mei=2      
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(xu,pu1,'og',linewidth=3,markevery=mei,label='CFD')
     #plt.plot(xl,pl1,'ob',linewidth=3,markevery=mei,label='CFD-lower') 
@@ -267,7 +267,7 @@ def plot_cp():
     plt.savefig('./plot/cp_%s.png'%suff,format='png',bbox_inches='tight', dpi=100)
     plt.show()
     
-#plot_cp()
+plot_cp()
 
     
 #plot

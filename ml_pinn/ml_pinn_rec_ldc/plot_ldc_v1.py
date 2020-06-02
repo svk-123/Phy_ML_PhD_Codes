@@ -41,7 +41,7 @@ import matplotlib
 
 
 Re=100
-suff='%s_x5_5'%Re    
+suff='%s_wc_wt'%Re    
 xy=np.loadtxt('./data_file/Re%s/ldc_internal_combined.dat'%Re,skiprows=1)
 
 val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
@@ -60,8 +60,8 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_1_Re%s_nodp_nodv_ws_9x5/tf_model/'%Re
-    new_saver1 = tf.train.import_meta_graph( path1 + 'model_50000.meta')
+    path1='./tf_model/case_1_Re%s_ws_wc_wt1000/tf_model/'%Re
+    new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
     tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
@@ -84,8 +84,8 @@ v_pred=tout[:,1]
 #plot
 def line_plot1():
     plt.figure(figsize=(6, 5), dpi=100)
-    plt0, =plt.plot(u1a,ya,'-og',linewidth=3,label='true')
-    plt0, =plt.plot(u2a,ya,'r',linewidth=3,label='NN')
+    plt0, =plt.plot(u1a,ya,'-og',linewidth=3,label='CFD')
+    plt0, =plt.plot(u2a,ya,'r',linewidth=3,label='PINN')
     plt.legend(fontsize=20)
     plt.xlabel('u-velocity',fontsize=20)
     plt.ylabel('Y',fontsize=20)
@@ -93,13 +93,13 @@ def line_plot1():
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.01,1.4)    
-    plt.savefig('./plot/%s-u'%(suff), format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot/%s-u.png'%(suff), format='png',bbox_inches='tight', dpi=100)
     plt.show() 
     
 def line_plot2():
     plt.figure(figsize=(6, 5), dpi=100)
-    plt0, =plt.plot(xb,v1a,'-og',linewidth=3,label='true')
-    plt0, =plt.plot(xb,v2a,'r',linewidth=3,label='NN')    
+    plt0, =plt.plot(xb,v1a,'-og',linewidth=3,label='CFD')
+    plt0, =plt.plot(xb,v2a,'r',linewidth=3,label='PINN')    
     plt.legend(fontsize=20)
     plt.xlabel('X ',fontsize=20)
     plt.ylabel('v-velocity' ,fontsize=20)
@@ -107,7 +107,7 @@ def line_plot2():
     #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=4, fancybox=False, shadow=False)
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.01,1.4)    
-    plt.savefig('./plot/%s-v'%(suff), format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot/%s-v.png'%(suff), format='png',bbox_inches='tight', dpi=100)
     plt.show()     
     
 #plot
@@ -126,7 +126,7 @@ def plot(xp,yp,zp,nc,name):
     #plt.title('%s  '%flist[ii]+name)
     plt.xlabel('X ',fontsize=20)
     plt.ylabel('Y ',fontsize=20)
-    plt.savefig('./plot/%s'%suff+name, format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot/%s.png'%(suff+name), format='png',bbox_inches='tight', dpi=100)
     plt.show()
           
 plot(xtmp,ytmp,u,20,'u-cfd')

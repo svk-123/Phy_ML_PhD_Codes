@@ -54,7 +54,7 @@ plt.rc('font', family='serif')
 
 # ref:[data,name]
 path='./data_file/'
-data_file='foil_param_216_no_aug_ts.pkl'
+data_file='foil_param_216_no_aug.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -65,14 +65,16 @@ name=result[3]
 
 inp=np.asarray(inp)
 my_out=np.asarray(out)
+name=np.asarray(name)
 
 xtr1=inp
 ttr1=my_out 
 
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
 
-np.random.seed(1234534)
-I=np.random.randint(0,329,15)
+#np.random.seed(1234534)
+
+I=np.random.randint(0,1500,20)
 
 xtr1=xtr1[I]
 ttr1=ttr1[I]
@@ -105,11 +107,11 @@ for i in range(len(c6)):
     plt.plot(xx[::-1],ttr1[i,:35],'k',marker='o', mfc='None',mew=1.0,ms=8,lw=0,label='True')
     plt.plot(xx,ttr1[i,35:],'k',marker='o', mfc='None',mew=1.0,ms=8,lw=0)
     
-    plt.legend(fontsize=14)
+    plt.legend(fontsize=14, frameon=False, shadow=False, fancybox=False)
     
     plt.xlim([-0.05,1.05])
     plt.ylim([-0.25,0.25])
     plt.xlabel('X',fontsize=16)
     plt.ylabel('Y',fontsize=16)
-    plt.savefig('./plot/%s_%04d.png'%(name[i],i), bbox_inches='tight',dpi=300)
+    plt.savefig('./plot/%s_%04d.tiff'%(name[i],i), bbox_inches='tight',dpi=300)
     plt.close()

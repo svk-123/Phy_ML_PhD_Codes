@@ -48,7 +48,7 @@ v=xy[:,5]
 
 
 b=np.unique(ttmp)
-tttt=8
+tttt=0
 idx=np.argwhere(ttmp==b[tttt])
 
 xtmp=xtmp[idx[:,0]]
@@ -76,11 +76,12 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_2_wake_120x10_30k_pwall_specified/tf_model/'
-    new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
+    path1='./tf_model/case_1_nodp_nodv_ws_ar_80_t20_20k/tf_model/'
+    new_saver1 = tf.train.import_meta_graph( path1 + 'model_80000.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
-    tf_dict = {'input0:0': xtmp[:,None], 'input1:0': ytmp[:,None], 'input2:0': ttmp[:,None]}
+    tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], 'input1c:0': ttmp[:,None], \
+               'input1d:0': ytmp[:,None]/ytmp.max(), 'input1e:0': ytmp[:,None]/ytmp.max() }
 
     op_to_load1 = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')    
     

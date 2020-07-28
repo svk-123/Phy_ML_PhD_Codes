@@ -73,7 +73,7 @@ name=[]
 path='./data_file/'
 data_file='naca4_clcd_turb_st_8para.pkl'
 with open(path + data_file, 'rb') as infile:
-    result1 = pickle.load(infile,encoding='bytes')
+    result1 = pickle.load(infile)
 
 cd.extend(result1[1])
 cl.extend(result1[2])
@@ -85,7 +85,7 @@ name.extend(result1[6])
 path='./data_file/'
 data_file='gen_clcd_turb_st_8para.pkl'
 with open(path + data_file, 'rb') as infile:
-    result2 = pickle.load(infile,encoding='bytes')
+    result2 = pickle.load(infile)
 
 cd.extend(result2[1])
 cl.extend(result2[2])
@@ -110,9 +110,9 @@ name=np.asarray(nname)
 
 
 
-model_cl=load_model('./selected_model/turb_gen_8para_6x50/final_sf.hdf5')  
+model_cl=load_model('./clcd_model_8para/final_sf.hdf5')  
 #model_cl=load_model('./selected_model/turb_naca4_8para_6x30/final_sf.hdf5')  
-model_para=load_model('./selected_model/case_aug_tanh_8/model_cnn_1500_0.000016_0.000026.hdf5') 
+model_para=load_model('./para_model_8para/model_cnn_1500_0.000016_0.000026.hdf5') 
 get_c= K.function([model_para.layers[17].input],  [model_para.layers[21].output])
 
 global scaler

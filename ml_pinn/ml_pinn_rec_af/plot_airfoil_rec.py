@@ -44,7 +44,7 @@ import matplotlib
 import tensorflow as tf
 matplotlib.rc('xtick', labelsize=18) 
 matplotlib.rc('ytick', labelsize=18) 
-
+'''
 #1,12,19,20,23
 xy=np.loadtxt('./data_file/naca4412_internal_combined_1211.dat',skiprows=1)
 
@@ -83,7 +83,7 @@ sess1.close()
 co=np.loadtxt('./data_file/naca4412_200_cos.dat',skiprows=1)  
 i=1
 j=1
-  
+'''  
 
 def find_nearest(array, value):
     array = np.asarray(array)
@@ -97,28 +97,33 @@ def con_plot(i):
     h1=-1
     h2=1
     
+    a1=0
+    b1=-1.5
+    a2=0
+    b2=-1.8
+    
     fig = plt.figure(figsize=(10, 12),dpi=100)
         
     ax1 = fig.add_subplot(3,2,1)
     cp1 = ax1.tricontourf(xtmp,ytmp,ptmp,20,cmap=cm.jet)
     ax1.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax1.set_title('p-cfd')
-    ax1.set_xlabel('X',fontsize=16)
+    #ax1.set_xlabel('X',fontsize=16)
     ax1.set_ylabel('Y',fontsize=16)
+    ax1.text(a1,b1,'(a) p-CFD',fontsize=14)
     ax1.set_xlim([l1,l2])
     ax1.set_ylim([h1,h2])
-    divider = make_axes_locatable(ax1)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
-    cbar1=plt.colorbar(cp1, cax=cax, orientation='vertical');
-    cbar1.ax.tick_params(labelsize=10)
-    plt.subplots_adjust( wspace=0.2,hspace=0.3)
-    ax1.set_aspect(0.9)
+#    divider = make_axes_locatable(ax1)
+#    cax = divider.append_axes('right', size='5%', pad=0.05)
+#    cbar1=plt.colorbar(cp1, cax=cax, orientation='vertical');
+#    cbar1.ax.tick_params(labelsize=10)
+#    plt.subplots_adjust( wspace=0.2,hspace=0.3)
+#    ax1.set_aspect(0.9)
     
     ax2 = fig.add_subplot(3,2,2)
     cp2 = ax2.tricontourf(xtmp,ytmp,tout[:,2],20,cmap=cm.jet)
     ax2.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax2.set_title('p-PINN')
-    ax2.set_xlabel('X',fontsize=16)
+    ax2.text(a1,b1,'(b) p-PINN',fontsize=14)
+    #ax2.set_xlabel('X',fontsize=16)
     ax2.set_yticks([])
     ax2.set_xlim([l1,l2])
     ax2.set_ylim([h1,h2])
@@ -126,28 +131,28 @@ def con_plot(i):
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar2=plt.colorbar(cp2, cax=cax, orientation='vertical');
     cbar2.ax.tick_params(labelsize=10)
-    ax2.set_aspect(0.9)
+#    ax2.set_aspect(0.9)
       
             
     ax3 = fig.add_subplot(3,2,3)
     cp3 = ax3.tricontourf(xtmp,ytmp,utmp,20,cmap=cm.jet)
     ax3.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax3.set_title('u-cfd')
-    ax3.set_xlabel('X',fontsize=16)
+    ax3.text(a1,b1,'(c) u-CFD',fontsize=14)
+    #ax3.set_xlabel('X',fontsize=16)
     ax3.set_ylabel('Y',fontsize=16)
     ax3.set_xlim([l1,l2])
     ax3.set_ylim([h1,h2])
-    divider = make_axes_locatable(ax3)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
-    cbar3=plt.colorbar(cp3, cax=cax, orientation='vertical');
-    cbar3.ax.tick_params(labelsize=10)
-    ax3.set_aspect(0.9)
+#    divider = make_axes_locatable(ax3)
+#    cax = divider.append_axes('right', size='5%', pad=0.05)
+#    cbar3=plt.colorbar(cp3, cax=cax, orientation='vertical');
+#    cbar3.ax.tick_params(labelsize=10)
+#    ax3.set_aspect(0.9)
         
     ax4 = fig.add_subplot(3,2,4)
     cp4 = ax4.tricontourf(xtmp,ytmp,tout[:,0],20,cmap=cm.jet)
     ax4.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax4.set_title('u-PINN')
-    ax4.set_xlabel('X',fontsize=16)
+    ax4.text(a1,b1,'(d) u-PINN',fontsize=14)
+    #ax4.set_xlabel('X',fontsize=16)
     ax4.set_yticks([])
     ax4.set_xlim([l1,l2])
     ax4.set_ylim([h1,h2])
@@ -155,27 +160,27 @@ def con_plot(i):
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
     cbar4.ax.tick_params(labelsize=10)
-    ax4.set_aspect(0.9)      
+#    ax4.set_aspect(0.9)      
 
          
     ax5 = fig.add_subplot(3,2,5)
     cp5 = ax5.tricontourf(xtmp,ytmp,vtmp,20,cmap=cm.jet)
     ax5.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax5.set_title('v-cfd')
+    ax5.text(a2,b2,'(e) v-CFD',fontsize=14)
     ax5.set_xlabel('X',fontsize=16)
     ax5.set_ylabel('Y',fontsize=16)
     ax5.set_xlim([l1,l2])
     ax5.set_ylim([h1,h2])
-    divider = make_axes_locatable(ax5)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
-    cbar5=plt.colorbar(cp5, cax=cax, orientation='vertical');
-    cbar5.ax.tick_params(labelsize=10)
-    ax5.set_aspect(0.9)
+#    divider = make_axes_locatable(ax5)
+#    cax = divider.append_axes('right', size='5%', pad=0.05)
+#    cbar5=plt.colorbar(cp5, cax=cax, orientation='vertical');
+#    cbar5.ax.tick_params(labelsize=10)
+#    ax5.set_aspect(0.9)
         
     ax6 = fig.add_subplot(3,2,6)
     cp6 = ax6.tricontourf(xtmp,ytmp,tout[:,1],20,cmap=cm.jet)
     ax6.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax6.set_title('v-PINN')
+    ax6.text(a2,b2,'(f) v-PINN',fontsize=14)
     ax6.set_xlabel('X',fontsize=16)
     ax6.set_yticks([])
     ax6.set_xlim([l1,l2])
@@ -184,13 +189,13 @@ def con_plot(i):
     cax = divider.append_axes('right', size='5%', pad=0.05)
     cbar6=plt.colorbar(cp6, cax=cax, orientation='vertical');
     cbar6.ax.tick_params(labelsize=10)
-    ax6.set_aspect(0.9)
+#    ax6.set_aspect(0.9)
 
    
     #fig.suptitle(" NACA 0012 fontsize=20)
     
-    plt.subplots_adjust( wspace=0.2,hspace=0.2)       
-    plt.savefig('./plot/airfoil_%s.png'%(i),format='png',dpi=300)
+    plt.subplots_adjust( wspace=0.2,hspace=0.3)       
+    plt.savefig('./plot/airfoil_%s.tiff'%(i),format='tiff',bbox_inches='tight', dpi=300)
     plt.close()
 
 con_plot(j)  
@@ -245,17 +250,16 @@ def plot_cp(i):
     
     mei=5       
     plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(xu,pu1,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD-upper')
-    plt.plot(xl,pl1,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD-lower') 
-    plt.plot(xu,pu2,'g',linewidth=3,label='PINN-upper')
-    plt.plot(xl,pl2,'g',linewidth=3,label='PINN-lower')  
+    plt.plot(xu,pu1,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei,label='CFD')
+    plt.plot(xl,pl1,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei) 
+    plt.plot(xu,pu2,'g',linewidth=3,label='PINN')
+    plt.plot(xl,pl2,'g',linewidth=3)  
     #plt.plot(xu,pu3,'r',linewidth=3,label='NN-upper')
     #plt.plot(xl,pl3,'r',linewidth=3,label='NN-lower')  
     plt.xlabel('X',fontsize=20)
     plt.ylabel('P',fontsize=20)
-    plt.title('Pressure Dist. over airfoil')
     plt.legend(fontsize=14)
-    plt.savefig('./plot/cp_%s.png'%(i),format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot/cp_%s.tiff'%(i),format='tiff',bbox_inches='tight', dpi=300)
     plt.show()
     
 plot_cp(j)  
@@ -374,7 +378,7 @@ def line_plotu_sub(i):
     plt.figure(figsize=(6, 4), dpi=100)
     
     plt.subplot(1,3,1)
-    plt.plot(u1a,ya,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(u1a,ya,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei,label='CFD')
     plt.plot(u2a,ya,'g',linewidth=3,label='PINN')
     #plt.plot(u3a,ya,'r',linewidth=3,label='NN')
     #plt.legend(fontsize=14)
@@ -382,7 +386,7 @@ def line_plotu_sub(i):
     plt.xlim(-0.1,1.2)
     
     plt.subplot(1,3,2)
-    plt.plot(u1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(u1b,yb,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei)
     plt.plot(u2b,yb,'g',linewidth=3)
     #plt.plot(u3b,yb,'r',linewidth=3)
     plt.xlabel('u-velocity',fontsize=20)
@@ -390,7 +394,7 @@ def line_plotu_sub(i):
     plt.xlim(-0.1,1.2)
         
     plt.subplot(1,3,3)
-    plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei,label='CFD')
     plt.plot(u2d,yd,'g',linewidth=3,label='PINN')
     #plt.plot(u3d,yd,'r',linewidth=3,label='NN')
     plt.legend(loc="upper left", bbox_to_anchor=[-0.02, 0.9], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
@@ -399,7 +403,7 @@ def line_plotu_sub(i):
     
     plt.figtext(0.4, 0.00, '(a)', wrap=True, horizontalalignment='center', fontsize=24)
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
-    plt.savefig('./plot/u_%s.png'%(i), format='png', bbox_inches='tight',dpi=100)
+    plt.savefig('./plot/u_%s.tiff'%(i), format='tiff', bbox_inches='tight',dpi=300)
     plt.show()   
     plt.close()
     
@@ -409,7 +413,7 @@ def line_plotu_sub(i):
     plt.figure(figsize=(6, 4), dpi=100)
     
     plt.subplot(1,3,1)
-    plt.plot(v1a,ya,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(v1a,ya,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei)
     plt.plot(v2a,ya,'g',linewidth=3)
     #plt.plot(v3a,ya,'r',linewidth=3)
     #plt.legend(fontsize=14)
@@ -417,7 +421,7 @@ def line_plotu_sub(i):
     plt.xlim(-0.1,1)
     
     plt.subplot(1,3,2)
-    plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei)
     plt.plot(v2b,yb,'g',linewidth=3)
     #plt.plot(v3b,yb,'r',linewidth=3)
     plt.xlabel('v-velocity',fontsize=20)
@@ -426,7 +430,7 @@ def line_plotu_sub(i):
     
     
     plt.subplot(1,3,3)
-    plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei,label='CFD')
     plt.plot(v2d,yd,'g',linewidth=3,label='PINN')
     #plt.plot(v3d,yd,'r',linewidth=3,label='NN')
     plt.yticks([])  
@@ -436,7 +440,7 @@ def line_plotu_sub(i):
        
     plt.figtext(0.4, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
-    plt.savefig('./plot/v_%s.png'%(i), format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot/v_%s.tiff'%(i), format='tiff',bbox_inches='tight', dpi=300)
     plt.show() 
     plt.close()    
     

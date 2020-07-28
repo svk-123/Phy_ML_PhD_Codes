@@ -13,6 +13,10 @@ from matplotlib import cm
 import pandas
 from os import listdir
 from os.path import isfile, join
+
+
+
+
 ##########-------------Diff. BC for re=100 wos-----#############
 
 path='./data_file/Re100/'  
@@ -57,9 +61,9 @@ plt0, =plt.plot(x_, d_,'b',lw=2, label='BL', zorder=6)
 plt.text(2.5, -0.3, "Wall: u=0,dp=0", horizontalalignment='center', verticalalignment='center')
 plt.text(2.5, 3.3, "Outlet: p=0,du=0", horizontalalignment='center', verticalalignment='center')
 plt.text(-0.3, 1.5, "Inlet: u-specified, dp=0", horizontalalignment='center', verticalalignment='center',rotation=90)
+plt.figtext(0.22, -0.08, '(a) BC-1', wrap=True, horizontalalignment='center', fontsize=16)
 
-
-#plt.xlabel('X',fontsize=20)
+plt.xlabel('X',fontsize=20)
 plt.ylabel('Y',fontsize=20)
 plt.xlim(-1,6)
 plt.ylim(-1,4)   
@@ -76,6 +80,7 @@ plt0, =plt.plot(x_, d_,'b',lw=2, label='BL', zorder=6)
 plt.text(2.5, -0.3, "Wall: u=0", horizontalalignment='center', verticalalignment='center')
 plt.text(2.5, 3.3, "Outlet: p=0", horizontalalignment='center', verticalalignment='center')
 plt.text(-0.3, 1.5, "Inlet: u-specified", horizontalalignment='center', verticalalignment='center',rotation=90)
+plt.figtext(0.52, -0.08, '(b) BC-2', wrap=True, horizontalalignment='center', fontsize=16)
 plt.xlabel('X',fontsize=20)
 #plt.ylabel('Y',fontsize=20)
 plt.xlim(-1,6)
@@ -94,14 +99,14 @@ plt0, =plt.plot(x_, d_,'b',lw=2, label='BL', zorder=6)
 plt.text(2.5, -0.3, "Wall: u=0,p-specified", horizontalalignment='center', verticalalignment='center')
 plt.text(2.5, 3.3, "Outlet: p=0,u-specified", horizontalalignment='center', verticalalignment='center')
 plt.text(-0.3, 1.5, "Inlet: u, p-specified", horizontalalignment='center', verticalalignment='center',rotation=90)
-
-#plt.legend(fontsize=20)
+plt.figtext(0.8, -0.08, '(c) BC-3', wrap=True, horizontalalignment='center', fontsize=16)
+plt.xlabel('X',fontsize=20)
 
 #plt.title('%s-u'%(flist[ii]),fontsiuze=16)
 
 plt.xlim(-1,6)
 plt.ylim(-1,4)    
-plt.savefig('./plot/mesh8.png', format='png',bbox_inches='tight', dpi=200)
+plt.savefig('./plot/mesh8.tiff', format='tiff',bbox_inches='tight', dpi=300)
 plt.show()
 
 
@@ -152,7 +157,8 @@ plt0, =plt.plot(x_, d_,'b',lw=2, label='BL', zorder=6)
 plt.text(2.5, -0.3, "Wall: u=0", horizontalalignment='center', verticalalignment='center')
 plt.text(2.5, 3.3, "Outlet: p=0", horizontalalignment='center', verticalalignment='center')
 plt.text(-0.3, 1.5, "Inlet: u-specified", horizontalalignment='center', verticalalignment='center',rotation=90)
-#plt.xlabel('X',fontsize=20)
+plt.figtext(0.3, -0.08, '(a) S-1', wrap=True, horizontalalignment='center', fontsize=16)
+plt.xlabel('X',fontsize=20)
 plt.ylabel('Y',fontsize=20)
 plt.xlim(-1,6)
 plt.ylim(-1,4)   
@@ -169,8 +175,9 @@ plt0, =plt.plot(x_, d_,'b',lw=2, label='BL', zorder=6)
 plt.text(2.5, -0.3, "Wall: u=0", horizontalalignment='center', verticalalignment='center')
 plt.text(2.5, 3.3, "Outlet: p=0", horizontalalignment='center', verticalalignment='center')
 plt.text(-0.3, 1.5, "Inlet: u-specified", horizontalalignment='center', verticalalignment='center',rotation=90)
-#plt.xlabel('X',fontsize=20)
-plt.ylabel('Y',fontsize=20)
+plt.figtext(0.73, -0.08, '(b) S-2', wrap=True, horizontalalignment='center', fontsize=16)
+plt.xlabel('X',fontsize=20)
+#plt.ylabel('Y',fontsize=20)
 plt.xlim(-1,6)
 plt.ylim(-1,4) 
 
@@ -180,5 +187,5 @@ plt.ylim(-1,4)
 plt.legend(loc='upper center', bbox_to_anchor=(0.0, 1.3), ncol=4, fancybox=False, shadow=False,fontsize=16)
 plt.xlim(-1,6)
 plt.ylim(-1,4)    
-plt.savefig('./plot/mesh9.png', format='png',bbox_inches='tight', dpi=200)
+plt.savefig('./plot/mesh9.tiff', format='tiff',bbox_inches='tight', dpi=300)
 plt.show()

@@ -70,7 +70,7 @@ xtr1=inp
 ttr1=my_out 
 
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
-model_test=load_model('./selected_model/case_5c/model_cnn_2450_0.000021_0.000032.hdf5')  
+model_test=load_model('./selected_model/case_1_p1_tanh/model_cnn/final_cnn.hdf5')  
        
 out=model_test.predict([xtr1])
 out=out*0.25
@@ -79,7 +79,7 @@ xxx=xx[::-1].copy()
 xxxx=np.concatenate((xx[:,None],xxx[1:,None]))
 
 #[0,9]
-for k in [0]:
+for k in [10]:
     print k
     yy1=out[k][0:35]
     yy2=out[k][35:]
@@ -102,6 +102,7 @@ for k in [0]:
     plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
     plt.savefig('./plot/ts_%s_%s.tiff'%(k,name[k]),format='tiff',bbox_inches='tight',dpi=300)
     plt.show()
+    
 #    
 #for k in range(1):
 #    
@@ -119,7 +120,7 @@ for k in [0]:
     
     
 
-'''
+
 #calculate error norm
 train_l2=[]
 train_l1=[]
@@ -144,7 +145,7 @@ plt.xlabel('True',fontsize=20)
 plt.ylabel('Prediction',fontsize=20)
 #lt.xlim([-1.5,1.5])
 #plt.ylim([-1.5,1.5])    
-plt.savefig('trainn_spread.png', bbox_inches='tight',dpi=100)
+plt.savefig('trainn_spread_1.png', bbox_inches='tight',dpi=100)
 plt.show()          
 
 
@@ -162,9 +163,9 @@ plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize
 plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
 plt.xlim([-0.05,1.3])
 plt.xticks([0,0.5,1.])
-plt.savefig('ts_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
+plt.savefig('ts_tot_1.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
-'''
+
 
 
 

@@ -63,8 +63,10 @@ indir = path
 #    tmp=[f for f in listdir(dir2) if isdir(join(dir2, f))]
 #    fname_2.append(tmp)
 
-Re=100  
-fname_2=np.asarray([ ['bl_%s_0'%Re,'bl_%s_0_nodp_nodv_ws_x8_50'%Re,'bl_%s_0_nodp_nodv_ws_x8_150'%Re] ])    
+Re=20000
+
+#wos-combine
+fname_2=np.asarray([ ['bl_%s_0'%Re,'bl_%s_0_nodp_nodv_x8'%Re] ])    
 #fname_2.sort()
 
 '''
@@ -87,20 +89,20 @@ for i in range(len(fname_1)):
 tmp=np.asarray(tmp)    
 foil=np.asarray(foil)
 
-mylabel=['CFD','BC-1','BC-2','BC-3']
+#mylabel=['CFD','BC-1','BC-2','BC-3']
 
-mylabel=['CFD','Samp-1','Samp-2','BC-3']
-#mylabel=['CFD','PINN']
+#mylabel=['CFD','S-1','S-2']
+mylabel=['CFD','PINN']
 
 mu=1/float(Re)
 T=[]
-for jj in range(3):
+for jj in range(2):
     
         #load shearstress 
         tu1=[]
         tu2=[]
 
-        with open('./bl_ml/%s/629/wallShearStress'%(tmp[jj]), 'r') as infile:
+        with open('./bl_ml/%s/188/wallShearStress'%(tmp[jj]), 'r') as infile:
             
             data0=infile.readlines()
             ln=0
@@ -125,14 +127,14 @@ c=['g','g','b','r','r','m','darkorange','lime','pink','purple','peru','gold','ol
 plt.figure(figsize=(6,5),dpi=100)
 plt.plot(np.linspace(0,5,199),T[0][:],'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=3,label='CFD')
 
-for i in range(1,3):
+for i in range(1,2):
     plt.plot(np.linspace(0,5,199),T[i][:],'%s'%c[i],lw=2,label='%s'%mylabel[i])
     
 plt.legend(loc='center left', fontsize=18, bbox_to_anchor=(0.5,0.75), ncol=1, frameon=False, fancybox=False, shadow=False)
 plt.xlabel('X',fontsize=20)
 plt.ylabel('$C_f$',fontsize=20)  
 plt.ylim([-0.0, max(T[0])*1.1])
-plt.savefig('./plot/%s.png'%fname_2[0][1], bbox_inches='tight',dpi=100)
+plt.savefig('./plot/%s.tiff'%fname_2[0][1], format='tiff', bbox_inches='tight',dpi=300)
 plt.show()          
         
         

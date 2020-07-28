@@ -82,10 +82,11 @@ class AdversarialAutoencoder():
         # a 2D array (batch, n). Perform a fully connected layer
         flat5 = Flatten()(pool4)
         
-        flat5 = Dense(200, activation='relu')(flat5)
-        flat5 = Dense(200, activation='relu')(flat5)
-        flat5 = Dense(200, activation='relu')(flat5)
-        latent_repr = Dense(self.latent_dim, activation='sigmoid')(flat5)
+        flat5 = Dense(200, activation='tanh')(flat5)
+        flat5 = Dense(200, activation='tanh')(flat5)
+        flat5 = Dense(200, activation='tanh')(flat5)
+        flat5 = Dense(200, activation='tanh')(flat5)
+        latent_repr = Dense(self.latent_dim, activation='tanh')(flat5)
                     
         return Model(img, latent_repr)
 
@@ -93,9 +94,10 @@ class AdversarialAutoencoder():
 
         model = Sequential()
 
-        model.add(Dense(200, activation='relu', input_dim=self.latent_dim))
-        model.add(Dense(200, activation='relu'))
-        model.add(Dense(200, activation='relu'))
+        model.add(Dense(200, activation='tanh', input_dim=self.latent_dim))
+        model.add(Dense(200, activation='tanh'))
+        model.add(Dense(200, activation='tanh'))
+        model.add(Dense(200, activation='tanh'))        
         model.add(Dense(100,  activation='linear'))
 
         model.summary()
@@ -128,6 +130,8 @@ class AdversarialAutoencoder():
         xx  = []
 
         data_file='./data_file/foil_param_uiuc_216.pkl'	
+        
+        
         with open(data_file, 'rb') as infile:
             result = pickle.load(infile)
             print (result[-1:])    

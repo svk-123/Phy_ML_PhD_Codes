@@ -29,15 +29,26 @@ boundary not loaded: may be required?
 """
 
 # ref:[data,name]
-path='./data_file/'
-data_file='param_gan_uiuc_RS_8.pkl'
-# ['[para_scaled,name,para(unscaled),mm_scaler,info]']
-with open(path + data_file, 'rb') as infile:
-    result1 = pickle.load(infile)
-para=result1[0]
-name=result1[1]
-mm_scaler=result1[3]
-name=np.asarray(name)
+##replace GAN para
+#path='./data_file/'
+#data_file='param_gan_uiuc_RS_8.pkl'
+## ['[para_scaled,name,para(unscaled),mm_scaler,info]']
+#with open(path + data_file, 'rb') as infile:
+#    result1 = pickle.load(infile)
+#para=result1[0]
+#name=result1[1]
+#mm_scaler=result1[3]
+#name=np.asarray(name)
+
+
+#replace CST para
+para=np.loadtxt("./cst_parameter/cst.dat")
+
+file = open("./cst_parameter/foilname.dat")
+line = file.read().replace("\n", " ")
+file.close()
+tmp=line.split(" ")
+name=np.asarray(tmp[:1433])
 
 #del result1
 fp=open('removed.dat','w')
@@ -94,11 +105,13 @@ new_myinp_aoa=np.asarray(new_myinp_aoa)
 new_myinp_para=np.asarray(new_myinp_para)
 new_myname=np.asarray(new_myname)
 
+mm_scaler=[]
+
 info= '[cm, cd, cl, reno, aoa, para_scaled, name,scaler, info:cl_0p02_cd_0p001]'
 
 data1 = [new_myinp_cm, new_myinp_cd, new_myinp_cl, new_myinp_reno, new_myinp_aoa, new_para, new_myname, mm_scaler, info ]
 
-with open(path+'/gen_gan_clcd_turb_RS_0p02_0p001_8para.pkl', 'wb') as outfile1:
+with open(path+'/gen_cst_clcd_turb_8para.pkl', 'wb') as outfile1:
     pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
 fp.close()

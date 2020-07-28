@@ -70,7 +70,7 @@ xtr1=inp
 ttr1=my_out 
 
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
-model_test=load_model('./selected_model/case_1_p16_tanh/model_cnn/final_cnn.hdf5')  
+model_test=load_model('./selected_model/case_1_p6_tanh_C5F7/model_cnn/final_cnn.hdf5')  
        
 out=model_test.predict([xtr1])
 out=out*0.25
@@ -79,7 +79,7 @@ xxx=xx[::-1].copy()
 xxxx=np.concatenate((xx[:,None],xxx[1:,None]))
 
 #[0,9]
-for k in [0]:
+for k in [10]:
     print k
     yy1=out[k][0:35]
     yy2=out[k][35:]
@@ -100,8 +100,10 @@ for k in [0]:
     #plt.axis('off')
     plt.figtext(0.40, 0.01, '(a)', wrap=True, horizontalalignment='center', fontsize=24) 
     plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
-    plt.savefig('./plot/ts_%s_%s.tiff'%(k,name[k]),format='tiff',bbox_inches='tight',dpi=300)
+    plt.savefig('./plot/ts_%s_%s.png'%(k,name[k]),format='png',bbox_inches='tight',dpi=100)
     plt.show()
+    
+    
 #    
 #for k in range(1):
 #    
@@ -158,9 +160,9 @@ plt.ylabel('Number of Samples',fontsize=20)
 plt.xlabel('$L_2$ relative error(%)',fontsize=20)
 plt.figtext(0.40, 0.01, '(c)', wrap=True, horizontalalignment='center', fontsize=24)    
 plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
-plt.xlim([-0.01,0.5])
+#plt.xlim([-0.01,0.5])
 #plt.xticks([0,0.5,1.,1.5,2.])
-plt.savefig('p16_tr.tiff',format='tiff', bbox_inches='tight',dpi=300)
+plt.savefig('p1_tr.png',format='png', bbox_inches='tight',dpi=100)
 plt.show()
 
 

@@ -20,6 +20,7 @@ from scipy import interpolate
 from os import listdir
 from os.path import isfile,isdir, join
 import pickle
+from sklearn.cluster import KMeans
 
 """
 load x y z
@@ -53,7 +54,7 @@ fname_2=np.asarray(fname_2)
 
 reno=[]
 for i in range(len(tmp)):
-    reno.append(tmp[i].split('_')[1])    
+    reno.append(tmp[i].split('_')[2])    
 
 reno=np.array(reno)
 reno = reno.astype(np.float)
@@ -63,98 +64,6 @@ st= [0]
 end=[1]
 
 
-'''
-###---inout--------------
-L=50
-W=50
-
-new_coord=[]
-x1=np.linspace(-2,3,L)
-y1=np.linspace(2,2,L)
-
-x2=np.linspace(-2,-2,W)
-y2=np.linspace(-1.95,1.95,W)
-
-x3=np.linspace(-2,3,L)
-y3=np.linspace(-2,-2,L)
-
-x4=np.linspace(3,3,W)
-y4=np.linspace(-1.95,1.95,W)
-
-tx=0.0
-ty=0.05
-fx=-0.05
-fy=0.0
-bx=-0.0
-by=-0.05
-wx=0.1
-wy=0.0
-
-for i in range(1):
-    new_coord.extend(np.asarray([x1+tx*i,y1+ty*i]).transpose())
-    new_coord.extend(np.asarray([x2+fx*i,y2+fy*i]).transpose())
-    new_coord.extend(np.asarray([x3+bx*i,y3+by*i]).transpose())
-#    new_coord.extend(np.asarray([x4+wx*i,y4+wy*i]).transpose())
-    
-new_coord=np.asarray(new_coord)
-'''
-####-----------------------------------------------------
-###---------------wake/around-----------------------------
-'''
-L=10
-W=10
-
-new_coord=[]
-x1=np.linspace(-1,1,L)
-y1=np.linspace(1,1,L)
-
-x2=np.linspace(-1,-1,W)
-y2=np.linspace(-0.95,0.95,W)
-
-x3=np.linspace(-1,1,L)
-y3=np.linspace(-1,-1,L)
-
-x4=np.linspace(1,1,W)
-y4=np.linspace(-0.95,0.95,W)
-
-tx=0.0
-ty=0.05
-fx=-0.05
-fy=0.0
-bx=-0.0
-by=-0.05
-wx=0.05
-wy=0.0
-
-for i in range(2):
-    new_coord.extend(np.asarray([x1+tx*i,y1+ty*i]).transpose())
-    new_coord.extend(np.asarray([x2+fx*i,y2+fy*i]).transpose())
-    new_coord.extend(np.asarray([x3+bx*i,y3+by*i]).transpose())
-    new_coord.extend(np.asarray([x4+wx*i,y4+wy*i]).transpose())
-
-new_coord=np.asarray(new_coord)
-
-###############################
-
-###---- On cy wall--------####
-co=np.zeros((40,2))
-theta=np.linspace(0,360,40)*np.pi/180.
-
-for i in range(len(theta)):
-    co[i,0]=0.5*np.cos(theta[i])
-    co[i,1]=0.5*np.sin(theta[i])
-    
-#new_coord=co
-######---------------------------------------------------------
-
-plt.figure()
-#plt.plot(coord[:,0],coord[:,1],'o')
-#plt.plot(x1,y1,x2,y2,x3,y3,x4,y4)
-plt.plot(new_coord[:,0],new_coord[:,1],'o')
-#plt.xlim([-2,2])
-#plt.ylim([-2,2])
-plt.show()
-'''
 ####-----------------------------------------------
 #interpolate
 def interp(x,y,Var,new_coord):
@@ -187,6 +96,10 @@ for jj in range(1):
     otime=[]
     para=[]
     
+    my_xc=[]
+    my_yc=[]
+    my_tt_c=[]
+    
     for ii in range(1):
         
         print ( ii)
@@ -200,19 +113,22 @@ for jj in range(1):
         yname=yname[:-3].astype(np.float) 
                 
         xx=np.loadtxt(casedir+'/postProcessing/forceCoeffs/0/forceCoeffs.dat', skiprows=10)
-        #xx=xx[::2,:]
-        xx=xx[-100:]
-        #xx=xx[xx[:,3].argsort()]
-        
-#        plt.figure(figsize=(10, 4))
-#        plt.plot(xx[:,0],xx[:,3],'ob')
-#        plt.plot([t1,t10],[xx[:,3].mean(),xx[:,3].mean()],'or')
-#        plt.savefig('./plots/%s.png'%ii,format='png',dpi=100)
-#        plt.close()
+#        xx=xx[::10,:]
+#        xx=xx[-50:]
+#        #xx=xx[xx[:,3].argsort()]
+#        
+        plt.figure(figsize=(10, 4))
+        plt.plot(xx[:,0],xx[:,3],'-ob')
+        #plt.plot([t1,t10],[xx[:,3].mean(),xx[:,3].mean()],'or')
+        plt.xlim([24,28])
+        plt.ylim([0.62,1.2])
+        #plt.savefig('./plots/%s.png'%ii,format='png',dpi=100)
+        plt.show()
+        plt.close()
             
-        t1=193
-        t2=195
-        
+        t1=24.0
+        t2=25.0
+   
 #        if (abs(xx[0,0]-xx[1,0]) > 6):
 #            t2=xx[2,0]
 #            
@@ -221,22 +137,23 @@ for jj in range(1):
 #            t1 =t2
 #            t2 = tmp1
    
-        tt = np.linspace(t1,t2,int (round((t2-t1)/0.1)+1) )
+        tt = np.linspace(t1,t2,int (round((t2-t1)/0.05)+1) )
          
     
         mytt = tt-t1
         mytt = mytt
-                   
-        plt.figure(figsize=(3, 4))
-        plt.plot(xx[:,0],xx[:,3],'-ob')
-        #plt.plot([t1,t2],[xx[:,3].mean(),xx[:,3].mean()],'or')
-        plt.savefig('./plots/%s.png'%fname_2[ii],format='png',dpi=100)
-        plt.close()
+#                   
+#        plt.figure(figsize=(3, 4))
+#        plt.plot(xx[:,0],xx[:,3],'-ob')
+#        #plt.plot([t1,t2],[xx[:,3].mean(),xx[:,3].mean()],'or')
+#        plt.savefig('./plots/%s.png'%fname_2[ii],format='png',dpi=100)
+#        plt.close()
                
-        '''
+  
         for kk in range(len(tt)):  
             
             ymax=round(tt[kk],2)
+            print (ymax)
             if((ymax%1) == 0):
                 ymax=int(ymax)
             print ('t = ', ymax)
@@ -298,29 +215,31 @@ for jj in range(1):
             w=np.array(w)        
             w = w.astype(np.float)       
             
-#            #filter wake
-#            I=[]
-#            for i in range(len(x)):
-#                if (x[i]<=1.0 and x[i]>=0.5 and y[i]<=1.0 and y[i]>=-1.0 ):
-#                    I.append(i)
+
             
-#            #2222                    
-#            I=[]
-#            for i in range(len(x)):
-#                if (x[i]<=2.98 and x[i]>=-1.98 and y[i]<=1.98 and y[i]>=-1.98):
-#                    I.append(i)   
-#                                        
-#            x=x[I]
-#            y=y[I]
-#            z=z[I]
-#            u=u[I]
-#            v=v[I]
-#            w=w[I]
-#            p=p[I]
+            #2222                    
+            I=[]
+            for i in range(len(x)):
+                if (x[i]<=1.98 and x[i]>=-0.98 and y[i]<=0.98 and y[i]>=-0.98):
+                    I.append(i)   
+                                        
+            x=x[I]
+            y=y[I]
+            z=z[I]
+            u=u[I]
+            v=v[I]
+            w=w[I]
+            p=p[I]
             
-            pi=interp(x, y, p, new_coord)
-            ui=interp(x, y, u, new_coord)
-            vi=interp(x, y, v, new_coord) 
+            if(kk==0):
+                print(x.shape)
+                xy=np.concatenate((x[:,None],y[:,None]),axis=1)
+                print (xy.shape)
+                kmeans = KMeans(n_clusters=1000, random_state=0).fit(xy)
+                c1=kmeans.cluster_centers_
+                
+                xc=c1[:,0]
+                yc=c1[:,1]
             
             
             
@@ -350,27 +269,27 @@ for jj in range(1):
                 #plt.savefig('./plotc/%s.eps'%(nname[ii]), format='eps')
                 plt.close()
                 
-            #plot(x,y,u,20,'name')    
+            plot(x,y,u,20,'name')    
             
-            myinp_x.extend(new_coord[:,0])
-            myinp_y.extend(new_coord[:,1])
-            myout_p.extend(pi)
-            myout_u.extend(ui)
-            myout_v.extend(vi)
-    
+            myinp_x.extend(x)
+            myinp_y.extend(y)
+            myout_p.extend(p)
+            myout_u.extend(u)
+            myout_v.extend(v)
+        
             tlist=[]
-            for k in range(len(new_coord)):
+            for k in range(len(x)):
                 tlist.append(mytt[kk])
             tlist=np.asarray(tlist)
             
             #original time
             otlist=[]
-            for k in range(len(new_coord)):
+            for k in range(len(x)):
                 otlist.append(tt[kk])
             otlist=np.asarray(otlist)            
                         
             relist=[]
-            for k in range(len(new_coord)):
+            for k in range(len(x)):
                 relist.append(reno[ii])
             relist=np.asarray(relist)
             
@@ -379,20 +298,30 @@ for jj in range(1):
             otime.extend(otlist)     
             para.append([t1,t2,mytt.max()])
 
+            #for centres
+            my_xc.extend(xc)
+            my_yc.extend(yc)
+            
+            tlist_c=[]
+            for k in range(len(xc)):
+                tlist_c.append(mytt[kk])
+            tlist_c=np.asarray(tlist_c)
+            my_tt_c.extend(tlist_c)
 
 
-fp=open('./data_file/cy_sample_ar_10x2.dat','w')
-fp.write('x y t p u v\n')
+
+fp=open('./data_file/naca0012_internal_1211.dat','w')
+fp.write('x y t p u v: 24-25: 0.05 dt\n')
 for i in range(len(myinp_x)):
     fp.write('%f %f %f %f %f %f\n'%(myinp_x[i], myinp_y[i], myinp_t[i], myout_p[i], myout_u[i], myout_v[i]))
 fp.close()
 
-##only-for wall bc
-#fp=open('./data_file/cy_xxx.dat','w')
-#fp.write('x y t p u v\n')
-#for i in range(len(myinp_x)):
-#    fp.write('%f %f %f %f 1e-12 1e-12\n'%(myinp_x[i], myinp_y[i], myinp_t[i], myout_p[i]))
-#fp.close()
+fp=open('./data_file/naca0012_internal_centers_1000_1211.dat','w')
+fp.write('x y t : centers for gov. eqn\n')
+for i in range(len(my_xc)):
+    fp.write('%f %f %f \n'%(my_xc[i], my_yc[i], my_tt_c[i]))
+fp.close()
+        
 
         
 #    #save file
@@ -405,5 +334,3 @@ fp.close()
 #
 #    with open(filepath+'/cy_un_lam_around_5555_%s.pkl'%(jj+1), 'wb') as outfile1:
 #        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
-
-'''

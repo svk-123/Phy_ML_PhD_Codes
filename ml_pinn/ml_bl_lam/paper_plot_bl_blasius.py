@@ -73,8 +73,8 @@ import matplotlib
 #u=np.asarray(u)
 #v=np.asarray(v)
 
-Re=1000
-suff='re%s_nodp_nodv_ws_x8'%Re    
+Re=100
+suff='re%s_nodp_nodv_nopinn'%Re    
 xy=np.loadtxt('./data_file/Re%s/bl_internal_combined.dat'%Re,skiprows=1)
 
 val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
@@ -93,8 +93,8 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8/tf_model/'%Re
-    new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
+    path1='./tf_model/case_1_re%s_nodp_nodv_nopinn/tf_model/'%Re
+    new_saver1 = tf.train.import_meta_graph( path1 + 'model_15000.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
     #new with nx ny

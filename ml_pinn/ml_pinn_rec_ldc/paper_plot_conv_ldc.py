@@ -34,8 +34,8 @@ for i in range(1):
  
     
       
-l1=200
-l2=250
+l1=5000
+l2=6000
 l3=20
 c=['g','b','r','c','r','m','darkorange','lime','pink','purple','peru','gold','olive','salmon','brown'] 
 
@@ -44,8 +44,8 @@ plt.figure(figsize=(6,5),dpi=100)
 for i in range(1):
     
     #total loss
-    plt.plot(data1[i][:L,0], data1[i][:L,1]-data1[i][:L,4] ,'%s'%c[0],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='MSE')
-    plt.plot(data1[i][:L,0], data1[i][:L,4]                ,'%s'%c[2],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='Gov. Eq')
+    plt.plot(data1[i][:L,0], data1[i][:L,1]-data1[i][:L,4] ,'%s'%c[0],marker='^',mew=1.5, mfc='None',ms=12,lw=2,markevery=l1,label='MSE Loss')
+    plt.plot(data1[i][:L,0], data1[i][:L,4]                ,'%s'%c[2],marker='o',mew=1.5, mfc='None',ms=12,lw=2,markevery=l2,label='N-S Loss')
     #plt.plot(data1[i][:L,0], data1[i][:L,2]+data1[i][:L,3] ,'%s'%c[1],marker='None',mfc='r',ms=12,lw=2,markevery=l1,label='MSE')
 
 #    #MSE loss = total - gov
@@ -67,6 +67,6 @@ plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0
 #plt.xticks(range(0,2001,500))
 #plt.xlim([-50,6000])
 #plt.ylim([5e-6,1e-3])    
-plt.savefig('./plot/ldc_%s.png'%suff, format='png', bbox_inches='tight',dpi=300)
+plt.savefig('./plot/ldc_%s.tiff'%suff, format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
 #--------------------

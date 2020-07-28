@@ -51,8 +51,8 @@ reytmp=[]
 utmp=[]
 vtmp=[]
 ptmp=[]
-#flist=['Re100','Re200','Re300','Re400','Re600','Re700','Re800','Re900']
-flist=['Re100']
+flist=['Re100','Re200','Re300','Re400','Re600','Re700','Re800','Re900']
+#flist=['Re100']
 for ii in range(len(flist)):
     #x,y,Re,u,v
     with open('./data/cavity_%s_part.pkl'%flist[ii], 'rb') as infile:

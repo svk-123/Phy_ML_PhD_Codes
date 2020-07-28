@@ -7,7 +7,6 @@ Created on Mon May  1 08:09:04 2017
 """
 
 import time
-start_time = time.time()
 
 # Python 3.5
 import numpy as np
@@ -74,7 +73,12 @@ val_out=np.concatenate((utmp[:,None],vtmp[:,None],ptmp[:,None]),axis=1)
 
 #load_model
 model_test=load_model('./thesis_selected_model/case_1_6x100_tanh/model/final_sf.hdf5') 
+
+start_time = time.time()
+
 out=model_test.predict([val_inp])    
+print("--- %s seconds ---" % (time.time() - start_time))
+
 
 #plot
 def line_plot1():

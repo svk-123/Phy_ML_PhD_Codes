@@ -68,7 +68,7 @@ import matplotlib
 #p=np.asarray(p)
 #u=np.asarray(u)
 #v=np.asarray(v)
-
+'''
 Re=100
 suff='re%s_nodp_nodv_f3'%Re    
 xy=np.loadtxt('./data_file/Re%s/bfs_internal_combined.dat'%Re,skiprows=1)
@@ -110,17 +110,26 @@ v_pred=tout[:,1]
 kout=val_out
 i=1
 j=1    
-
+'''
 #plot
 def con_plot():
     
-    fig = plt.figure(figsize=(8, 8),dpi=100)
+    fig = plt.figure(figsize=(10, 8),dpi=100)
     
     l1=-1
     l2=7
     h1=0
     h2=3
     AR=0.8
+
+
+    a1=2.5
+    b1=-1.8
+    a2=2.5
+    b2=-1.8
+
+
+
 
     co=np.loadtxt('bfs_sq_co.dat')
     
@@ -138,12 +147,11 @@ def con_plot():
 
     
     ax1.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
-    ax1.set_title('p-CFD')
-    ax1.set_xlabel('X',fontsize=16)
+    #ax1.set_xlabel('X',fontsize=16)
     ax1.set_ylabel('Y',fontsize=16)
     ax1.set_xlim([l1,l2])
     ax1.set_ylim([h1,h2])
-    
+    ax1.text(a1,b1,'(a) p-CFD',fontsize=14)
 #    divider = make_axes_locatable(ax1)
 #    cax = divider.append_axes('right', size='1%', pad=0.05)
 #    cbar1=plt.colorbar(cp1, cax=cax, orientation='vertical')
@@ -154,23 +162,23 @@ def con_plot():
     cp2a = ax2.tricontour(xtmp,ytmp,p_pred,levels=lpa,linewidths=0.4,colors='k',zorder=5)
     cp2 = ax2.tricontourf(xtmp,ytmp,p_pred,levels=lp,cmap=cm.jet,extend ='both')
     ax2.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
-    ax2.set_title('p-PINN')
-    ax2.set_xlabel('X',fontsize=16)
+    #ax2.set_xlabel('X',fontsize=16)
     ax2.set_yticks([])
     ax2.set_xlim([l1,l2])
     ax2.set_ylim([h1,h2])
-#    divider = make_axes_locatable(ax2)
-#    cax = divider.append_axes('right', size='1%', pad=0.05)
-#    cbar2=plt.colorbar(cp2, cax=cax, orientation='vertical');
-#    cbar2.ax.tick_params(labelsize=10)
+    ax2.text(a2,b2,'(b) p-PINN',fontsize=14)    
+    divider = make_axes_locatable(ax2)
+    cax = divider.append_axes('right', size='2%', pad=0.05)
+    cbar2=plt.colorbar(cp2, cax=cax, orientation='vertical');
+    cbar2.ax.tick_params(labelsize=10)
     ax2.set_aspect(AR,adjustable='box-forced')
         
     ax3 = fig.add_subplot(3,2,3)
     cp3a = ax3.tricontour(xtmp,ytmp,u,levels=lua,linewidths=0.4,colors='k',zorder=5)    
     cp3 = ax3.tricontourf(xtmp,ytmp,u,levels=lu,cmap=cm.jet,extend ='both')
     ax3.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
-    ax3.set_title('u-CFD')
-    ax3.set_xlabel('X',fontsize=16)
+    ax3.text(a1,b1,'(c) u-CFD',fontsize=14)
+    #ax3.set_xlabel('X',fontsize=16)
     ax3.set_ylabel('Y',fontsize=16)
     ax3.set_xlim([l1,l2])
     ax3.set_ylim([h1,h2])
@@ -184,22 +192,22 @@ def con_plot():
     cp4a = ax4.tricontour(xtmp,ytmp,u_pred,levels=lua,linewidths=0.4,colors='k',zorder=5)    
     cp4 = ax4.tricontourf(xtmp,ytmp,u_pred,levels=lu,cmap=cm.jet,extend ='both')
     ax4.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
-    ax4.set_title('u-PINN')
-    ax4.set_xlabel('X',fontsize=16)
+    ax4.text(a2,b2,'(d) u-PINN',fontsize=14)
+    #ax4.set_xlabel('X',fontsize=16)
     ax4.set_yticks([])
     ax4.set_xlim([l1,l2])
     ax4.set_ylim([h1,h2])
-#    divider = make_axes_locatable(ax4)
-#    cax = divider.append_axes('right', size='1%', pad=0.05)
-#    cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
-#    cbar4.ax.tick_params(labelsize=10)
+    divider = make_axes_locatable(ax4)
+    cax = divider.append_axes('right', size='2%', pad=0.05)
+    cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
+    cbar4.ax.tick_params(labelsize=10)
     ax4.set_aspect(AR)      
         
     ax5 = fig.add_subplot(3,2,5)
     cp5a = ax5.tricontour(xtmp,ytmp,v,levels=lva,linewidths=0.4,colors='k',zorder=5)      
     cp5 = ax5.tricontourf(xtmp,ytmp,v,levels=lv,cmap=cm.jet,extend ='both')
     ax5.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
-    ax5.set_title('v-CFD')
+    ax5.text(a1,b1,'(e) v-CFD',fontsize=14)
     ax5.set_xlabel('X',fontsize=16)
     ax5.set_ylabel('Y',fontsize=16)
     ax5.set_xlim([l1,l2])
@@ -214,22 +222,23 @@ def con_plot():
     cp6a = ax6.tricontour(xtmp,ytmp,v_pred,levels=lva,linewidths=0.4,colors='k',zorder=5)      
     cp6 = ax6.tricontourf(xtmp,ytmp,v_pred,levels=lv,cmap=cm.jet,extend ='both')
     ax6.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w',zorder=10)
-    ax6.set_title('v-PINN')
+    ax6.text(a2,b2,'(f) v-PINN',fontsize=14)
     ax6.set_xlabel('X',fontsize=16)
     ax6.set_yticks([])
     ax6.set_xlim([l1,l2])
     ax6.set_ylim([h1,h2])
-    #divider = make_axes_locatable(ax6)
-    #cax = divider.append_axes('right', size='1%', pad=0.05)
-    #cbar6=plt.colorbar(cp6, cax=cax, orientation='vertical');
-    #cbar6.ax.tick_params(labelsize=10)
+    divider = make_axes_locatable(ax6)
+    cax = divider.append_axes('right', size='2%', pad=0.05)
+    cbar6=plt.colorbar(cp6, cax=cax, orientation='vertical');
+    cbar6.ax.tick_params(labelsize=10)
     ax6.set_aspect(AR)
     
     #fig.suptitle(" Re=40 at t=0", fontsize=20)
     
     #plt.tight_layout()
     plt.subplots_adjust( hspace = 0.05, wspace = 0.05)       
-    plt.savefig('./plot/bl_%s.png'%suff,format='png',bbox_inches='tight',dpi=300)
+    plt.savefig('./plot/bl_%s.tiff'%suff,format='tiff',bbox_inches='tight',dpi=300)
+    plt.show()
     plt.close()
 
 
@@ -393,7 +402,7 @@ def line_plotu_sub(i):
     plt.figure(figsize=(6, 4), dpi=100)
     
     plt.subplot(1,3,1)
-    plt.plot(u1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(u1b,yb,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei,label='CFD')
     plt.plot(u2b,yb,'g',linewidth=3,label='PINN')
     #plt.plot(u3a,ya,'r',linewidth=3,label='NN')
     #plt.legend(fontsize=14)
@@ -402,7 +411,7 @@ def line_plotu_sub(i):
     #plt.ylim(-0.05,1.05)    
     
     plt.subplot(1,3,2)
-    plt.plot(u1c,yc,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(u1c,yc,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei)
     plt.plot(u2c,yc,'g',linewidth=3)
     #plt.plot(u3b,yb,'r',linewidth=3)
     plt.xlabel('u-velocity',fontsize=20)
@@ -411,7 +420,7 @@ def line_plotu_sub(i):
     #plt.ylim(-0.05,1.05)    
         
     plt.subplot(1,3,3)
-    plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei,label='CFD')
     plt.plot(u2d,yd,'g',linewidth=3,label='PINN')
     #plt.plot(u3d,yd,'r',linewidth=3,label='NN')
     plt.legend(loc="upper left", bbox_to_anchor=[-0.02, 0.9], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
@@ -421,7 +430,7 @@ def line_plotu_sub(i):
     
     plt.figtext(0.4, 0.00, '(a)', wrap=True, horizontalalignment='center', fontsize=24)
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
-    plt.savefig('./plot/u_%s_%s.png'%(i,suff), format='png', bbox_inches='tight',dpi=100)
+    plt.savefig('./plot/u_%s_%s.tiff'%(i,suff), format='tiff', bbox_inches='tight',dpi=300)
     plt.show()   
     plt.close()
     
@@ -431,7 +440,7 @@ def line_plotu_sub(i):
     plt.figure(figsize=(6, 4), dpi=100)
     
     plt.subplot(1,3,1)
-    plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei)
     plt.plot(v2b,yb,'g',linewidth=3)
     #plt.plot(v3a,ya,'r',linewidth=3)
     #plt.legend(fontsize=14)
@@ -440,7 +449,7 @@ def line_plotu_sub(i):
     #plt.ylim(-0.05,1.05)    
     
     plt.subplot(1,3,2)
-    plt.plot(v1c,yc,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(v1c,yc,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei)
     plt.plot(v2c,yc,'g',linewidth=3)
     #plt.plot(v3b,yb,'r',linewidth=3)
     plt.xlabel('v-velocity',fontsize=20)
@@ -449,7 +458,7 @@ def line_plotu_sub(i):
     #plt.ylim(-0.05,1.05)        
     
     plt.subplot(1,3,3)
-    plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei,label='CFD')
     plt.plot(v2d,yd,'g',linewidth=3,label='PINN')
     #plt.plot(v3d,yd,'r',linewidth=3,label='NN')
     plt.yticks([])  
@@ -459,7 +468,7 @@ def line_plotu_sub(i):
        
     plt.figtext(0.4, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
-    plt.savefig('./plot/v_%s_%s.png'%(i,suff), format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot/v_%s_%s.tiff'%(i,suff), format='tiff',bbox_inches='tight', dpi=300)
     plt.show() 
     plt.close()    
     

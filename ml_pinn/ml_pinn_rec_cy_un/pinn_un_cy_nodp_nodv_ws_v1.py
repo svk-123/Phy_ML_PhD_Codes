@@ -444,7 +444,7 @@ if __name__ == "__main__":
     ######################## Gov Data ####################################
     ######################################################################    
     
-    xyu_int=np.loadtxt(path + 'cy_internal_3222.dat',skiprows=1)    
+    xyu_int=np.loadtxt(path + 'cy_internal_centers_1000_3222.dat',skiprows=1)    
     
     N_train=20000
     idx = np.random.choice(len(xyu_int), N_train, replace=False)           
@@ -466,26 +466,26 @@ if __name__ == "__main__":
 
 ############################
  
-#plt.figure(figsize=(6, 4), dpi=100)
-#plt0, =plt.plot(xyu_wall[:,0:1],xyu_wall[:,1:2],'ok',linewidth=0,ms=3,label='MSE BC pts: 280',zorder=5)
-#plt0, =plt.plot(xyu_outlet_t[:,0:1],xyu_outlet_t[:,1:2],'ok',linewidth=0,ms=3,zorder=5)
-#plt0, =plt.plot(xyu_inlet[:,0:1],xyu_inlet[:,1:2],'ok',linewidth=0,ms=3,zorder=5)
-#plt0, =plt.plot(xyu_int[:,0:1],xyu_int[:,1:2],'+r',linewidth=0,ms=2,label='Gov Eq. Res. pts: 20000 ',zorder=4)
-#plt0, =plt.plot(xyu_s[:,0:1],xyu_s[:,1:2],'og',linewidth=0,ms=4,label='MSE internal pts: 80 ',zorder=8)
+plt.figure(figsize=(6, 4), dpi=100)
+plt0, =plt.plot(xyu_wall[:,0:1],xyu_wall[:,1:2],'ok',linewidth=0,ms=3,label='MSE BC pts: 280',zorder=5)
+plt0, =plt.plot(xyu_outlet_t[:,0:1],xyu_outlet_t[:,1:2],'ok',linewidth=0,ms=3,zorder=5)
+plt0, =plt.plot(xyu_inlet[:,0:1],xyu_inlet[:,1:2],'ok',linewidth=0,ms=3,zorder=5)
+plt0, =plt.plot(xyu_int[:,0:1],xyu_int[:,1:2],'+r',linewidth=0,ms=2,label='Gov Eq. Res. pts: 1000 ',zorder=4)
+plt0, =plt.plot(xyu_s[:,0:1],xyu_s[:,1:2],'og',linewidth=0,ms=4,label='MSE internal pts: 80 ',zorder=8)
+
 #
-##
-####text-1
-##plt.text(2.5, -0.3, "Wall: u=0", horizontalalignment='center', verticalalignment='center')
-##plt.text(2.5, 3.3, "Outlet: p=0", horizontalalignment='center', verticalalignment='center')
-##plt.text(-0.3, 1.5, "Inlet: u-specified", horizontalalignment='center', verticalalignment='center',rotation=90)
-#
-##plt.legend(fontsize=20)
-#plt.xlabel('X',fontsize=20)
-#plt.ylabel('Y',fontsize=20)
-##plt.title('%s-u'%(flist[ii]),fontsiuze=16)
-#plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, fancybox=False, shadow=False,fontsize=16)
-#plt.xlim(-2,3)
-#plt.ylim(-2,2)    
-#plt.savefig('./plot/mesh9.png', format='png',bbox_inches='tight', dpi=200)
-#plt.show()
+###text-1
+#plt.text(2.5, -0.3, "Wall: u=0", horizontalalignment='center', verticalalignment='center')
+#plt.text(2.5, 3.3, "Outlet: p=0", horizontalalignment='center', verticalalignment='center')
+#plt.text(-0.3, 1.5, "Inlet: u-specified", horizontalalignment='center', verticalalignment='center',rotation=90)
+
+#plt.legend(fontsize=20)
+plt.xlabel('X',fontsize=20)
+plt.ylabel('Y',fontsize=20)
+#plt.title('%s-u'%(flist[ii]),fontsiuze=16)
+plt.legend(loc='upper center', bbox_to_anchor=(1.45, 1), ncol=1, frameon=False, fancybox=False, shadow=False,fontsize=16)
+plt.xlim(-2,3)
+plt.ylim(-2,2)    
+plt.savefig('./plot/mesh9.tiff', format='tiff',bbox_inches='tight', dpi=300)
+plt.show()
 

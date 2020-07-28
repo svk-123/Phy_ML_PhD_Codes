@@ -56,10 +56,9 @@ matplotlib.rc('ytick', labelsize=18)
 path='./foil_all_re_aoa/data_files_train_test_NT/'
 
 
-
-for ii in [5]:
+for ii in [7]:
 #for ii in [1,2,3,4,5,7,8,9,10]:
-    data_file='data_re_aoa_fp_NT_tr_%d.pkl'%ii
+    data_file='data_re_aoa_fp_NT_E_ts_%d.pkl'%ii
     inp_up=[]
     inp_lr=[]
     out=[]
@@ -128,7 +127,7 @@ for ii in [5]:
         
     tmp=0
     mm=0    
-    for mm in range(100):
+    for mm in range(30):
         k=tmp+mm
         print k
         fig = plt.figure(figsize=(6, 5))
@@ -140,11 +139,11 @@ for ii in [5]:
         plt.ylim([-0.2,0.2])
         
         plt.subplots_adjust(top = 0.9, bottom = 0.1, right = 0.9, left = 0.1, hspace = 0.3, wspace = 0.2)
-        plt.text(0.5,-0.18,'%s, Re=%se6, AoA=%s %%'%(name[k].upper(),reno[k]*3,aoa[k]*12), horizontalalignment='center',fontsize=14)            
+        plt.text(0.5,-0.18,'%s, Re=%se6, AoA=%s '%(name[k].upper(),reno[k]*3,aoa[k]*12), horizontalalignment='center',fontsize=14)            
         plt.xlabel('X',fontsize=24)
         plt.ylabel('Y',fontsize=24)     
         plt.legend(fontsize=14,frameon=False)        
-        plt.savefig('./plot2/ts_%s_%s.png'%(k,name[k]), bbox_inches='tight',dpi=100)
+        plt.savefig('./plot2/ts_%s_%s.png'%(k,name[k]), bbox_inches='tight',dpi=300)
         plt.close()
         
         

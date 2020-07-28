@@ -75,7 +75,7 @@ matplotlib.rc('ytick', labelsize=16)
 #plot
 def con_plot2():
     
-    Re=10000
+    Re=20000
     suff='re%s_nodp_nodv_x8'%Re    
     xy=np.loadtxt('./data_file/Re%s/bl_internal_combined.dat'%Re,skiprows=1)
     
@@ -136,11 +136,14 @@ def con_plot2():
         a1=-0.05
         a2=-0.20
     if (Re==5000):
-        a1=-0.05
-        a2=-0.20
+        a1=-0.02
+        a2=-0.08
     if (Re==10000):
         a1=-0.02
         a2=-0.05
+    if (Re==20000):
+        a1=-0.01
+        a2=-0.04        
         
     lp=np.linspace(p.min(),p.max(),20)    
     lu=np.linspace(u.min(),u.max(),20)      
@@ -255,7 +258,7 @@ def con_plot2():
     plt.savefig('./plot/bl_%s.tiff'%suff,format='tiff',bbox_inches='tight',dpi=300)
     plt.close()
 
-con_plot2()    
+#con_plot2()    
 
 
 #plot
@@ -613,7 +616,7 @@ def con_plot3():
     ax2.set_xticks([])
     ax2.set_xlim([l1,l2])
     ax2.set_ylim([h1,h2])
-    ax2.text(2.0,a1,'(b) p-PINN-S1',fontsize=14)
+    ax2.text(2.0,a1,'(b) p-PINN-S-1',fontsize=14)
 
         
     ax4 = fig.add_subplot(3,3,3)
@@ -623,7 +626,7 @@ def con_plot3():
     ax4.set_xticks([])
     ax4.set_xlim([l1,l2])
     ax4.set_ylim([h1,h2])
-    ax4.text(2.0,a1,'(c) p-PINN-S2',fontsize=14)     
+    ax4.text(2.0,a1,'(c) p-PINN-S-2',fontsize=14)     
     divider = make_axes_locatable(ax4)
     cax = divider.append_axes('right', size='1%', pad=0.05)
     cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
@@ -650,7 +653,7 @@ def con_plot3():
     ax2.set_xticks([])
     ax2.set_xlim([l1,l2])
     ax2.set_ylim([h1,h2])
-    ax2.text(2.0,a1,'(e) u-PINN-S1',fontsize=14)
+    ax2.text(2.0,a1,'(e) u-PINN-S-1',fontsize=14)
 
         
     ax4 = fig.add_subplot(3,3,6)
@@ -660,7 +663,7 @@ def con_plot3():
     ax4.set_xticks([])
     ax4.set_xlim([l1,l2])
     ax4.set_ylim([h1,h2])
-    ax4.text(2.0,a1,'(f) u-PINN-S2',fontsize=14)     
+    ax4.text(2.0,a1,'(f) u-PINN-S-2',fontsize=14)     
     divider = make_axes_locatable(ax4)
     cax = divider.append_axes('right', size='1%', pad=0.05)
     cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
@@ -688,7 +691,7 @@ def con_plot3():
     ax2.set_xlabel('X',fontsize=16)
     ax2.set_xlim([l1,l2])
     ax2.set_ylim([h1,h2])
-    ax2.text(2.0,a2,'(h) u-PINN-S1',fontsize=14)
+    ax2.text(2.0,a2,'(h) u-PINN-S-1',fontsize=14)
 
         
     ax4 = fig.add_subplot(3,3,9)
@@ -698,7 +701,7 @@ def con_plot3():
     ax4.set_xlabel('X',fontsize=16)
     ax4.set_xlim([l1,l2])
     ax4.set_ylim([h1,h2])
-    ax4.text(2.0,a2,'(i) u-PINN-S2',fontsize=14)     
+    ax4.text(2.0,a2,'(i) u-PINN-S-2',fontsize=14)     
     divider = make_axes_locatable(ax4)
     cax = divider.append_axes('right', size='1%', pad=0.05)
     cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
@@ -712,6 +715,209 @@ def con_plot3():
 
 
 #con_plot3()
+    
+    
+    
+    
+      
+
+#plot
+def con_plot3nn():
+    
+    Re=100
+    suff='re%s_nodp_nodv_nopinn'%Re    
+    xy=np.loadtxt('./data_file/Re%s/bl_internal_combined.dat'%Re,skiprows=1)
+    
+    val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
+    val_out=np.concatenate((xy[:,3:4],xy[:,4:5],xy[:,2:3]),axis=1)    
+    
+    xtmp=xy[:,0]
+    ytmp=xy[:,1]
+    p=xy[:,2]
+    u=xy[:,3]
+    v=xy[:,4]
+    
+   
+    
+    ##load model
+    ##session-run
+    tf.reset_default_graph    
+    graph = tf.get_default_graph() 
+    #load model
+    with tf.Session() as sess1:
+        
+        path1='./tf_model/case_1_re%s_nodp_nodv/tf_model/'%Re
+        new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
+        new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
+    
+        tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
+                   'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }
+    
+        op_to_load1 = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')    
+        
+        #uvp
+        tout1 = sess1.run(op_to_load1, tf_dict)
+    
+    sess1.close()
+               
+    tf.reset_default_graph    
+    graph = tf.get_default_graph() 
+    #load model
+    with tf.Session() as sess2:
+        
+        path1='./tf_model/case_1_re%s_nodp_nodv_nopinn/tf_model/'%Re
+        new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
+        new_saver1.restore(sess2, tf.train.latest_checkpoint(path1))
+    
+        tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
+                   'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }
+    
+        op_to_load1 = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')    
+        
+        #uvp
+        tout2 = sess2.run(op_to_load1, tf_dict)
+    
+    sess2.close() 
+    
+            
+    
+    nu_=1.0/float(Re)
+    x1=5.0
+    Rex1=x1/nu_
+    d5=4.91*x1/np.sqrt(Rex1)
+    
+    fig = plt.figure(figsize=(5.2*3, 2.2*3),dpi=100)
+    
+    l1=0
+    l2=5
+    h1=0
+    h2=d5
+    
+    a1=-0.15
+    a2=-0.55
+
+    
+    lp=np.linspace(p.min(),p.max(),20)    
+    lpa=np.linspace(p.min(),p.max(),30) 
+   
+
+    ax1 = fig.add_subplot(3,3,1)
+    cp1a = ax1.tricontour(xtmp,ytmp,p,levels=lpa,linewidths=0.4,colors='k',zorder=5)
+    cp1 = ax1.tricontourf(xtmp,ytmp,p,levels=lp,cmap=cm.jet,extend ='both')
+    ax1.set_xticks([])
+    ax1.set_ylabel('Y',fontsize=16)
+    ax1.set_xlim([l1,l2])
+    ax1.set_ylim([h1,h2])
+    ax1.text(2.0,a1,'(a) p-CFD',fontsize=14)
+      
+    
+    ax2 = fig.add_subplot(3,3,2)
+    cp2a = ax2.tricontour(xtmp,ytmp,tout1[:,2],levels=lpa,linewidths=0.4,colors='k',zorder=5)
+    cp2 = ax2.tricontourf(xtmp,ytmp,tout1[:,2],levels=lp,cmap=cm.jet,extend ='both')
+    ax2.set_yticks([])
+    ax2.set_xticks([])
+    ax2.set_xlim([l1,l2])
+    ax2.set_ylim([h1,h2])
+    ax2.text(2.0,a1,'(b) p-PINN',fontsize=14)
+
+        
+    ax4 = fig.add_subplot(3,3,3)
+    cp4a = ax4.tricontour(xtmp,ytmp,tout2[:,2],levels=lpa,linewidths=0.4,colors='k',zorder=5)    
+    cp4 = ax4.tricontourf(xtmp,ytmp,tout2[:,2],levels=lp,cmap=cm.jet,extend ='both')
+    ax4.set_yticks([])
+    ax4.set_xticks([])
+    ax4.set_xlim([l1,l2])
+    ax4.set_ylim([h1,h2])
+    ax4.text(2.0,a1,'(c) p-NN',fontsize=14)     
+    divider = make_axes_locatable(ax4)
+    cax = divider.append_axes('right', size='1%', pad=0.05)
+    cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
+    cbar4.ax.tick_params(labelsize=10)
+
+    
+    lp=np.linspace(u.min(),u.max(),20)    
+    lpa=np.linspace(u.min(),u.max(),30) 
+    
+    ax1 = fig.add_subplot(3,3,4)
+    cp1a = ax1.tricontour(xtmp,ytmp,u,levels=lpa,linewidths=0.4,colors='k',zorder=5)
+    cp1 = ax1.tricontourf(xtmp,ytmp,u,levels=lp,cmap=cm.jet,extend ='both')
+    ax1.set_xticks([])
+    ax1.set_ylabel('Y',fontsize=16)
+    ax1.set_xlim([l1,l2])
+    ax1.set_ylim([h1,h2])
+    ax1.text(2.0,a1,'(d) u-CFD',fontsize=14)
+      
+    
+    ax2 = fig.add_subplot(3,3,5)
+    cp2a = ax2.tricontour(xtmp,ytmp,tout1[:,0],levels=lpa,linewidths=0.4,colors='k',zorder=5)
+    cp2 = ax2.tricontourf(xtmp,ytmp,tout1[:,0],levels=lp,cmap=cm.jet,extend ='both')
+    ax2.set_yticks([])
+    ax2.set_xticks([])
+    ax2.set_xlim([l1,l2])
+    ax2.set_ylim([h1,h2])
+    ax2.text(2.0,a1,'(e) u-PINN',fontsize=14)
+
+        
+    ax4 = fig.add_subplot(3,3,6)
+    cp4a = ax4.tricontour(xtmp,ytmp,tout2[:,0],levels=lpa,linewidths=0.4,colors='k',zorder=5)    
+    cp4 = ax4.tricontourf(xtmp,ytmp,tout2[:,0],levels=lp,cmap=cm.jet,extend ='both')
+    ax4.set_yticks([])
+    ax4.set_xticks([])
+    ax4.set_xlim([l1,l2])
+    ax4.set_ylim([h1,h2])
+    ax4.text(2.0,a1,'(f) u-NN',fontsize=14)     
+    divider = make_axes_locatable(ax4)
+    cax = divider.append_axes('right', size='1%', pad=0.05)
+    cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
+    cbar4.ax.tick_params(labelsize=10)
+    
+
+
+    lp=np.linspace(v.min(),v.max(),20)    
+    lpa=np.linspace(v.min(),v.max(),30)     
+        
+    ax1 = fig.add_subplot(3,3,7)
+    cp1a = ax1.tricontour(xtmp,ytmp,v,levels=lpa,linewidths=0.4,colors='k',zorder=5)
+    cp1 = ax1.tricontourf(xtmp,ytmp,v,levels=lp,cmap=cm.jet,extend ='both')
+    ax1.set_xlabel('X',fontsize=16)
+    ax1.set_ylabel('Y',fontsize=16)
+    ax1.set_xlim([l1,l2])
+    ax1.set_ylim([h1,h2])
+    ax1.text(2.0,a2,'(g) v-CFD',fontsize=14)
+      
+    
+    ax2 = fig.add_subplot(3,3,8)
+    cp2a = ax2.tricontour(xtmp,ytmp,tout1[:,1],levels=lpa,linewidths=0.4,colors='k',zorder=5)
+    cp2 = ax2.tricontourf(xtmp,ytmp,tout1[:,1],levels=lp,cmap=cm.jet,extend ='both')
+    ax2.set_yticks([])
+    ax2.set_xlabel('X',fontsize=16)
+    ax2.set_xlim([l1,l2])
+    ax2.set_ylim([h1,h2])
+    ax2.text(2.0,a2,'(h) v-PINN',fontsize=14)
+
+        
+    ax4 = fig.add_subplot(3,3,9)
+    cp4a = ax4.tricontour(xtmp,ytmp,tout2[:,1],levels=lpa,linewidths=0.4,colors='k',zorder=5)    
+    cp4 = ax4.tricontourf(xtmp,ytmp,tout2[:,1],levels=lp,cmap=cm.jet,extend ='both')
+    ax4.set_yticks([])
+    ax4.set_xlabel('X',fontsize=16)
+    ax4.set_xlim([l1,l2])
+    ax4.set_ylim([h1,h2])
+    ax4.text(2.0,a2,'(i) v-NN',fontsize=14)     
+    divider = make_axes_locatable(ax4)
+    cax = divider.append_axes('right', size='1%', pad=0.05)
+    cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
+    cbar4.ax.tick_params(labelsize=10)
+    
+                             
+    plt.tight_layout()
+    plt.subplots_adjust( hspace = 0.3, wspace = 0.05)       
+    plt.savefig('./plot/bl_pinn_nn_comp.tiff',format='tiff',bbox_inches='tight',dpi=100)
+    plt.close()
+
+
+con_plot3nn()
+    
     
     
     

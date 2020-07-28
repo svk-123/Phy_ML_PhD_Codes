@@ -137,9 +137,9 @@ global init_cl
 global reno
 global aoa
 
-tar_cl=1.5
+tar_cl=1
 init_cl=0
-reno=np.asarray([60000])/100000.
+reno=np.asarray([50000])/100000.
 aoa=np.asarray([4])/14.
 
 reno=np.asarray(reno)
@@ -169,7 +169,7 @@ def loss(para):
     #print (score)
     coord= decoder.predict(mypara_1)
     
-    if(score > 0.99999):
+    if(score > 0.9999):
 
         my_inp=np.concatenate((reno,aoa,mypara),axis=0)
         my_inp=np.reshape(my_inp,(1,10))
@@ -213,6 +213,7 @@ def loss(para):
 #base foil name
 idx1=np.random.randint(80000)   
 fn=name[idx1]
+print(fn)
 idx=np.argwhere(name=='%s'%fn)
 
 #scaled parameter
@@ -229,7 +230,7 @@ mylimit=((0,a),(0,a),(0,a),(0,a),(0,a),(0,a),(0,a),(0,a))
 res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
                options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
                                  'eps': 0.001, 'maxfun': 100, \
-                                 'maxiter': 100, 'maxls': 100})
+                                 'maxiter': 1000, 'maxls': 100})
     
 #res = minimize(loss, x0=p1, method = 'L-BFGS-B', \
 #               options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \

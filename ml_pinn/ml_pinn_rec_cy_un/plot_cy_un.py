@@ -48,7 +48,7 @@ v=xy[:,5]
 
 
 b=np.unique(ttmp)
-tttt=0
+tttt=16
 idx=np.argwhere(ttmp==b[tttt])
 
 xtmp=xtmp[idx[:,0]]
@@ -105,13 +105,20 @@ j=1
 #plot
 def con_plot():
     
-    fig = plt.figure(figsize=(10, 12),dpi=100)
+    fig = plt.figure(figsize=(10, 11),dpi=100)
     
     
     l1=-2
     l2=3
     h1=-2
     h2=2
+    
+    a1=0
+    b1=-3.0
+    a2=0
+    b2=-3.4
+    
+    
     
     lp=np.linspace(p.min(),p.max(),20)    
     lu=np.linspace(u.min(),u.max(),20)      
@@ -120,92 +127,93 @@ def con_plot():
     ax1 = fig.add_subplot(3,2,1)
     cp1 = ax1.tricontourf(xtmp,ytmp,p,levels=lp,cmap=cm.jet,extend ='both')
     ax1.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax1.set_title('p-cfd')
-    ax1.set_xlabel('X',fontsize=16)
+    ax1.text(a1,b1,'(a) p-CFD',fontsize=14)
+    #ax1.set_xlabel('X',fontsize=16)
     ax1.set_ylabel('Y',fontsize=16)
     ax1.set_xlim([l1,l2])
     ax1.set_ylim([h1,h2])
-    divider = make_axes_locatable(ax1)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
-    cbar1=plt.colorbar(cp1, cax=cax, orientation='vertical');
-    cbar1.ax.tick_params(labelsize=10)
-    plt.subplots_adjust( wspace=0.2,hspace=0.3)
-    ax1.set_aspect(0.9)
+#    divider = make_axes_locatable(ax1)
+#    cax = divider.append_axes('right', size='5%', pad=0.05)
+#    cbar1=plt.colorbar(cp1, cax=cax, orientation='vertical');
+#    cbar1.ax.tick_params(labelsize=10)
+    
+    #ax1.set_aspect(0.9)
     
     ax2 = fig.add_subplot(3,2,2)
     cp2 = ax2.tricontourf(xtmp,ytmp,p_pred,levels=lp,cmap=cm.jet,extend ='both')
     ax2.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax2.set_title('p-NN')
-    ax2.set_xlabel('X',fontsize=16)
+    ax2.text(a2,b1,'(b) p-PINN',fontsize=14)
+    #ax2.set_xlabel('X',fontsize=16)
     ax2.set_yticks([])
     ax2.set_xlim([l1,l2])
     ax2.set_ylim([h1,h2])
     divider = make_axes_locatable(ax2)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
+    cax = divider.append_axes('right', size='2%', pad=0.05)
     cbar2=plt.colorbar(cp2, cax=cax, orientation='vertical');
     cbar2.ax.tick_params(labelsize=10)
-    ax2.set_aspect(0.9)
+    #ax2.set_aspect(0.9)
         
     ax3 = fig.add_subplot(3,2,3)
     cp3 = ax3.tricontourf(xtmp,ytmp,u,levels=lu,cmap=cm.jet,extend ='both')
     ax3.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax3.set_title('u-cfd')
-    ax3.set_xlabel('X',fontsize=16)
+    ax3.text(a1,b1,'(c) u-CFD',fontsize=14)
+    #ax3.set_xlabel('X',fontsize=16)
     ax3.set_ylabel('Y',fontsize=16)
     ax3.set_xlim([l1,l2])
     ax3.set_ylim([h1,h2])
-    divider = make_axes_locatable(ax3)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
-    cbar3=plt.colorbar(cp3, cax=cax, orientation='vertical');
-    cbar3.ax.tick_params(labelsize=10)
-    ax3.set_aspect(0.9)
+#    divider = make_axes_locatable(ax3)
+#    cax = divider.append_axes('right', size='5%', pad=0.05)
+#    cbar3=plt.colorbar(cp3, cax=cax, orientation='vertical');
+#    cbar3.ax.tick_params(labelsize=10)
+    #ax3.set_aspect(0.9)
         
     ax4 = fig.add_subplot(3,2,4)
     cp4 = ax4.tricontourf(xtmp,ytmp,u_pred,levels=lu,cmap=cm.jet,extend ='both')
     ax4.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax4.set_title('u-NN')
-    ax4.set_xlabel('X',fontsize=16)
+    ax4.text(a1,b1,'(d) u-PINN',fontsize=14)
+    #ax4.set_xlabel('X',fontsize=16)
     ax4.set_yticks([])
     ax4.set_xlim([l1,l2])
     ax4.set_ylim([h1,h2])
     divider = make_axes_locatable(ax4)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
+    cax = divider.append_axes('right', size='2%', pad=0.05)
     cbar4=plt.colorbar(cp4, cax=cax, orientation='vertical');
     cbar4.ax.tick_params(labelsize=10)
-    ax4.set_aspect(0.9)      
+    #ax4.set_aspect(0.9)      
         
     ax5 = fig.add_subplot(3,2,5)
     cp5 = ax5.tricontourf(xtmp,ytmp,v,levels=lv,cmap=cm.jet,extend ='both')
     ax5.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax5.set_title('v-cfd')
+    ax5.text(a1,b2,'(e) v-CFD',fontsize=14)
     ax5.set_xlabel('X',fontsize=16)
     ax5.set_ylabel('Y',fontsize=16)
     ax5.set_xlim([l1,l2])
     ax5.set_ylim([h1,h2])
-    divider = make_axes_locatable(ax5)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
-    cbar5=plt.colorbar(cp5, cax=cax, orientation='vertical');
-    cbar5.ax.tick_params(labelsize=10)
-    ax5.set_aspect(0.9)
+#    divider = make_axes_locatable(ax5)
+#    cax = divider.append_axes('right', size='5%', pad=0.05)
+#    cbar5=plt.colorbar(cp5, cax=cax, orientation='vertical');
+#    cbar5.ax.tick_params(labelsize=10)
+    #ax5.set_aspect(0.9)
         
     ax6 = fig.add_subplot(3,2,6)
     cp6 = ax6.tricontourf(xtmp,ytmp,v_pred,levels=lv,cmap=cm.jet,extend ='both')
     ax6.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
-    ax6.set_title('v-NN')
+    ax6.text(a1,b2,'(f) v-PINN',fontsize=14)
     ax6.set_xlabel('X',fontsize=16)
     ax6.set_yticks([])
     ax6.set_xlim([l1,l2])
     ax6.set_ylim([h1,h2])
     divider = make_axes_locatable(ax6)
-    cax = divider.append_axes('right', size='5%', pad=0.05)
+    cax = divider.append_axes('right', size='2%', pad=0.05)
     cbar6=plt.colorbar(cp6, cax=cax, orientation='vertical');
     cbar6.ax.tick_params(labelsize=10)
-    ax6.set_aspect(0.9)
+    #ax6.set_aspect(0.9)
     
     #fig.suptitle(" Re=40 at t=0", fontsize=20)
-   
-    plt.subplots_adjust(top = 0.98, bottom = 0.05, right = 0.9, left = 0.1, hspace = 0.2, wspace = 0.2)
-    plt.savefig('./plot/cy_%s.png'%tttt,format='png',dpi=300)
+    plt.subplots_adjust( wspace=0.1,hspace=0.3)
+    #plt.subplots_adjust(top = 0.98, bottom = 0.05, right = 0.9, left = 0.1, hspace = 0.2, wspace = 0.2)
+    plt.savefig('./plot/cy_%s.tiff'%tttt,format='tiff',bbox_inches='tight',dpi=300)
+    plt.show()
     plt.close()
 
 
@@ -250,16 +258,15 @@ def plot_cp():
     
     mei=2       
     plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(xu,pu1,'og',linewidth=3,markevery=mei,label='CFD')
+    plt.plot(xu,pu1,'k',marker='o',mew=1.5, mfc='None',ms=12,lw=0,markevery=2,label='CFD')
     #plt.plot(xl,pl1,'ob',linewidth=3,markevery=mei,label='CFD-lower') 
-    plt.plot(xu,pu2,'r',linewidth=3,label='NN')
+    plt.plot(xu,pu2,'g',linewidth=3,label='NN')
     #plt.plot(xl,pl2,'k',linewidth=3,label='NN-lower')  
     plt.xlabel('X',fontsize=20)
     plt.ylabel('P',fontsize=20)
-    plt.title('Pressure Dist. over cylinder')
     plt.legend(fontsize=14)
     #plt.subplots_adjust(top = 0.8, bottom = 0.1, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0)
-    plt.savefig('./plot/cp_%s.png'%tttt,format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot/cp_%s.tiff'%tttt,format='tiff',bbox_inches='tight', dpi=100)
     plt.show()
     
 plot_cp()
@@ -281,11 +288,11 @@ def line_plotu_sub(i):
     xb=np.linspace(0,0,50)
     yb=np.linspace(0.5,1.0,50)
 
-    xc=np.linspace(1,1,50)
+    xc=np.linspace(1.0,1.0,50)
     yc=np.linspace(-0,1,50)
 
-    xd=np.linspace(2,2,50)
-    yd=np.linspace(-0,1,50)
+    xd=np.linspace(1.5,1.5,50)
+    yd=np.linspace(0,1,50)
         
         
     # for u    
@@ -374,7 +381,7 @@ def line_plotu_sub(i):
     plt.figure(figsize=(6, 4), dpi=100)
     
     plt.subplot(1,3,1)
-    plt.plot(u1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(u1b,yb,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei,label='CFD')
     plt.plot(u2b,yb,'g',linewidth=3,label='PINN')
     #plt.plot(u3a,ya,'r',linewidth=3,label='NN')
     #plt.legend(fontsize=14)
@@ -383,7 +390,7 @@ def line_plotu_sub(i):
     plt.ylim(-0.05,1.05)    
     
     plt.subplot(1,3,2)
-    plt.plot(u1c,yc,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(u1c,yc,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei)
     plt.plot(u2c,yc,'g',linewidth=3)
     #plt.plot(u3b,yb,'r',linewidth=3)
     plt.xlabel('u-velocity',fontsize=20)
@@ -392,7 +399,7 @@ def line_plotu_sub(i):
     plt.ylim(-0.05,1.05)    
         
     plt.subplot(1,3,3)
-    plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(u1d,yd,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei,label='CFD')
     plt.plot(u2d,yd,'g',linewidth=3,label='PINN')
     #plt.plot(u3d,yd,'r',linewidth=3,label='NN')
     plt.legend(loc="upper left", bbox_to_anchor=[-0.02, 0.9], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
@@ -402,7 +409,7 @@ def line_plotu_sub(i):
     
     plt.figtext(0.4, 0.00, '(a)', wrap=True, horizontalalignment='center', fontsize=24)
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
-    plt.savefig('./plot/u_%s.png'%(tttt), format='png', bbox_inches='tight',dpi=100)
+    plt.savefig('./plot/u_%s.tiff'%(tttt), format='tiff', bbox_inches='tight',dpi=300)
     plt.show()   
     plt.close()
     
@@ -412,7 +419,7 @@ def line_plotu_sub(i):
     plt.figure(figsize=(6, 4), dpi=100)
     
     plt.subplot(1,3,1)
-    plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(v1b,yb,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei)
     plt.plot(v2b,yb,'g',linewidth=3)
     #plt.plot(v3a,ya,'r',linewidth=3)
     #plt.legend(fontsize=14)
@@ -421,7 +428,7 @@ def line_plotu_sub(i):
     plt.ylim(-0.05,1.05)    
     
     plt.subplot(1,3,2)
-    plt.plot(v1c,yc,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(v1c,yc,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei)
     plt.plot(v2c,yc,'g',linewidth=3)
     #plt.plot(v3b,yb,'r',linewidth=3)
     plt.xlabel('v-velocity',fontsize=20)
@@ -430,7 +437,7 @@ def line_plotu_sub(i):
     plt.ylim(-0.05,1.05)        
     
     plt.subplot(1,3,3)
-    plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(v1d,yd,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=mei,label='CFD')
     plt.plot(v2d,yd,'g',linewidth=3,label='PINN')
     #plt.plot(v3d,yd,'r',linewidth=3,label='NN')
     plt.yticks([])  
@@ -440,7 +447,7 @@ def line_plotu_sub(i):
        
     plt.figtext(0.4, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
-    plt.savefig('./plot/v_%s.png'%(tttt), format='png',bbox_inches='tight', dpi=100)
+    plt.savefig('./plot/v_%s.tiff'%(tttt), format='tiff',bbox_inches='tight', dpi=300)
     plt.show() 
     plt.close()    
     

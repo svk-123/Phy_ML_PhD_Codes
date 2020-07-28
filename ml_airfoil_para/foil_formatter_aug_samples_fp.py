@@ -163,7 +163,7 @@ for iiii in range(1):
 
     info='[foil_mat,foil_fp,xx,nname,info,[x:-.05,1.05,y:-.25,.25:lw=0.5]'    
     data2=[foil_mat,foil_fp,xx,nname,info]
-    with open(path+'foil_param_naca4_opti.pkl', 'wb') as outfile:
+    with open(path+'foil_param_base.pkl', 'wb') as outfile:
         pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
 
 

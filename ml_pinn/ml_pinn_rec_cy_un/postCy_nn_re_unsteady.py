@@ -20,6 +20,7 @@ from scipy import interpolate
 from os import listdir
 from os.path import isfile,isdir, join
 import pickle
+from sklearn.cluster import KMeans
 
 """
 load x y z
@@ -73,6 +74,11 @@ for jj in range(1):
     
     otime=[]
     para=[]
+    
+    
+    my_xc=[]
+    my_yc=[]
+    my_tt_c=[]
     
     for ii in range(1):
         
@@ -205,6 +211,20 @@ for jj in range(1):
             w=w[I]
             p=p[I]
             
+            if(kk==0):
+                print(x.shape)
+                xy=np.concatenate((x[:,None],y[:,None]),axis=1)
+                print (xy.shape)
+                kmeans = KMeans(n_clusters=1000, random_state=0).fit(xy)
+                c1=kmeans.cluster_centers_
+                
+                xc=c1[:,0]
+                yc=c1[:,1]
+            
+            
+            
+            
+            
             if (p.max() > 5):
                 print (tmp[ii])
                 #fp.write('%s \n'%tmp[ii])
@@ -237,7 +257,7 @@ for jj in range(1):
             myout_p.extend(p)
             myout_u.extend(u)
             myout_v.extend(v)
-    
+        
             tlist=[]
             for k in range(len(x)):
                 tlist.append(mytt[kk])
@@ -259,15 +279,26 @@ for jj in range(1):
             otime.extend(otlist)     
             para.append([t1,t2,mytt.max()])
 
+            #for centres
+            my_xc.extend(xc)
+            my_yc.extend(yc)
+            tlist_c=[]
+            for k in range(len(xc)):
+                tlist_c.append(mytt[kk])
+            tlist_c=np.asarray(tlist_c)
+            my_tt_c.extend(tlist_c)
+            
+#fp=open('./data_file/cy_internal_3222.dat','w')
+#fp.write('x y t p u v: 193-195: 0.1 dt\n')
+#for i in range(len(myinp_x)):
+#    fp.write('%f %f %f %f %f %f\n'%(myinp_x[i], myinp_y[i], myinp_t[i], myout_p[i], myout_u[i], myout_v[i]))
+#fp.close()
 
-
-fp=open('./data_file/cy_internal_3222.dat','w')
-fp.write('x y t p u v: 193-195: 0.1 dt\n')
-for i in range(len(myinp_x)):
-    fp.write('%f %f %f %f %f %f\n'%(myinp_x[i], myinp_y[i], myinp_t[i], myout_p[i], myout_u[i], myout_v[i]))
+fp=open('./data_file/cy_internal_centers_1000_3222.dat','w')
+fp.write('x y t : centers for gov. eqn\n')
+for i in range(len(my_xc)):
+    fp.write('%f %f %f \n'%(my_xc[i], my_yc[i], my_tt_c[i]))
 fp.close()
-
-
         
 #    #save file
 #    filepath='./data_file'
@@ -280,3 +311,6 @@ fp.close()
 #    with open(filepath+'/cy_un_lam_around_5555_%s.pkl'%(jj+1), 'wb') as outfile1:
 #        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
 
+plt.figure(figsize=(6,5))
+plt.plot(xc,yc,'o')
+plt.show()

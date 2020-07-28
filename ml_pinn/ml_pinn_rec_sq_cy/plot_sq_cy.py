@@ -282,10 +282,10 @@ def line_plotu_sub(i):
     xb=np.linspace(0,0,50)
     yb=np.linspace(0.5,1.0,50)
 
-    xc=np.linspace(1,1,50)
-    yc=np.linspace(-0,1,50)
+    xc=np.linspace(0.5,0.5,50)
+    yc=np.linspace(0.5,1,50)
 
-    xd=np.linspace(1.5,1.5,50)
+    xd=np.linspace(1.0,1.0,50)
     yd=np.linspace(-0,1,50)
             
     #for u    
@@ -436,7 +436,7 @@ def line_plotu_sub(i):
     plt.yticks([])  
     plt.legend(loc="upper left", bbox_to_anchor=[0.19, 0.5], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
     plt.ylim(-0.05,1.05)    
-    #plt.xlim(-0.3,0.5)
+    plt.xlim(-0.01,0.05)
        
     plt.figtext(0.4, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0, hspace = 0, wspace = 0.1)

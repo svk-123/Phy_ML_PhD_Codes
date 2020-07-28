@@ -123,7 +123,7 @@ by=-0.05
 wx=0.05
 wy=0.0
 
-for i in range(2):
+for i in range(4):
     new_coord.extend(np.asarray([x1+tx*i,y1+ty*i]).transpose())
     new_coord.extend(np.asarray([x2+fx*i,y2+fy*i]).transpose())
     new_coord.extend(np.asarray([x3+bx*i,y3+by*i]).transpose())
@@ -381,7 +381,7 @@ for jj in range(1):
 
 
 
-fp=open('./data_file/cy_sample_ar_10x2.dat','w')
+fp=open('./data_file/cy_sample_ar_10x4.dat','w')
 fp.write('x y t p u v\n')
 for i in range(len(myinp_x)):
     fp.write('%f %f %f %f %f %f\n'%(myinp_x[i], myinp_y[i], myinp_t[i], myout_p[i], myout_u[i], myout_v[i]))

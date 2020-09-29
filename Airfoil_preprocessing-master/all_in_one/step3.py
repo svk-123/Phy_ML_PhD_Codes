@@ -16,7 +16,7 @@ from scipy.interpolate import UnivariateSpline
 
 # read airfoils names
 namelist =[]
-f = open('step2_name_cst.txt','r')
+f = open('step2_name_0p5.txt','r')
 while True:
   filename=f.readline()
   if filename:
@@ -150,8 +150,9 @@ fdis = open('step3_discarded.txt','w')
 
 for iair in xrange(len(namelist)):
     filename = namelist[iair]
-    aa = np.loadtxt('cst_reformat/'+filename)
+    aa = np.loadtxt('picked_uiuc_aug/'+filename,skiprows=1)
     print filename
+    print iair
     pickflag, newairfoil  = checkthick(aa)
     if pickflag:
         fname.write(filename+'\n')

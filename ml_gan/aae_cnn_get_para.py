@@ -18,8 +18,8 @@ import numpy as np
 
 import cPickle as pickle
 
-path='./models/case_2_aae_uiuc_RS/saved_model/'
-iters=99999
+path='./models_v1/case_1_include_naca4_5166/saved_model/'
+iters=80000
 
 # load json and create model
 json_file = open(path+'aae_decoder_%s_%s.json'%(iters,iters), 'r')
@@ -55,7 +55,7 @@ myout=[]
 xx=[]
 name=[]
 
-data_file='./data_file/foil_param_uiuc_216.pkl'	
+data_file='./data_file_new/foil_naca4_opti_0.pkl'	
 with open(data_file, 'rb') as infile:
     result = pickle.load(infile)
     print (result[-1:]) 
@@ -76,6 +76,7 @@ c1=encoder.predict(myin)
 out=decoder.predict(c1)
 score=discriminator.predict(c1)
 
+'''
 eps=1e-12
 mm=[]
 for i in range(8):
@@ -90,10 +91,11 @@ mm_scale=np.asarray(mm_scale)
 c1_scaled=c1.copy()
 for i in range(8): 
     c1_scaled[:,i]=c1_scaled[:,i]/mm_scale[i]
-    
-info='[para_scaled,name,para(unscaled),mm_scaler,info:foil_param_uiuc_216.pkl]'    
-data2=[c1_scaled,name,c1,mm_scale,info]
-with open('./data_file/param_gan_uiuc_RS_8.pkl', 'wb') as outfile:
+'''
+
+info='[para(unscaled),name,info:uiuc_para (gan trained with uiuc, naca4, op5 gan foils)]'    
+data2=[c1,name,info]
+with open('./data_file_new/gan_naca4_para8_tanh_v1.pkl', 'wb') as outfile:
     pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
     
     

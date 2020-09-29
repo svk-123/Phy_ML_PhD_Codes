@@ -74,13 +74,16 @@ class AdversarialAutoencoder():
         
         conv4 = Conv2D(256, (2, 2), activation='relu', padding='same')(pool3)
         pool4 = MaxPooling2D(pool_size=(2, 2))(conv4)
+
+        conv5 = Conv2D(512, (2, 2), activation='relu', padding='same')(pool4)
+        pool5 = MaxPooling2D(pool_size=(2, 2))(conv5)
         
         #conv5 = Conv2D(128, (2, 2), activation='relu', padding='same')(pool4)
         #pool5 = MaxPooling2D(pool_size=(2, 2))(conv5)
         
         # flatten the 4D array (batch, height, width, depth) into 
         # a 2D array (batch, n). Perform a fully connected layer
-        flat5 = Flatten()(pool4)
+        flat5 = Flatten()(pool5)
         
         flat5 = Dense(200, activation='tanh')(flat5)
         flat5 = Dense(200, activation='tanh')(flat5)
@@ -129,9 +132,8 @@ class AdversarialAutoencoder():
         myout = []
         xx  = []
 
-        data_file='./data_file/foil_param_uiuc_216.pkl'	
-        
-        
+        data_file='./data_file_new/foil_uiuc.pkl'	
+                
         with open(data_file, 'rb') as infile:
             result = pickle.load(infile)
             print (result[-1:])    
@@ -139,9 +141,21 @@ class AdversarialAutoencoder():
             myin.extend(result[0])
             myout.extend(result[1])
             xx.extend(result[2])
+
+        for jj in range(1,7): 
+            data_file='./data_file_new/foil_0p5_%d.pkl'%jj	
+                    
+            with open(data_file, 'rb') as infile:
+                result = pickle.load(infile)
+                print (result[-1:])    
+                
+                myin.extend(result[0])
+                myout.extend(result[1])
+                xx.extend(result[2])
         
         myin=np.asarray(myin)
         myin=np.reshape(myin,(len(myin),216,216,1))  
+        print(len(myin))
         
         myout=np.asarray(myout)/0.2
 
@@ -168,6 +182,9 @@ class AdversarialAutoencoder():
             latent_real = self.encoder.predict(imgs)
             #latent_fake = np.random.normal(size=(batch_size, self.latent_dim))
             latent_fake=np.random.random_sample((batch_size,self.latent_dim))
+            for ii in range(batch_size):
+                idx = np.random.choice(8,np.random.randint(8), replace=False)   
+                latent_fake[ii,idx]=-latent_fake[ii,idx]
             
             # Train the discriminator
             d_loss_real = self.discriminator.train_on_batch(latent_real, valid)
@@ -190,10 +207,12 @@ class AdversarialAutoencoder():
                 #self.sample_images(epoch)
                 #self.training_images(epoch)
                 
-            if ((epoch+1) % 1000 == 0):
+            if ((epoch+1) % 3000 == 0 and self.my_lr > 1.e-6):
                 self.my_lr=self.my_lr*0.5
+
+            if ((epoch+1) % 3000 == 0):    
+                self.save_model(epoch+1)
                 
-        self.save_model()
         
     def sample_images(self, epoch):
         r, c = 5, 5
@@ -278,4 +297,4 @@ class AdversarialAutoencoder():
 
 if __name__ == '__main__':
     aae = AdversarialAutoencoder()
-    aae.train(epochs=10000, batch_size=32, sample_interval=100)
+    aae.train(epochs=100000, batch_size=256, sample_interval=100)

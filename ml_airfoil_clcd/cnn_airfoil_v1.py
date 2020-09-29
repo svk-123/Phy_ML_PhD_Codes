@@ -288,4 +288,3 @@ with open('./model_cnn/hist.pkl', 'wb') as outfile:
 
 
 
-

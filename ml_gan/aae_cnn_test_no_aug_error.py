@@ -19,7 +19,7 @@ import numpy as np
 import cPickle as pickle
 
 path='./models/case_1_aae_no_aug_RT/saved_model/'
-iters=99000
+iters=4800
 
 # load json and create model
 json_file = open(path+'aae_decoder_%s_%s.json'%(iters,iters), 'r')
@@ -30,7 +30,6 @@ decoder = model_from_json(loaded_model_json)
 decoder.load_weights(path+"aae_decoder_%s_weights_%s.hdf5"%(iters,iters))
 print("Loaded model from disk")  
 
-
 # load json and create model
 json_file = open(path+'aae_encoder_%s_%s.json'%(iters,iters), 'r')
 loaded_model_json = json_file.read()
@@ -40,23 +39,22 @@ encoder = model_from_json(loaded_model_json)
 encoder.load_weights(path+"aae_encoder_%s_weights_%s.hdf5"%(iters,iters))
 print("Loaded model from disk")  
 
-
- # load json and create model
+# load json and create model
 json_file = open(path+'aae_discriminator_%s_%s.json'%(iters,iters), 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 discriminator = model_from_json(loaded_model_json)
+
 # load weights into new model
 discriminator.load_weights(path+"aae_discriminator_%s_weights_%s.hdf5"%(iters,iters))
 print("Loaded model from disk")  
-
 
 #load data
 myin=[]
 myout=[]
 xx=[]
 
-data_file='./data_file/foil_param_216_no_aug_ts.pkl'	
+data_file='./data_file/foil_param_uiuc_216.pkl'	
 with open(data_file, 'rb') as infile:
     result = pickle.load(infile)
     print (result[-1:]) 
@@ -73,16 +71,14 @@ del result
 #encoder
 latent=encoder.predict(myin)
 out=decoder.predict(latent)
-out=out*0.25
+out=out*0.2
 score=discriminator.predict(latent)
-
 
 #cnt = 0
 #for k in range(4):
 #        r=5
 #        c=5
 #        fig, axs = plt.subplots(r, c)
-#        
 #        for i in range(r):
 #            for j in range(c):
 #                axs[i,j].plot(xx[::-1],myout[cnt, :35])
@@ -91,17 +87,16 @@ score=discriminator.predict(latent)
 #                cnt += 1
 #        fig.savefig("plot/true_%d.png" % k)
 #        plt.close()   
-
-
 # morphed airfoils
+
 cnt=0    
-for k in range(100):
+for k in range(0):
         
         I= np.random.randint(0,100)
         l=latent[I]
         noise=np.random.normal(0,0.1,8)
         out1=decoder.predict((l[:,None]+noise[:,None]).transpose())
-        out1=out1*0.25
+        out1=out1*0.2
         score1=discriminator.predict((l[:,None]+noise[:,None]).transpose())
         print (score1[0][0])
         if(score1[0][0] > 0.999999):
@@ -125,57 +120,55 @@ for k in range(100):
             plt.show()
             plt.close()     
             cnt=cnt+1
-
-
             
-###random sample    
-##cnt = 0
-##score=[]
-##for k in range(1000):
-##    latent_fake=np.random.random_sample((1,10))
-##    score.append(discriminator.predict(latent_fake))
-##score=np.asarray(score)
-#    
-#    
-##calculate error norm
-#train_l2=[]
-#train_l1=[]
-#for k in range(len(out)):    
-#    
-#    tmp=myout[k]-out[k]
-#    
-#    train_l2.append( (LA.norm(tmp)/LA.norm(out))*100 )
-#
-#    tmp2=tmp/out[k]
-#    train_l1.append(sum(abs(tmp2))/len(out))
-#print ("train_l2_avg",sum(train_l2)/len(train_l2))
-##spread_plot
-#plt.figure(figsize=(6,5),dpi=100)
-#plt.plot([-2,1.5],[-2,1.5],'k',lw=3)
-#plt.plot(myout[0],out[0],'ro')
-#for k in range(len(out)):
-#    
-#    plt.plot(myout[k],out[k],'ro')
-#plt.legend(fontsize=20)
-#plt.xlabel('True',fontsize=20)
-#plt.ylabel('Prediction',fontsize=20)
-##lt.xlim([-1.5,1.5])
-##plt.ylim([-1.5,1.5])    
-#plt.savefig('test_spread.png', bbox_inches='tight',dpi=100)
-#plt.show() 
-#    
-##error plot
-#plt.figure(figsize=(6,5),dpi=100)
-#plt.hist(train_l2, 20,histtype='step', color='grey',stacked=True,fill=True,alpha=1,orientation ='vertical')
-#plt.ylabel('Number of Samples',fontsize=20)
-#plt.xlabel('$L_2$ relative error(%)',fontsize=20)
-#plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
-#plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
-##plt.xlim([-0.0,0.25])
-##plt.xticks([0,0.5,1.])
-#plt.savefig('tr_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
-#plt.show()
-#
+##random sample    
+#cnt = 0
+#score=[]
+#for k in range(1000):
+#    latent_fake=np.random.random_sample((1,10))
+#    score.append(discriminator.predict(latent_fake))
+#score=np.asarray(score)
+    
+    
+#calculate error norm
+train_l2=[]
+train_l1=[]
+for k in range(len(out)):    
+    
+    tmp=myout[k]-out[k]
+    
+    train_l2.append( (LA.norm(tmp)/LA.norm(out))*100 )
+
+    tmp2=tmp/out[k]
+    train_l1.append(sum(abs(tmp2))/len(out))
+print ("train_l2_avg",sum(train_l2)/len(train_l2))
+#spread_plot
+plt.figure(figsize=(6,5),dpi=100)
+plt.plot([-2,1.5],[-2,1.5],'k',lw=3)
+plt.plot(myout[0],out[0],'ro')
+for k in range(len(out)):
+    
+    plt.plot(myout[k],out[k],'ro')
+plt.legend(fontsize=20)
+plt.xlabel('True',fontsize=20)
+plt.ylabel('Prediction',fontsize=20)
+#lt.xlim([-1.5,1.5])
+#plt.ylim([-1.5,1.5])    
+plt.savefig('test_spread.png', bbox_inches='tight',dpi=100)
+plt.show() 
+    
+#error plot
+plt.figure(figsize=(6,5),dpi=100)
+plt.hist(train_l2, 20,histtype='step', color='grey',stacked=True,fill=True,alpha=1,orientation ='vertical')
+plt.ylabel('Number of Samples',fontsize=20)
+plt.xlabel('$L_2$ relative error(%)',fontsize=20)
+plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
+plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
+#plt.xlim([-0.0,0.25])
+#plt.xticks([0,0.5,1.])
+plt.savefig('tr_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
+plt.show()
+
 #    
 #    
 #
@@ -204,7 +197,4 @@ for k in range(100):
 #            plt.show()
 #            plt.close()     
 #            cnt=cnt+1    
-#    
-#    
-#    
-#    
+ 

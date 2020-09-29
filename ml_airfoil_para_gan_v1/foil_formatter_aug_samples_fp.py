@@ -31,7 +31,7 @@ np.set_printoptions(threshold=np.inf)
 
 path='./'
 
-indir='./picked_cst_101/'
+indir='./picked_uiuc_aug_101_parts/part_1/'
 
 fname = [f for f in listdir(indir) if isfile(join(indir, f))]
 fname.sort()  
@@ -49,13 +49,13 @@ coord=np.asarray(coord)
 xx=coord[0,:,0]
 
 
+st=[0,1000,2000,3000,4000,5000]
+end=[1000,2000,3000,4000,5000,len(fname)]
 
-st=[0]
-end=[len(fname)]
-
-for iiii in range(1):
+for iiii in range(3,6):
     foil_fp=[]
     foil_mat=[]
+    foil_name=[]
     
     folder = './plot/'
     for the_file in os.listdir(folder):
@@ -96,11 +96,12 @@ for iiii in range(1):
         foil_mat.append(img)
         #print 'image matrix size: ', img.shape      # print the size of image
         foil_fp.append(coord[i,0:100,1])
-    
+        foil_name.append(nname[i])
+        
     foil_fp=np.asarray(foil_fp)    
     info='[foil_mat,foil_fp,xx,nname,info,[x:-.05,1.05,y:-.2,.2:lw=0.5]'    
-    data2=[foil_mat,foil_fp,xx,nname,info]
-    with open(path+'foil_param_cst.pkl', 'wb') as outfile:
+    data2=[foil_mat,foil_fp,xx,foil_name,info]
+    with open(path+'foil_uiuc_aug_%s.pkl'%iiii, 'wb') as outfile:
         pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
 
 

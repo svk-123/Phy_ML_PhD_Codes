@@ -18,8 +18,8 @@ import numpy as np
 
 import cPickle as pickle
 
-path='./models/case_1_aae_batch_RT/saved_model/'
-iters=1800
+path='./models_v1/case_1_include_naca4_5166/saved_model/'
+iters=80000
 
 # load json and create model
 json_file = open(path+'aae_decoder_%s_%s.json'%(iters,iters), 'r')
@@ -57,7 +57,7 @@ myout=[]
 xx=[]
 name=[]
 
-data_file='./data_file/foil_param_uiuc_216.pkl'	
+data_file='./data_file_new/foil_uiuc.pkl'	
 with open(data_file, 'rb') as infile:
     result = pickle.load(infile)
     print (result[-1:]) 
@@ -129,37 +129,48 @@ for k in range(0):
 
 #write airfoils
 cnt=0    
-for k in range(1425):
+for k in range(100):
         print (k)
         
-        for m in range(5):
+        for m in range(1):
             l=latent[k]
             
-            noise=np.random.normal(0,0.05,8)
-            out1=decoder.predict((l[:,None]+noise[:,None]).transpose())
+            noise=np.random.normal(0,0.5,8)
+            out1=decoder.predict((l[:,None]).transpose())
             out1=out1*0.2
-            score1=discriminator.predict((l[:,None]+noise[:,None]).transpose())
+            score1=discriminator.predict((l[:,None]).transpose())
+
+            out2=decoder.predict((l[:,None]+noise[:,None]).transpose())
+            out2=out2*0.2
+            score2=discriminator.predict((l[:,None]+noise[:,None]).transpose())
+            print (score2)
             
-            if(score1[0][0] > 0.99999):
+            if(score2[0][0] < 0.9):
                 
-                fp=open('./foil_0p5/%s_%s.dat'%(name[k],m),'w')
-                
-                for n in range(100):
-                    fp.write("%f %f \n"%(xx[n],out1[0,n]))
-                fp.write("%f %f \n"%(xx[100],out1[0,0]))
-                fp.close()    
+#                fp=open('./foil_0p5/%s_%s.dat'%(name[k],m),'w')
+#                
+#                for n in range(100):
+#                    fp.write("%f %f \n"%(xx[n],out1[0,n]))
+#                fp.write("%f %f \n"%(xx[100],out1[0,0]))
+#                fp.close()    
 
 
                 plt.figure()
-                plt.plot(xx[:100],out1[0,:],'r')
+                plt.plot(xx[:100],out1[0,:],'r',label='original')
+                plt.plot(xx[:100],out2[0,:],'g',label='morphed')
+                plt.legend(fontsize=12)
                 #plt.axis('off')
                 plt.ylim([-0.2,0.2])
-                plt.text(0.4,-0.18,'%s'%score1)
+                plt.text(0.4,-0.18,'%s'%score2[0][0],fontsize=16)
                 plt.savefig("./foil_0p5_plot/%s_%s.png" %(name[k],m))
                 
                 plt.show()
                 plt.close() 
-
+                
+                
+                
+                
+'''
 #testing airfoils
 cnt=0    
 for k in range(0):
@@ -216,23 +227,24 @@ plt.xlabel('True',fontsize=20)
 plt.ylabel('Prediction',fontsize=20)
 #lt.xlim([-1.5,1.5])
 #plt.ylim([-1.5,1.5])    
-plt.savefig('tr_spread_batch.png', bbox_inches='tight',dpi=100)
+plt.savefig('tr_spread_5166.png', bbox_inches='tight',dpi=100)
 plt.show() 
     
 #error plot
+train_l2=np.asarray(train_l2)*10
 plt.figure(figsize=(6,5),dpi=100)
 plt.hist(train_l2, 20,histtype='step', color='grey',stacked=True,fill=True,alpha=1,orientation ='vertical')
 plt.ylabel('Number of Samples',fontsize=20)
 plt.xlabel('$L_2$ relative error(%)',fontsize=20)
-plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
+plt.figtext(0.40, 0.01, '(c)', wrap=True, horizontalalignment='center', fontsize=24)    
 plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
-plt.xlim([-0.0,0.5])
+#plt.xlim([-0.0,0.5])
 #plt.xticks([0,0.5,1.])
-plt.savefig('tr_tot_batch.tiff',format='tiff', bbox_inches='tight',dpi=300)
+plt.savefig('tr_tot_5166.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
 
     
-    
+    '''
     
     
     

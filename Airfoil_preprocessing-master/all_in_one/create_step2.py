@@ -24,14 +24,14 @@ from os.path import isfile, isdir, join
 from numpy import random
 
 #load file name
-casedir='./cst_reformat/'
+casedir='./picked_uiuc_aug/'
 fname = [f for f in listdir(casedir) if isfile(join(casedir, f))]
 fname=np.asarray(fname)
 fname.sort()
 np.random.seed(12453)
 random.shuffle(fname)
 
-fp=open('step2_name_cst.txt','w')
+fp=open('step2_name_0p5.txt','w')
 for i in range(len(fname)):
     fp.write('%s\n'%fname[i])
 

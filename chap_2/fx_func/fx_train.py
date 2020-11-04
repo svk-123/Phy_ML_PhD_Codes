@@ -89,6 +89,7 @@ g =Dense(1, activation='linear')(xx)
 #xx =Dense(50,activation='linear')(xx)
 #g =Dense(1, activation='linear')(xx)
 
+'''
 #model
 model = Model(inputs=[aa], outputs=[g])
 # Compile model
@@ -117,11 +118,10 @@ lrate=hist.history['lr']
 data1=[hist.history]
 with open('./hist/hist_%s.pkl'%suff, 'wb') as outfile:
     pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
-
+'''
 
 # only testing 
-
-xt=np.linspace(0,1.2,100)
+xt=np.linspace(0,1.0,100)
 yt=np.zeros(len(xt))
 for i in range(len(xt)):
     yt[i] = 0.2+0.4*xt[i]**2+0.3*xt[i]*math.sin(15*xt[i])+0.05*math.cos(50*xt[i])
@@ -136,17 +136,20 @@ zte=np.zeros(len(ze))
 for i in range(len(zte)):
     zte[i] = 0.2+0.4*ze[i]**2+0.3*ze[i]*math.sin(15*ze[i])+0.05*math.cos(50*ze[i])
     
+'''    
 pred = model.predict(xt)    
 predz = model.predict(z)
 predze = model.predict(ze)
+'''
 
 mei=10
 plt.figure(figsize=(6, 5), dpi=100)
-plt.plot(xt,yt,'b',marker='o',mfc='None',mew=1.5,mec='blue',linewidth=3,ms=10,markevery=mei,label='True')
+#plt.plot(xt,yt,'b',marker='o',mfc='None',mew=1.5,mec='blue',linewidth=3,ms=10,markevery=mei,label='True')
+plt.plot(xt,yt,'b',marker='None',mfc='None',mew=1.5,mec='blue',linewidth=3,ms=10,markevery=mei)
 #plt.plot(z,zt,'g',linewidth=3,label='MLP-tr')
 #plt.plot(ze,zte,'r',linewidth=3,label='MLP-ts')
-plt.plot(z,predz,'g',linewidth=3,label='MLP-tr')
-plt.plot(ze,predze,'r',linewidth=3,label='MLP-ts')
+#plt.plot(z,predz,'g',linewidth=3,label='MLP-tr')
+#plt.plot(ze,predze,'r',linewidth=3,label='MLP-ts')
 #plt.plot(u3d,yd,'r',linewidth=3,label='NN')
 plt.legend(loc="upper left", bbox_to_anchor=[-0.02, 0.9], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
 #plt.yticks([])    
@@ -157,7 +160,7 @@ plt.ylabel('f(x)',fontsize=20)
     
 #plt.figtext(0.4, 0.00, '(a)', wrap=True, horizontalalignment='center', fontsize=24)
 plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
-#plt.savefig('./plot/u_%s.tiff'%(suff), format='tiff', bbox_inches='tight',dpi=300)
+plt.savefig('./plot/fx_%s.tiff'%(suff), format='tiff', bbox_inches='tight',dpi=300)
 plt.show()   
 plt.close()
 

@@ -118,11 +118,11 @@ global xx
 
 xx=xx_
 
-tar_cl=1.0
+tar_cl=100.0
 init_cl=0
 reno=100000.0
 mach=0.0
-aoa=6.0
+aoa=4.0
 
 reno=np.asarray(reno)
 aoa=np.asarray(aoa)
@@ -169,9 +169,9 @@ def loss(para):
     _,pred_cl,pred_cd=evaluate(xy,reno,mach,aoa,200,True)
     
     if(pred_cl > 0):
-        e=(pred_cd/pred_cl)*100
+        e=100.0-(pred_cl/pred_cd)
     else:
-        e=100.0
+        e=1000.0
     
 #    if(pred_cl > tar_cl):
 #        #e=np.sqrt(((tar_cl - pred_cl) ** 2))
@@ -180,7 +180,7 @@ def loss(para):
 #        e=np.sqrt(((tar_cl - pred_cl) ** 2))
      
     
-    fp.write('%s %s %s\n'%(my_counter,e,pred_cl))    
+    fp.write('%s %s %s %s\n'%(my_counter,e,pred_cl,pred_cd))    
     if(my_counter == 0):
         init_cl=pred_cl
     my_counter = my_counter +1
@@ -197,12 +197,13 @@ def loss(para):
      
 
 #base foil name
-for iters in range(100):
+np.random.seed(123)    
+for iters in range(1):
     aa=mypara.copy()
     #base foil name
     idx1=np.random.randint(1425)   
     fn=name[idx1]
-    #fn='n0012'
+    fn='n0012'
     print(fn)
     idx=np.argwhere(name=='%s'%fn)    
     
@@ -213,14 +214,15 @@ for iters in range(100):
      
     print('Starting loss = {}'.format(loss(p1)))
     print('Intial foil = %s' %name[idx[0]])
-    
-    mylimit=((aa[:,0].min(),aa[:,0].max()),(aa[:,1].min(),aa[:,1].max()),(aa[:,2].min(),aa[:,2].max()),\
-             (aa[:,3].min(),aa[:,3].max()),(aa[:,4].min(),aa[:,4].max()),(aa[:,5].min(),aa[:,5].max()),\
-             (aa[:,6].min(),aa[:,6].max()),(aa[:,7].min(),aa[:,7].max()))
+    a1=-0.2
+    a2=0.2
+    mylimit=((aa[:,0].min()+a1,aa[:,0].max()+a2),(aa[:,1].min()+a1,aa[:,1].max()+a2),(aa[:,2].min()+a1,aa[:,2].max()+a2),\
+             (aa[:,3].min()+a1,aa[:,3].max()+a2),(aa[:,4].min()+a1,aa[:,4].max()+a2),(aa[:,5].min()+a1,aa[:,5].max()+a2),\
+             (aa[:,6].min()+a1,aa[:,6].max()+a2),(aa[:,7].min()+a1,aa[:,7].max()+a2))
 
     res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
                    options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
-                                     'eps': 0.05, 'maxfun': 100, \
+                                     'eps': 0.01, 'maxfun': 100, \
                                      'maxiter': 100, 'maxls': 100})
     #res = minimize(loss, x0=p1, method = 'L-BFGS-B', \
     #               options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
@@ -248,10 +250,10 @@ for iters in range(100):
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(xy0[:,0],xy0[:,1],'--k',label='Base')
     plt.plot(xy[:,0],xy[:,1],'g',lw=3,label='Optimized')
-    plt.legend(fontsize=14)
+    plt.legend(fontsize=14,fancybox=False,frameon=False, shadow=False)
     plt.xlim([-0.05,1.05])
     plt.ylim([-0.25,0.25])
-    plt.xlabel('X',fontsize=16)
-    plt.ylabel('Y',fontsize=16)
+    plt.xlabel('X/C',fontsize=16)
+    plt.ylabel('Y/C',fontsize=16)
     plt.savefig('./opt_plot/opti_%s.png'%fn,format='png',bbox_inches='tight',dpi=300)
     plt.close()

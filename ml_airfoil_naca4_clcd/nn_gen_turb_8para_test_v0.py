@@ -48,19 +48,19 @@ out_cl=[]
 
 for ii in [1]:
     
-    data_file='./data_file/naca4_clcd_turb_st_8para.pkl'
-    with open(data_file, 'rb') as infile:
-        result = pickle.load(infile)
-
-	out_cm.extend(result[0])   
-	out_cd.extend(result[1])
-    	out_cl.extend(result[2])
-
-    	inp_reno.extend(result[3])
-	inp_aoa.extend(result[4])
-	inp_para.extend(result[5])
+#    data_file='./data_file/naca4_clcd_turb_st_8para.pkl'
+#    with open(data_file, 'rb') as infile:
+#        result = pickle.load(infile)
+#
+#	out_cm.extend(result[0])   
+#	out_cd.extend(result[1])
+#    	out_cl.extend(result[2])
+#
+#    	inp_reno.extend(result[3])
+#	inp_aoa.extend(result[4])
+#	inp_para.extend(result[5])
     
-    data_file='./data_file/gen_clcd_turb_st_8para.pkl'
+    data_file='./data_file_v1/gen_cnn_clcd_turb_8para_v1.pkl'
     with open(data_file, 'rb') as infile:
         result = pickle.load(infile)
 
@@ -87,7 +87,7 @@ inp_aoa=inp_aoa/14.0
 my_inp=np.concatenate((inp_reno[:,None],inp_aoa[:,None],inp_para[:,:]),axis=1)
 my_out=np.concatenate((out_cd[:,None],out_cl[:,None]),axis=1)
 
-model_test=load_model('./selected_model/turb_gen_8para_6x50/model_sf_1600_0.00003714_0.00004874.hdf5') 
+model_test=load_model('./selected_model/case_gen_naca4_80x6/model/final_sf.hdf5') 
 out=model_test.predict([my_inp]) 
 
 my_out[:,0]=my_out[:,0] * 0.33
@@ -96,14 +96,20 @@ my_out[:,1]=my_out[:,1] * 2.04
 out[:,0]=out[:,0] * 0.33
 out[:,1]=out[:,1] * 2.04
 
+
+
+
+
+
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot([-0.0,0.35],[-0.0,0.35],'k',lw=3)
-plt.plot(my_out[:,0],out[:,0],'og',markersize=3)
+#plt.plot([-0.0,0.35],[-0.0,0.35],'k',lw=3,label='True')
+plt.plot([-0.6,2.1],[-0.6,2.1],'k',lw=3,label='True')
+plt.plot(my_out[:,1],out[:,1],'+r',markersize=3,label='MLP')
 plt.xticks(fontsize=16)
 plt.yticks(fontsize=16)
 plt.xlabel('True $C_d$',fontsize=20)
 plt.ylabel('Predicted $C_d$',fontsize=20)  
-plt.savefig('./plot/gen_cd.png', bbox_inches='tight',dpi=100)
+plt.savefig('./plot/gen_cl.png', bbox_inches='tight',dpi=100)
 plt.show()
 
 

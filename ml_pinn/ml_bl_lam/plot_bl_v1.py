@@ -69,7 +69,7 @@ import matplotlib
 #u=np.asarray(u)
 #v=np.asarray(v)
 
-Re=100
+Re=20000
 suff='re%s_nodp_nodv_x8_50'%Re    
 xy=np.loadtxt('./data_file/Re%s/bl_internal_combined.dat'%Re,skiprows=1)
 
@@ -89,13 +89,15 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8_nn50x8/tf_model/'%Re
+    path1='./tf_model/case_1_re100000_nodp_nodv_with_samling_x8_re_check/tf_model/'
     new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
-    tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
-               'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }
+    '''tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
+               'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }'''
 
+    tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None] }
+    
     op_to_load1 = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')    
     
     #uvp
@@ -119,7 +121,7 @@ def con_plot():
     l1=0
     l2=5
     h1=0
-    h2=0.2
+    h2=0.5
     AR=2.0/h2
 
     

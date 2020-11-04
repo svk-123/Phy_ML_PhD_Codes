@@ -90,11 +90,13 @@ graph = tf.get_default_graph()
 with tf.Session() as sess1:
     
     path1='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8/tf_model/'%Re
-    new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
+    new_saver1 = tf.train.import_meta_graph( path1 + 'model_50000.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
-    tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
-               'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }
+    #tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
+    #           'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }
+
+    tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None] }
 
     op_to_load1 = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')    
     

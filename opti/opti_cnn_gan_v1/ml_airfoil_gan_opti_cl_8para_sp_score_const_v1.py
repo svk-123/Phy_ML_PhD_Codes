@@ -51,9 +51,8 @@ import matplotlib
 matplotlib.rc('xtick', labelsize=16) 
 matplotlib.rc('ytick', labelsize=16) 
 
-
 # ref:[data,name]
-folder = './tmp/'
+folder = './opti_plot/'
 for the_file in os.listdir(folder):
     file_path = os.path.join(folder, the_file)
     try:
@@ -63,44 +62,37 @@ for the_file in os.listdir(folder):
     except Exception as e:
         print(e)
 
-
-
+#folder = './tmp/'
+#for the_file in os.listdir(folder):
+#    file_path = os.path.join(folder, the_file)
+#    try:
+#        if os.path.isfile(file_path):
+#            os.unlink(file_path)
+#        #elif os.path.isdir(file_path): shutil.rmtree(file_path)
+#    except Exception as e:
+#        print(e)
+        
 global xx
 mypara=[]
 name=[]
-xx=[]
+
 
 #load airfoil para
-path='./data_file_cnn/'
-data_file='cnn_uiuc_para_8_tanh_v1.pkl'
+path='./data_file_gan/'
+data_file='gan_uiuc_para8_tanh_v1.pkl'
 with open(path + data_file, 'rb') as infile:
     result1 = pickle.load(infile)
 
 mypara.extend(result1[0])
 name.extend(result1[1])
-xx.extend(result1[2])
-
-#myscaler=result1[7] #scaled parameter
-
-##load airfoil para
-#path='./data_file_cnn/'
-#data_file='naca4_cnn_clcd_turb_8para_v1.pkl'
-#with open(path + data_file, 'rb') as infile:
-#    result2 = pickle.load(infile)
-#
-#cd.extend(result2[1])
-#cl.extend(result2[2])
-#mypara.extend(result2[5])
-#name.extend(result2[6])
 
 
 mypara=np.asarray(mypara)
 name=np.asarray(name)
-xx=np.asarray(xx)
+with open('./data_file_gan/xx.npy','rb') as f:
+    xx=np.load(f)
+xx=xx[:100]
 
-#with open('xx.npy', 'wb') as f:
-#    np.save(f, xx)
-    
 #nname=[]
 #for i in range(len(name)):
 #    nname.append(name[i].decode())
@@ -112,21 +104,49 @@ xx=np.asarray(xx)
 #    
 #fp.close()
 
+model_cl=load_model('./selected_model_gan/case_gen_gan_para_naca4_80x6/model/final_sf.hdf5')  
 
-model_cl=load_model('./selected_model_cnn/case_gen_naca4_80x6/model/final_sf.hdf5')  
-model_para=load_model('./selected_model_cnn/case_1_p8_tanh_include_naca4_v2/model_cnn/final_cnn.hdf5') 
-get_c= K.function([model_para.layers[16].input],  [model_para.layers[19].output])
+path='./selected_model_gan/case_1_include_naca4_5166/saved_model/'
+iters=80000
+
+# load json and create model
+json_file = open(path+'aae_decoder_%s_%s.json'%(iters,iters), 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+decoder = model_from_json(loaded_model_json)
+# load weights into new model
+decoder.load_weights(path+"aae_decoder_%s_weights_%s.hdf5"%(iters,iters))
+print("Loaded model from disk")  
+
+# load json and create model
+json_file = open(path+'aae_encoder_%s_%s.json'%(iters,iters), 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+encoder = model_from_json(loaded_model_json)
+# load weights into new model
+encoder.load_weights(path+"aae_encoder_%s_weights_%s.hdf5"%(iters,iters))
+print("Loaded model from disk")  
+
+ # load json and create model
+json_file = open(path+'aae_discriminator_%s_%s.json'%(iters,iters), 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+discriminator = model_from_json(loaded_model_json)
+# load weights into new model
+discriminator.load_weights(path+"aae_discriminator_%s_weights_%s.hdf5"%(iters,iters))
+print("Loaded model from disk")  
 
 global scaler
+
 global tar_cl
 global init_cl
 global reno
 global aoa
 
-tar_cl=1.5
+tar_cl=1.2
 init_cl=0
-reno=np.asarray([50000])/100000.
-aoa=np.asarray([6])/14.
+reno=np.asarray([20000])/100000.
+aoa=np.asarray([4])/14.
 
 reno=np.asarray(reno)
 aoa=np.asarray(aoa)
@@ -138,72 +158,87 @@ global error
 error=[]
 
 
-
-
-def get_coord(p2):
-    
-    para1=p2
-    para1=np.reshape(para1,(1,8))
-    c1 = get_c([para1])[0][0,:]
-    c1=c1*0.2
-    c2=np.concatenate((c1[0:100],-c1[0:1]),axis=0)
-    return (np.asarray([xx,c2]).transpose())
-
 def loss(para):
        
-    global my_counter  
     global init_cl
+    global coord
+    global my_counter
+    #rescale
     mypara=para
+    
+    mypara_1=np.reshape(mypara,(1,8))
+    
+    score= discriminator.predict(mypara_1)[0][0]
+    #print (score)
+    coord= decoder.predict(mypara_1)
+    
 
-    xy=get_coord(mypara)
 
     my_inp=np.concatenate((reno,aoa,mypara),axis=0)
     my_inp=np.reshape(my_inp,(1,10))
+        
     #cd, cl
     out=model_cl.predict([my_inp])
-    out=out*np.asarray([0.33,2.05])
-                
+    out=out*np.asarray([0.33,2.04])
+
     pred_cl=out[0,1]
-    pred_cd=out[0,0]
+    pred_cd=out[0,0]            
+    coord= decoder.predict(mypara_1)
+        
+    print ('Pred_cl: %0.6f %0.6f'%(pred_cl,pred_cd))
     
-    print ('Pred_cl:', pred_cl/pred_cd)
-#    if(pred_cl > tar_cl):
-#        #e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
-#        e=0
-#    else:
-#        e=np.sqrt(((tar_cl - pred_cl) ** 2).mean())
-    
-    if (pred_cl > 0):
-        e=(pred_cd/pred_cl)*100
+    #####for target cl--------------------------------
+    if(pred_cl > tar_cl ):
+        
+        e1=0
+        e2=max((0.9999-score),0)*10.0
+        e3=max((coord[0,-8]+0.001)-coord[0,8],0)*100.0
+        e  = e1 + e2 + e3
+        
     else:
-        e=100.0
-    print ('mse:', e)
+        
+        e1 = np.sqrt(((tar_cl - pred_cl) ** 2).mean())
+        #e1= abs(pred_cd/pred_cl)*10
+        e2 = max((0.9999-score),0)*10.0
+        #e3=0
+        e3=max((coord[0,-8]+0.001)-coord[0,8],0)*100.0
+        e  = e1 + e2 + e3
+        
+        
+    ##### max. cl/cd------------------------------------
+    '''e1= abs(pred_cd/pred_cl)*10
+    e2 = max((0.9999-score),0)*10.0
+    #e3=0
+    e3=max((coord[0,-8]+0.001)-coord[0,8],0)*100.0
+    e  = e1 + e2 + e3'''
+            
+    print ('mse: %0.6f %0.6f %0.6f %0.6f %0.6f'%(e, e1, e2, e3, score))
        
+    fp.write('%s %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n'%(my_counter,pred_cl, e, e1, e2, e3, score)) 
     
-    fp.write('%s %s %s\n'%(my_counter,e,pred_cl/pred_cd))    
     if(my_counter == 0):
         init_cl=pred_cl
     my_counter = my_counter +1
     print ('Iter:', my_counter)
     
-     
+  
     plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(xy[:,0],xy[:,1],'r',label='true')
+    plt.plot(xx,coord[0,:]*0.2,'r',label='true')
     plt.ylim([-0.5,0.5])
-    plt.savefig('./tmp/%s.png'%my_counter,format='png')
+    plt.savefig('./opti_plot/%s.png'%my_counter,format='png')
     plt.close()
                   
     return  e
 
-np.random.seed(123)     
-for iters in range(1):
-    
+
+dest='tmp'
+np.random.seed(12543)    
+for iters in range(10):
     my_counter=0
-    
     #base foil name
-    idx1=np.random.randint(1425)   
+    idx1=np.random.randint(len(mypara))   
     fn=name[idx1]
-    fn='n0012'
+    #fn='n0012'
     print(fn)
     idx=np.argwhere(name=='%s'%fn)
     
@@ -211,14 +246,13 @@ for iters in range(1):
     p1=mypara[idx[0][0],:]
     
     #conv file
-    fp=open('./opti_plot/conv_%s.dat'%fn,'w+')
+    fp=open('./%s/conv_%s.dat'%(dest,fn),'w+')
      
     print('Starting loss = {}'.format(loss(p1)))
     print('Intial foil = %s' %name[idx[0]])
-    
     a=mypara.copy()
-    a1=-0.0
-    a2=0.0
+    a1=-0.1
+    a2=0.1
     mylimit=((a[:,0].min()+a1,a[:,0].max()+a2),(a[:,1].min()+a1,a[:,1].max()+a2),(a[:,2].min()+a1,a[:,2].max()+a2),\
              (a[:,3].min()+a1,a[:,3].max()+a2),(a[:,4].min()+a1,a[:,4].max()+a2),\
              (a[:,5].min()+a1,a[:,5].max()+a2),(a[:,6].min()+a1,a[:,6].max()+a2),\
@@ -227,40 +261,42 @@ for iters in range(1):
     #mylimit=((0,6),(0,6),(6,32))
     res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
                    options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
-                                     'eps': 0.1, 'maxfun': 100, \
-                                     'maxiter': 50, 'maxls': 100})
+                                     'eps': 0.001, 'maxfun': 100, \
+                                     'maxiter': 100, 'maxls': 100})
         
     #res = minimize(loss, x0=p1, method = 'L-BFGS-B', \
     #               options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
     #                                 'eps': 0.01, 'maxfun': 100, \
     #                                 'maxiter': 50, 'maxls': 100})
         
+    
     print('Ending loss = {}'.format(loss(res.x)))
     fp.close()
-        
-    fp=open('./opti_plot/final_%s.dat'%fn,'w')
-    xy=get_coord(res.x)
-    for i in range(len(xy)):
-        fp.write('%f %f 0.00\n'%(xy[i,0],xy[i,0]))
+    
+    res_x=np.reshape(res.x,(1,8))
+    
+    fp=open('./%s/final_%s.dat'%(dest,fn),'w')
+    y=decoder.predict(res_x)[0,:]
+    for i in range(len(xx)):
+        fp.write('%f %f 0.00\n'%(xx[i],y[i]))
     fp.close()
     
-    fp=open('./opti_plot/resx_%s.dat'%fn,'w')
+    fp=open('./%s/resx_%s.dat'%(dest,fn),'w')
     fp.write('%s'%res.x)
     fp.close()
     
     #intial shape
-    xy0=get_coord(p1)
-        
+    init_x=np.reshape(p1,(1,8))
+    y0=decoder.predict(init_x)[0,:]
+    
     plt.figure(figsize=(6,5),dpi=100)
-    plt.plot(xy0[:,0],xy0[:,1],'--k',label='Base')
-    plt.plot(xy[:,0],xy[:,1],'g',lw=3,label='Optimized')
+    plt.plot(xx,y0*0.25,'--k',label='Base')
+    plt.plot(xx,y*0.25,'g',lw=3,label='Optimized')
     plt.legend(fontsize=14)
     plt.xlim([-0.05,1.05])
-    plt.ylim([-0.25,0.25])
+    plt.ylim([-0.5,0.5])
     plt.xlabel('X',fontsize=16)
     plt.ylabel('Y',fontsize=16)
-    plt.savefig('./opti_plot/opti_%s.png'%fn,format='png',bbox_inches='tight',dpi=300)
+    plt.savefig('./%s/opti_%s.png'%(dest,fn),format='png',bbox_inches='tight',dpi=300)
     plt.close()
-    
-    
     

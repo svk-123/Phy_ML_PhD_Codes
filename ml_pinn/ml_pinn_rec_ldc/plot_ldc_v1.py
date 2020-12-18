@@ -34,14 +34,15 @@ import matplotlib.gridspec as gridspec
 from scipy import interpolate
 from numpy import linalg as LA
 import matplotlib
+from scipy.interpolate import griddata
 
-#matplotlib.rc('xtick', labelsize=18) 
-#matplotlib.rc('ytick', labelsize=18) 
+matplotlib.rc('xtick', labelsize=18) 
+matplotlib.rc('ytick', labelsize=18) 
 
 
 
 Re=100
-suff='%s_wc_wt'%Re    
+suff='%s_ws_pinn'%Re    
 xy=np.loadtxt('./data_file/Re%s/ldc_internal_combined.dat'%Re,skiprows=1)
 
 val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
@@ -60,7 +61,7 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./tf_model/case_1_Re%s_ws_wc_wt1000/tf_model/'%Re
+    path1='./tf_model/case_1_Re100_nodp_nodv_ws_9x5/tf_model/'
     new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
@@ -187,6 +188,48 @@ line_plot2()
 
 
 
+def stream_plot(u11,v11,name):
+    
+    fig = plt.figure(figsize=(6, 6),dpi=100)
+    
+    pts_x=np.linspace(0.01,0.99,200)
+    pts_y=np.linspace(0.01,0.99,200)
+    xx,yy=np.meshgrid(pts_x,pts_y)
+    
+    pts=np.concatenate((xx.flatten()[:,None],yy.flatten()[:,None]),axis=1)
+    
+    points=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
+    grid_y, grid_x = np.mgrid[0:1:200j, 0:1:200j]
+    
+    u1 = griddata(points, u11, (grid_x, grid_y), method='linear')
+    v1 = griddata(points, v11, (grid_x, grid_y), method='linear')
+
+    ax1 = fig.add_subplot(1,1,1)
+    ax1.streamplot(grid_x,grid_y,u1,v1,density=4,linewidth=0.4,color='k', cmap=cm.jet,arrowsize=0.02,\
+                   minlength=0.1, maxlength=4.0, zorder=0)
+#    seed_points=np.array([xx.flatten(), yy.flatten()])
+#    ax1.streamplot(grid_x,grid_y,u1,v1,density=4,linewidth=1,color='k', cmap=cm.jet,arrowsize=0.02,\
+#                   minlength=0.1, start_points=seed_points.T, maxlength=4.0, zorder=0)    
+    
+        
+    #ax1.tricontourf(co[i][:,0],co[i][:,1],np.zeros(len(co[i])),colors='gray',zorder=5)
+    #ax1.set_title('%s'%name)
+    ax1.set_xlabel('X',fontsize=20)
+    ax1.set_ylabel('Y',fontsize=20)
+    ax1.set_xlim([0,1])
+    ax1.set_ylim([0,1])
+    #plt.subplots_adjust( wspace=0.2,hspace=0.3)
+    ax1.set_aspect(1)
+     
+         
+    
+    
+    plt.subplots_adjust(top = 1.2, bottom = 0.1, right = 0.98, left = 0.05, hspace = 0.0, wspace = 0.25)   
+    plt.savefig('./plot/stream_%s.png'%(name),format='png',bbox_inches='tight',dpi=200)
+    plt.show()
+    plt.close()
+
+stream_plot(u_pred,v_pred,'ws_pinn')
 
 
 

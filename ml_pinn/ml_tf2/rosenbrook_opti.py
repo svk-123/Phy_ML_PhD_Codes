@@ -8,9 +8,9 @@ import numpy as np
 import pickle
 import sys
 import math
-from matplotlib import pyplot as plt
-#tf.enable_eager_execution()
-from mpl_toolkits import mplot3d
+# from matplotlib import pyplot as plt
+# #tf.enable_eager_execution()
+# from mpl_toolkits import mplot3d
 
 
 
@@ -56,7 +56,7 @@ ttr=y1[:,None]
 
 xtr = xtr.astype('float32')
 ttr = ttr.astype('float32')
-
+'''
 #xtr=x_train
 #ttr=u_train
 
@@ -83,7 +83,8 @@ model.compile(optimizer=optimizer,loss='mse')
 model.fit(xtr, ttr, epochs=1000)
 #
 model.save('rosen_mlp')
-#new_model = tf.keras.models.load_model('final')
-##new_model.predict([xtr[1:2,:]])
+'''
+new_model = tf.keras.models.load_model('rosen_mlp')
+print(new_model.predict(np.asarray([0.6012779098876618, 0.3676370417975157]).reshape(1,2))*12140.0)
 
 

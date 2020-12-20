@@ -33,6 +33,7 @@ def val_and_grad(x):
     grad = tape.gradient(loss, x)
     return loss, grad
 
+
 #retun fucntion and gradients
 def func(x):
     return [vv.numpy().astype(np.float64)  for vv in val_and_grad(tf.constant(x, dtype=tf.float32))]

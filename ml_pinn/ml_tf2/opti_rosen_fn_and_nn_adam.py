@@ -22,7 +22,7 @@ def rosen_fn(a):
 model= tf.keras.models.load_model('rosen_mlp')
 #@tf.function
 def rosen_mlp(a):
-    return model(a)*12140.0
+    return model(a)
 
 
 #import pre-trained MLP model for rosenbrock fucntion
@@ -33,7 +33,7 @@ def rosen_mlp(a):
 variables = [x]
 
 # Instantiate a Gradient Decent Optimizer variant, it this case learning rate and specific type of optimizer doesn't matter too much
-optimizer = tf.optimizers.Adam(1e-6)
+optimizer = tf.optimizers.Adam(0.01)
 
 # We need to somehow specify the error between the actual value of the evaluated function in contrast to the target (which is zero)
 loss_object = tf.keras.losses.MeanAbsoluteError()
@@ -71,12 +71,24 @@ with tf.GradientTape(persistent=True) as tape:
         print('Iters: {}, Loss: {}, X: {}, {}'.format(iters,loss.numpy(), x.numpy()[0][0],x.numpy()[0][1]))
         iters=iters+1
 
+
+
+
+
+
+
+
+
+
+
+
+
+#nite-1
 '''
 inp = tf.Variable(np.random.normal(size=(1, 2)), dtype=tf.float32)
 model= tf.keras.models.load_model('rosen_mlp')
 
 with tf.GradientTape() as tape:
     preds = model(inp)
-
 grads = tape.gradient(preds, inp)
 '''

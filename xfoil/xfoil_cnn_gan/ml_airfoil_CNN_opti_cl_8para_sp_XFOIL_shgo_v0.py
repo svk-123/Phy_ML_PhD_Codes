@@ -45,7 +45,7 @@ from numpy import linalg as LA
 import os, shutil
 #from skimage import io, viewer,util 
 from scipy.optimize import minimize
-
+from scipy.optimize import shgo
 ##Xfoil imports
 from kulfan_to_coord import CST_shape
 import argparse
@@ -78,18 +78,18 @@ name=[]
 xx_=[]
 
 #load airfoil para
-path='./model_gan_v1/'
-data_file='gan_naca4_para8_tanh_v1.pkl'
+path='./model_cnn_v1/'
+data_file='cnn_uiuc_para_8_tanh_v1.pkl'
 with open(path + data_file, 'rb') as infile:
     result2 = pickle.load(infile)
 
 mypara.extend(result2[0])
 name.extend(result2[1])
+xx_.extend(result2[2])
 
 mypara=np.asarray(mypara)
 name=np.asarray(name)
-with open( path + 'xx.npy','rb') as f:
-    xx_=np.load(f)
+xx_=np.asarray(xx_)
 xx_=xx_[:101]
 
 #nname=[]
@@ -104,39 +104,11 @@ xx_=xx_[:101]
 #fp.close()
 
 
-#--- para model from AAE-----------------------------
-path='./model_gan_v1/case_1_include_naca4_5166/saved_model/'
-iters=80000
-
-# load json and create model
-json_file = open(path+'aae_decoder_%s_%s.json'%(iters,iters), 'r')
-loaded_model_json = json_file.read()
-json_file.close()
-decoder = model_from_json(loaded_model_json)
-# load weights into new model
-decoder.load_weights(path+"aae_decoder_%s_weights_%s.hdf5"%(iters,iters))
-print("Loaded model from disk")  
-
-# load json and create model
-json_file = open(path+'aae_encoder_%s_%s.json'%(iters,iters), 'r')
-loaded_model_json = json_file.read()
-json_file.close()
-encoder = model_from_json(loaded_model_json)
-# load weights into new model
-encoder.load_weights(path+"aae_encoder_%s_weights_%s.hdf5"%(iters,iters))
-print("Loaded model from disk")  
-
- # load json and create model
-json_file = open(path+'aae_discriminator_%s_%s.json'%(iters,iters), 'r')
-loaded_model_json = json_file.read()
-json_file.close()
-discriminator = model_from_json(loaded_model_json)
-# load weights into new model
-discriminator.load_weights(path+"aae_discriminator_%s_weights_%s.hdf5"%(iters,iters))
-print("Loaded model from disk")  
-#######------------------------------------------------
+model_para=load_model('./model_cnn_v1/case_1_p8_tanh_include_naca4_v2/model_cnn/final_cnn.hdf5') 
+get_c= K.function([model_para.layers[16].input],  [model_para.layers[19].output])
 
 global scaler
+
 global tar_cl
 global init_cl
 global reno
@@ -146,11 +118,11 @@ global xx
 
 xx=xx_
 
-tar_cl=1.0
+tar_cl=100.0
 init_cl=0
 reno=100000.0
 mach=0.0
-aoa=2.0
+aoa=4.0
 
 reno=np.asarray(reno)
 aoa=np.asarray(aoa)
@@ -165,16 +137,14 @@ def get_coord(p2):
     
     para1=p2
     para1=np.reshape(para1,(1,8))
-    #score= discriminator.predict(para1)[0][0]
-    #print (score)
-    c1= decoder.predict(para1)
+    c1 = get_c([para1])[0][0,:]
     c1=c1*0.2
-    c2=np.concatenate((c1[0,0:100],-c1[0,0:1]),axis=0)
+    c2=np.concatenate((c1[0:100],-c1[0:1]),axis=0)
     return (np.asarray([xx,c2]).transpose())
 
 
 #### check airfoil plot#####
-#fn='naca0012'
+#fn='n0012'
 #idx=np.argwhere(name=='%s'%fn)
 ##scaled parameter
 #p1=mypara[idx[0][0],:]
@@ -199,9 +169,9 @@ def loss(para):
     _,pred_cl,pred_cd=evaluate(xy,reno,mach,aoa,200,True)
     
     if(pred_cl > 0):
-        e=(pred_cd/pred_cl)*100
+        e=100.0*(pred_cd/pred_cl)
     else:
-        e=100.0
+        e=1000.0
     
 #    if(pred_cl > tar_cl):
 #        #e=np.sqrt(((tar_cl - pred_cl) ** 2))
@@ -210,7 +180,7 @@ def loss(para):
 #        e=np.sqrt(((tar_cl - pred_cl) ** 2))
      
     
-    fp.write('%s %s %s\n'%(my_counter,e,pred_cl))    
+    fp.write('%s %s %s %s\n'%(my_counter,e,pred_cl,pred_cd))    
     if(my_counter == 0):
         init_cl=pred_cl
     my_counter = my_counter +1
@@ -231,9 +201,9 @@ np.random.seed(123)
 for iters in range(1):
     aa=mypara.copy()
     #base foil name
-    idx1=np.random.randint(636)   
-    #fn=name[idx1]
-    fn='naca0012'
+    idx1=np.random.randint(1425)   
+    fn=name[idx1]
+    fn='n0012'
     print(fn)
     idx=np.argwhere(name=='%s'%fn)    
     
@@ -244,18 +214,13 @@ for iters in range(1):
      
     print('Starting loss = {}'.format(loss(p1)))
     print('Intial foil = %s' %name[idx[0]])
-    
-    mylimit=((aa[:,0].min(),aa[:,0].max()),(aa[:,1].min(),aa[:,1].max()),(aa[:,2].min(),aa[:,2].max()),\
-             (aa[:,3].min(),aa[:,3].max()),(aa[:,4].min(),aa[:,4].max()),(aa[:,5].min(),aa[:,5].max()),\
-             (aa[:,6].min(),aa[:,6].max()),(aa[:,7].min(),aa[:,7].max()))
+    a1=-0.2
+    a2=0.2
+    mylimit=((aa[:,0].min()+a1,aa[:,0].max()+a2),(aa[:,1].min()+a1,aa[:,1].max()+a2),(aa[:,2].min()+a1,aa[:,2].max()+a2),\
+             (aa[:,3].min()+a1,aa[:,3].max()+a2),(aa[:,4].min()+a1,aa[:,4].max()+a2),(aa[:,5].min()+a1,aa[:,5].max()+a2),\
+             (aa[:,6].min()+a1,aa[:,6].max()+a2),(aa[:,7].min()+a1,aa[:,7].max()+a2))
 
-    res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
-                   options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
-                                     'eps': 0.001, 'maxfun': 100, \
-                                     'maxiter': 5, 'maxls': 100})
-        
-        
-    #res = minimize(loss, x0=p1, method = 'L-BFGS-B', \
+    res = shgo(loss, bounds=mylimit, n=100, iters=1)
     #               options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
     #                                 'eps': 0.01, 'maxfun': 100, \
     #                                 'maxiter': 50, 'maxls': 100})
@@ -281,10 +246,10 @@ for iters in range(1):
     plt.figure(figsize=(6,5),dpi=100)
     plt.plot(xy0[:,0],xy0[:,1],'--k',label='Base')
     plt.plot(xy[:,0],xy[:,1],'g',lw=3,label='Optimized')
-    plt.legend(fontsize=14)
+    plt.legend(fontsize=14,fancybox=False,frameon=False, shadow=False)
     plt.xlim([-0.05,1.05])
     plt.ylim([-0.25,0.25])
-    plt.xlabel('X',fontsize=16)
-    plt.ylabel('Y',fontsize=16)
+    plt.xlabel('X/C',fontsize=16)
+    plt.ylabel('Y/C',fontsize=16)
     plt.savefig('./opt_plot/opti_%s.png'%fn,format='png',bbox_inches='tight',dpi=300)
     plt.close()

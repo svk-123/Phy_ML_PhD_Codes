@@ -15,7 +15,6 @@ import glob
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
-import pandas as pd
 from scipy import interpolate
 from os import listdir
 from os.path import isfile,isdir, join

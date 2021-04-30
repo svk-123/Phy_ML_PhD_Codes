@@ -13,7 +13,6 @@ start_time = time.time()
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
-import pandas
 from os import listdir
 from os.path import isfile, join
 
@@ -21,18 +20,14 @@ import keras
 from keras.models import Sequential, Model
 from keras.layers.core import Dense, Activation
 from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
-from keras.layers import merge, Input, dot
-from sklearn.metrics import mean_squared_error
 import random
 
 from keras.models import model_from_json
 from keras.models import load_model
-from sklearn import preprocessing
 from keras.layers.advanced_activations import LeakyReLU, PReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 from keras.callbacks import TensorBoard
 import cPickle as pickle
-import pandas
 
 from scipy import interpolate
 from numpy import linalg as LA
@@ -135,7 +130,7 @@ plt.rc('font', family='serif')
 #with open('test_l2_2.pkl', 'wb') as outfile1:
 #    pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)  
   
-
+'''
 #plot -test error
 p=[]
 u=[]
@@ -168,10 +163,10 @@ plt.xlabel('$L_2$ relative error(%)',fontsize=20)
 plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
 plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
 #plt.xlim([-0.001,4.0])
-plt.savefig('ts_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
+#plt.savefig('ts_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()    
 
-
+'''
 
 
 
@@ -207,7 +202,7 @@ plt.xlabel('$L_2$ relative error(%)',fontsize=20)
 plt.figtext(0.40, 0.01, '(a)', wrap=True, horizontalalignment='center', fontsize=24)    
 plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
 #plt.xlim([-0.001,4.0])
-plt.savefig('tr_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
+#plt.savefig('tr_tot.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
 
 

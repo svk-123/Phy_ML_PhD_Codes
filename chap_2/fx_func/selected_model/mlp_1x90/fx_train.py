@@ -19,14 +19,17 @@ from keras.models import Sequential, Model
 from keras.layers.core import Dense, Activation
 from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
 from keras.layers import merge, Input, dot
+from sklearn.metrics import mean_squared_error
 import random
 
 from keras.models import model_from_json
 from keras.models import load_model
+from sklearn import preprocessing
 from keras.layers.advanced_activations import LeakyReLU, PReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 from keras.callbacks import TensorBoard
 import cPickle as pickle
+from sklearn import preprocessing
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 import math
 from numpy import linalg as LA
@@ -57,32 +60,24 @@ ttr = Y[I][:n]
 ## Testing sets
 xte = X[I][n:]
 tte = Y[I][n:]
-'''
+
 aa=Input(shape=(1,))
-xx =Dense(50, kernel_initializer='random_normal',activation='tanh')(aa)
-xx =Dense(50,activation='tanh')(xx)
-xx =Dense(50,activation='tanh')(xx)
-xx =Dense(50,activation='tanh')(xx)
-xx =Dense(50,activation='tanh')(xx)
-xx =Dense(50,activation='tanh')(xx)
+xx =Dense(90, kernel_initializer='random_normal',activation='tanh')(aa)
+#xx =Dense(30,activation='tanh')(xx)
+#xx =Dense(30,activation='tanh')(xx)
+#xx =Dense(30,activation='tanh')(xx)
+#xx =Dense(50,activation='tanh')(xx)
+#xx =Dense(50,activation='tanh')(xx)
 g =Dense(1, activation='linear')(xx)
 
-#aa=Input(shape=(1,))
-#xx =Dense(50, kernel_initializer='random_normal',activation='linear')(aa)
-#xx =Dense(50,activation='linear')(xx)
-#xx =Dense(50,activation='linear')(xx)
-#xx =Dense(50,activation='linear')(xx)
-#xx =Dense(50,activation='linear')(xx)
-#xx =Dense(50,activation='linear')(xx)
-#g =Dense(1, activation='linear')(xx)
 
 #model
 model = Model(inputs=[aa], outputs=[g])
 # Compile model
-reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, mode='min'\
+reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5, mode='min'\
                               ,verbose=1 ,patience=200, min_lr=1.0e-6)
 
-e_stop = EarlyStopping(monitor='val_loss', min_delta=1.0e-5, patience=500, \
+e_stop = EarlyStopping(monitor='loss', min_delta=1.0e-7, patience=500, \
                        verbose=1, mode='auto')
 
 opt = Adam(lr=0.001)
@@ -93,7 +88,7 @@ hist = model.fit(xtr, ttr, validation_split=0.2,\
  
 
 
-suff='l1_50_no_activation'
+suff='l4_30_tanh'
 model.save('my_model_%s.h5'%suff) 
 print("--- %s seconds ---" % (time.time() - start_time))
 
@@ -101,14 +96,12 @@ loss1=hist.history['loss']
 loss2=hist.history['val_loss']
 lrate=hist.history['lr']
 
+data1=[hist.history]
+with open('./hist/hist_%s.pkl'%suff, 'wb') as outfile:
+    pickle.dump(data1, outfile, pickle.HIGHEST_PROTOCOL)
 
-'''
 
 # only testing 
-suff='l1_200_tanh'
-model = load_model('my_model_%s.h5'%suff)
-
-
 
 xt=np.linspace(0,1.2,100)
 yt=np.zeros(len(xt))
@@ -128,7 +121,7 @@ for i in range(len(zte)):
 pred = model.predict(xt)    
 predz = model.predict(z)
 predze = model.predict(ze)
-
+'''
 mei=10
 plt.figure(figsize=(6, 5), dpi=100)
 plt.plot(xt,yt,'b',marker='o',mfc='None',mew=1.5,mec='blue',linewidth=3,ms=10,markevery=mei,label='True')
@@ -150,15 +143,7 @@ plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0.0, hspace =
 plt.show()   
 plt.close()
 
-
-#calculate error norm
-tmp=zt-predz[:,0] 
-train_l2=((LA.norm(tmp)/LA.norm(zt))*100)
-print(train_l2)
-
-tmp=zte-predze[:,0] 
-test_l2=((LA.norm(tmp)/LA.norm(zte))*100)
-print(test_l2)
+'''
 
 
 

@@ -43,7 +43,7 @@ from keras import backend as K
 
 from numpy import linalg as LA
 import os, shutil
-from skimage import io, viewer,util 
+#from skimage import io, viewer,util 
 from scipy.optimize import minimize
 
 ##Xfoil imports
@@ -169,7 +169,7 @@ def loss(para):
     _,pred_cl,pred_cd=evaluate(xy,reno,mach,aoa,200,True)
     
     if(pred_cl > 0):
-        e=100.0-(pred_cl/pred_cd)
+        e=100.0*(pred_cd/pred_cl)
     else:
         e=1000.0
     
@@ -222,7 +222,7 @@ for iters in range(1):
 
     res = minimize(loss, x0=p1, method = 'L-BFGS-B', bounds=mylimit, \
                    options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \
-                                     'eps': 0.01, 'maxfun': 100, \
+                                     'eps': 0.1, 'maxfun': 100, \
                                      'maxiter': 100, 'maxls': 100})
     #res = minimize(loss, x0=p1, method = 'L-BFGS-B', \
     #               options={'disp': True, 'maxcor':100, 'ftol': 1e-16, \

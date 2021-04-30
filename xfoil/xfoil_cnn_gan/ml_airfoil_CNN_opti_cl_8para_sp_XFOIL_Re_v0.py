@@ -26,12 +26,11 @@ from keras.models import Sequential, Model
 from keras.layers.core import Dense, Activation
 from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
 from keras.layers import merge, Input, dot
-from sklearn.metrics import mean_squared_error
+
 import random
 
 from keras.models import model_from_json
 from keras.models import load_model
-from sklearn import preprocessing
 from keras.layers.advanced_activations import LeakyReLU, PReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 from keras.callbacks import TensorBoard
@@ -43,7 +42,6 @@ from keras import backend as K
 
 from numpy import linalg as LA
 import os, shutil
-from skimage import io, viewer,util 
 from scipy.optimize import minimize
 
 ##Xfoil imports

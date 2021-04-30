@@ -10,7 +10,6 @@ Created on Mon Apr 20 01:50:55 2020
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
-import pandas
 from os import listdir
 from os.path import isfile, join
 
@@ -204,7 +203,7 @@ plt.close()
 
 
 
-
+'''
 
 ###########_---- Re100--wos-PINN-NN###############################
 suff='pinn_nn_re100'
@@ -290,27 +289,27 @@ plt.savefig('./plot/v_%s.tiff'%suff, format='tiff', bbox_inches='tight',dpi=300)
 plt.show()   
 plt.close()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 '''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ##########-- high Re--------------------------------------
 
-suff='ws_re1000'
-uy1=np.loadtxt('./paper_files/uv/u_re1000_nodp_nodv_ws_x8.dat',skiprows=1)
+suff='ws_re20000'
+uy1=np.loadtxt('./paper_files/uv/u_re20000_nodp_nodv_ws_x8.dat',skiprows=1)
 
 
 plt.figure(figsize=(6, 4), dpi=100)
@@ -349,7 +348,7 @@ plt.close()
 
 ####################################################################################
 
-vy1=np.loadtxt('./paper_files/uv/v_re1000_nodp_nodv_ws_x8.dat',skiprows=1)
+vy1=np.loadtxt('./paper_files/uv/v_re20000_nodp_nodv_ws_x8.dat',skiprows=1)
 
 
 plt.figure(figsize=(6, 4), dpi=100)
@@ -384,4 +383,3 @@ plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0.0, hspace =
 plt.savefig('./plot/v_%s.tiff'%suff, format='tiff', bbox_inches='tight',dpi=300)
 plt.show()   
 plt.close()
-'''

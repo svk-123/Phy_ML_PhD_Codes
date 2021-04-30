@@ -20,12 +20,10 @@ from keras.models import Sequential, Model
 from keras.layers.core import Dense, Activation
 from keras.optimizers import SGD, Adam, Adadelta, Adagrad, Nadam
 from keras.layers import merge, Input, dot, add, concatenate
-from sklearn.metrics import mean_squared_error
 import random
 
 from keras.models import model_from_json
 from keras.models import load_model
-from sklearn import preprocessing
 from keras.layers.advanced_activations import LeakyReLU, PReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping,ModelCheckpoint
 from keras.callbacks import TensorBoard
@@ -63,10 +61,11 @@ out=result[1]
 xx=result[2]
 name=result[3]
 
+
 inp=np.asarray(inp)
 my_out=np.asarray(out)
 
-xtr1=inp
+xtr1=inp[101:102,:,:]
 ttr1=my_out 
 
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
@@ -79,6 +78,7 @@ del result
 get_out_1c= K.function([model.layers[0].input],
                                   [model.layers[15].output])
 c1 = get_out_1c([xtr1])[0]
+
 
 '''
 mm=[]
@@ -96,10 +96,10 @@ for i in range(16):
     c1_scaled[:,i]=c1_scaled[:,i]/mm_scale[i]
     '''
     
-info='[para(unscaled),name,xx,info]'    
-data2=[c1,name,xx,info]
-with open(path+'cnn_para_8_for_xfoil.pkl', 'wb') as outfile:
-    pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
+# info='[para(unscaled),name,xx,info]'    
+# data2=[c1,name,xx,info]
+# with open(path+'cnn_para_8_for_xfoil.pkl', 'wb') as outfile:
+#     pickle.dump(data2, outfile, pickle.HIGHEST_PROTOCOL)
 
 
 

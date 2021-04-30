@@ -111,6 +111,77 @@ kout=val_out
 i=1
 j=1    
    
+#get d1,d2,d3,d4 from CFD
+def line_plotu_sub1(i):
+
+    ######-BL thickness--######
+    ########################
+           
+    #LinearNDinterpolator
+    pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
+        
+    # for u    
+    print ('interpolation-1...')      
+    f1u=interpolate.LinearNDInterpolator(pD,val_out[:,0])
+    
+    N=300
+    
+    xa=np.linspace(1,1,N)
+    ya=np.linspace(0,0.5,N)  
+    
+    xb=np.linspace(2,2,N)
+    yb=np.linspace(0,1,N)       
+
+    xc=np.linspace(3,3,N)
+    yc=np.linspace(0,1.5,N)   
+    
+    xd=np.linspace(4.9,4.9,N)
+    yd=np.linspace(0,1.5,N)       
+    
+    u1a=np.zeros((len(ya)))
+    u2a=np.zeros((len(ya)))
+    u3a=np.zeros((len(ya)))
+    u4a=np.zeros((len(ya)))
+    
+    for j in range(len(ya)):
+        u1a[j]=f1u(xa[j],ya[j])
+        u2a[j]=f1u(xb[j],yb[j])
+        u3a[j]=f1u(xc[j],yc[j])
+        u4a[j]=f1u(xd[j],yd[j])
+               
+    c=0
+    for k in range(len(ya)):
+        if(u1a[k]>=0.99 and c==0):
+            d1=ya[k]
+            c=1
+    c=0
+    for k in range(len(ya)):
+        if(u2a[k]>=0.99 and c==0):
+            d2=yb[k]
+            c=1
+    c=0
+    for k in range(len(ya)):
+        if(u3a[k]>=0.99 and c==0):
+            d3=yc[k]
+            c=1            
+            
+    c=0
+    for k in range(len(ya)):
+        if(u4a[k]>=0.99 and c==0):
+            d4=yd[k]
+            c=1
+            
+    global d1
+    global d2
+    global d3
+    global d4
+            
+        
+line_plotu_sub1(j)  
+
+
+
+
 #plot
 def con_plot():
     
@@ -118,7 +189,6 @@ def con_plot():
     x1=5
     Rex1=x1/nu_
     d5=4.91*x1/np.sqrt(Rex1)
-
 
     
     fig = plt.figure(figsize=(8, 8),dpi=100)
@@ -299,38 +369,23 @@ def line_plotu_sub(i):
 
     ######-BL thickness--######
     ########################
-    
-    nu_=1.0/float(Re)
-    x1=1
-    x2=2
-    x3=3
-    
-    Rex1=x1/nu_
-    d1=4.91*x1/np.sqrt(Rex1)
 
-    Rex2=x2/nu_
-    d2=4.91*x2/np.sqrt(Rex2)
-
-    Rex3=x3/nu_
-    d3=4.91*x3/np.sqrt(Rex3)
-    
-    print (d1,d2,d3)
         
     #LinearNDinterpolator
     pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
     
-    
+    aa=1.5
     xa=np.linspace(1,1,50)#not used
     ya=np.linspace(0,1,50)
 
     xb=np.linspace(1,1,50)
-    yb=np.linspace(0,d1,50)
+    yb=np.linspace(0,d1*aa,50)
 
     xc=np.linspace(2,2,50)
-    yc=np.linspace(0,d2,50)
+    yc=np.linspace(0,d2*aa,50)
 
     xd=np.linspace(3,3,50)
-    yd=np.linspace(0,d3,50)
+    yd=np.linspace(0,d3*aa,50)
         
         
     # for u    
@@ -489,16 +544,11 @@ def line_plotu_sub(i):
     plt.show() 
     plt.close()    
     
-#line_plotu_sub(j)
+line_plotu_sub(j)
 
 
  
-    
-    
-    
-    
-    
-    
+
     
     
     

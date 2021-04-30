@@ -5,6 +5,10 @@
 Created on Mon May  1 08:09:04 2017
 
 @author: vinoth
+
+write for blasius velocity profile
+write for contours
+
 """
 
 import time
@@ -67,8 +71,8 @@ import matplotlib
 #u=np.asarray(u)
 #v=np.asarray(v)
 
-Re=100
-suff='re%s_nodp_nodv_x8'%Re    
+Re=20000
+suff='re%s_nodp_nodv_ws_x8'%Re    
 xy=np.loadtxt('./data_file/Re%s/bl_internal_combined.dat'%Re,skiprows=1)
 
 val_inp=np.concatenate((xy[:,0:1],xy[:,1:2]),axis=1)
@@ -88,14 +92,16 @@ graph = tf.get_default_graph()
 with tf.Session() as sess1:
     
     path1='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8/tf_model/'%Re
-    new_saver1 = tf.train.import_meta_graph( path1 + 'model_50000.meta')
+    new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
-    #tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
-    #           'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }
+    #new with nx ny
+    tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
+               'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }
 
-    tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None] }
-
+    '''#old-with out nx ny
+    tf_dict = {'input0:0': xtmp[:,None], 'input1:0': ytmp[:,None] }'''
+    
     op_to_load1 = graph.get_tensor_by_name('NS1/prediction/BiasAdd:0')    
     
     #uvp
@@ -111,6 +117,73 @@ kout=val_out
 i=1
 j=1    
    
+   
+#get d1,d2,d3,d4 from CFD
+def line_plotu_sub1(i):
+
+    ######-BL thickness--######
+    ########################
+           
+    #LinearNDinterpolator
+    pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
+        
+    # for u    
+    print ('interpolation-1...')      
+    f1u=interpolate.LinearNDInterpolator(pD,val_out[:,0])
+    
+    N=300
+    
+    xa=np.linspace(1,1,N)
+    ya=np.linspace(0,0.5,N)  
+    
+    xb=np.linspace(2,2,N)
+    yb=np.linspace(0,1,N)       
+
+    xc=np.linspace(3,3,N)
+    yc=np.linspace(0,1.5,N)   
+    
+    xd=np.linspace(4.9,4.9,N)
+    yd=np.linspace(0,1.5,N)       
+    
+    u1a=np.zeros((len(ya)))
+    u2a=np.zeros((len(ya)))
+    u3a=np.zeros((len(ya)))
+    u4a=np.zeros((len(ya)))
+    
+    for j in range(len(ya)):
+        u1a[j]=f1u(xa[j],ya[j])
+        u2a[j]=f1u(xb[j],yb[j])
+        u3a[j]=f1u(xc[j],yc[j])
+        u4a[j]=f1u(xd[j],yd[j])
+               
+    c=0
+    for k in range(len(ya)):
+        if(u1a[k]>=0.99 and c==0):
+            d1=ya[k]
+            c=1
+    c=0
+    for k in range(len(ya)):
+        if(u2a[k]>=0.99 and c==0):
+            d2=yb[k]
+            c=1
+    c=0
+    for k in range(len(ya)):
+        if(u3a[k]>=0.99 and c==0):
+            d3=yc[k]
+            c=1            
+            
+    c=0
+    for k in range(len(ya)):
+        if(u4a[k]>=0.99 and c==0):
+            d4=yd[k]
+            c=1
+            
+    global d1
+    global d2
+    global d3
+    global d4            
+line_plotu_sub1(j)  
+
 #plot
 def con_plot():
     
@@ -128,8 +201,7 @@ def con_plot():
     h1=0
     h2=d5
     AR=2.0/h2
-
-    
+     
     lp=np.linspace(p.min(),p.max(),20)    
     lu=np.linspace(u.min(),u.max(),20)      
     lv=np.linspace(v.min(),v.max(),20)   
@@ -141,7 +213,6 @@ def con_plot():
     ax1 = fig.add_subplot(3,2,1)
     cp1a = ax1.tricontour(xtmp,ytmp,p,levels=lpa,linewidths=0.4,colors='k',zorder=5)
     cp1 = ax1.tricontourf(xtmp,ytmp,p,levels=lp,cmap=cm.jet,extend ='both')
-
     
     #ax1.tricontourf(co[:,0],co[:,1],np.zeros(len(co)),colors='w')
     ax1.set_title('p-CFD')
@@ -165,11 +236,14 @@ def con_plot():
     ax2.set_yticks([])
     ax2.set_xlim([l1,l2])
     ax2.set_ylim([h1,h2])
+    ax2.set_aspect(AR,adjustable='box-forced')
+    
+    plt.colorbar(cp2)
 #    divider = make_axes_locatable(ax2)
-#    cax = divider.append_axes('right', size='1%', pad=0.05)
+#    cax = divider.append_axes('right', size='5%', pad=0.05)
 #    cbar2=plt.colorbar(cp2, cax=cax, orientation='vertical');
 #    cbar2.ax.tick_params(labelsize=10)
-    ax2.set_aspect(AR,adjustable='box-forced')
+
         
     ax3 = fig.add_subplot(3,2,3)
     cp3a = ax3.tricontour(xtmp,ytmp,u,levels=lua,linewidths=0.4,colors='k',zorder=5)    
@@ -285,7 +359,7 @@ def plot_cp():
     plt.ylabel('P',fontsize=20)
     #plt.title('Pressure Dist. over cylinder')
     plt.legend(fontsize=14)
-    plt.savefig('./plot/cp_%s.png'%suff,format='png',bbox_inches='tight', dpi=100)
+    #plt.savefig('./plot/cp_%s.png'%suff,format='png',bbox_inches='tight', dpi=100)
     plt.show()
     
     return pu1
@@ -300,41 +374,27 @@ def line_plotu_sub(i):
     ######-BL thickness--######
     ########################
     
-    nu_=1.0/float(Re)
-    x1=1
-    x2=2
-    x3=3
-    
-    Rex1=x1/nu_
-    d1=4.91*x1/np.sqrt(Rex1)
-
-    Rex2=x2/nu_
-    d2=4.91*x2/np.sqrt(Rex2)
-
-    Rex3=x3/nu_
-    d3=4.91*x3/np.sqrt(Rex3)
-    
-    print (d1,d2,d3)
-        
     #LinearNDinterpolator
     pD=np.asarray([val_inp[:,0],val_inp[:,1]]).transpose()
     
-    
+    aa=1.5
     xa=np.linspace(1,1,50)#not used
     ya=np.linspace(0,1,50)
 
     xb=np.linspace(1,1,50)
-    yb=np.linspace(0,d1,50)
+    yb=np.linspace(0,d1*aa,50)
 
     xc=np.linspace(2,2,50)
-    yc=np.linspace(0,d2,50)
+    yc=np.linspace(0,d2*aa,50)
 
     xd=np.linspace(3,3,50)
-    yd=np.linspace(0,d3,50)
+    yd=np.linspace(0,d3*aa,50)
         
+    
+       
         
     # for u    
-    print ('interpolation-1...')      
+    print 'interpolation-1...'      
     f1u=interpolate.LinearNDInterpolator(pD,val_out[:,0])
         
     u1a=np.zeros((len(ya)))
@@ -347,7 +407,7 @@ def line_plotu_sub(i):
         u1c[j]=f1u(xc[j],yc[j])
         u1d[j]=f1u(xd[j],yd[j])
         
-    print ('interpolation-2...')      
+    print 'interpolation-2...'      
     f2u=interpolate.LinearNDInterpolator(pD,tout[:,0])
         
     u2a=np.zeros((len(ya)))
@@ -360,7 +420,7 @@ def line_plotu_sub(i):
         u2c[j]=f2u(xc[j],yc[j])
         u2d[j]=f2u(xd[j],yd[j])
 
-    print ('interpolation-2...')      
+    print 'interpolation-2...'      
     f3u=interpolate.LinearNDInterpolator(pD,kout[:,0])
         
     u3a=np.zeros((len(ya)))
@@ -375,7 +435,7 @@ def line_plotu_sub(i):
 
 
     #for -v
-    print ('interpolation-1...')      
+    print 'interpolation-1...'      
     f1v=interpolate.LinearNDInterpolator(pD,val_out[:,1])
 
     v1a=np.zeros((len(ya)))
@@ -388,7 +448,7 @@ def line_plotu_sub(i):
         v1c[j]=f1v(xc[j],yc[j])
         v1d[j]=f1v(xd[j],yd[j])
    
-    print ('interpolation-2...')      
+    print 'interpolation-2...'      
     f2v=interpolate.LinearNDInterpolator(pD,tout[:,1])
    
     v2a=np.zeros((len(ya)))
@@ -401,7 +461,7 @@ def line_plotu_sub(i):
         v2c[j]=f2v(xc[j],yc[j])
         v2d[j]=f2v(xd[j],yd[j])
 
-    print ('interpolation-2...')      
+    print 'interpolation-2...'      
     f3v=interpolate.LinearNDInterpolator(pD,kout[:,1])
    
     v3a=np.zeros((len(ya)))
@@ -447,10 +507,17 @@ def line_plotu_sub(i):
     
     plt.figtext(0.4, 0.00, '(a)', wrap=True, horizontalalignment='center', fontsize=24)
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
-    plt.savefig('./plot/u_%s_%s.png'%(i,suff), format='png', bbox_inches='tight',dpi=100)
+    #plt.savefig('./plot/u_%s_%s.png'%(i,suff), format='png', bbox_inches='tight',dpi=100)
     plt.show()   
     plt.close()
     
+    fp=open('./paper_files/u_%s.dat'%suff,'w')
+    fp.write('u-cfd1 y1 u-pinn1 y1 u-cfd2 y2 u-pinn2 y2  ....\n')
+    for i in range(len(u1b)):
+        fp.write('%f %f %f %f %f %f %f %f %f %f %f %f\n'%(u1b[i],yb[i]/d1,u2b[i],yb[i]/d1,\
+                                  u1c[i],yc[i]/d2,u2c[i],yc[i]/d2,u1d[i],yd[i]/d3,u2d[i],yd[i]/d3))
+
+    fp.close()
     
     mei=2
     
@@ -485,14 +552,26 @@ def line_plotu_sub(i):
        
     plt.figtext(0.4, 0.00, '(b)', wrap=True, horizontalalignment='center', fontsize=24)    
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
-    plt.savefig('./plot/v_%s_%s.png'%(i,suff), format='png',bbox_inches='tight', dpi=100)
+    #plt.savefig('./plot/v_%s_%s.png'%(i,suff), format='png',bbox_inches='tight', dpi=100)
     plt.show() 
     plt.close()    
     
-#line_plotu_sub(j)
+    fp=open('./paper_files/v_%s.dat'%suff,'w')
+    fp.write('u-cfd1 y1 u-pinn1 y1 u-cfd2 y2 u-pinn2 y2  ....\n')
+    for i in range(len(u1b)):
+        fp.write('%f %f %f %f %f %f %f %f %f %f %f %f\n'%(v1b[i],yb[i]/d1,v2b[i],yb[i]/d1,\
+                                  v1c[i],yc[i]/d2,v2c[i],yc[i]/d2,v1d[i],yd[i]/d3,v2d[i],yd[i]/d3))
+
+    fp.close()
+    
+    
+line_plotu_sub(j)
 
 
- 
+
+
+    
+    
     
     
     

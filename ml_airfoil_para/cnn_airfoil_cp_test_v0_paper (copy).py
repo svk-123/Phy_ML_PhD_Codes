@@ -53,8 +53,8 @@ plt.rc('font', family='serif')
 """------------------------------------"""
 
 # ref:[data,name]
-path='./selected_model_p12_paper/data_file_new/'
-data_file='foil_uiuc.pkl'
+path='./data_file/'
+data_file='foil_param_216_ts.pkl'
 
 with open(path + data_file, 'rb') as infile:
     result = pickle.load(infile)
@@ -64,63 +64,82 @@ xx=result[2]
 name=result[3]
 
 inp=np.asarray(inp)
-out=np.asarray(out)
-name=np.asarray(name)
+my_out=np.asarray(out)
 
-#out=out/0.25
-
-np.random.seed(123)
-I=range(len(inp))
-I=np.asarray(I)
-np.random.shuffle(I)
-
-xtr1=inp[I][:1300]
-ttr1=out[I][:1300]
-name_tr1=name[I][:1300]
-
-xts1=inp[I][1300:]
-tts1=out[I][1300:]
-name_ts1=name[I][1300:]
-
-# I=np.random.randint(0,1300,30)
-# xtr1=xtr1[I]
-# ttr1=ttr1[I]
-# name_tr1=name_tr1[I]
-
-# I=np.random.randint(0,125,30)
-# xts1=xts1[I]
-# tts1=tts1[I]
-# name_ts1=name_ts1[I]
+xtr1=inp
+ttr1=my_out 
 
 xtr1=np.reshape(xtr1,(len(xtr1),216,216,1))  
-xts1=np.reshape(xts1,(len(xts1),216,216,1)) 
+model_test=load_model('./selected_model/case_1_p1_tanh/model_cnn/final_cnn.hdf5')  
+       
+out=model_test.predict([xtr1])
+out=out*0.25
 
+xxx=xx[::-1].copy()
+xxxx=np.concatenate((xx[:,None],xxx[1:,None]))
 
-
+# #[0,9]
+# for k in [10]:
+#     print k
+#     yy1=out[k][0:35]
+#     yy2=out[k][35:]
+#     yy2=yy2[::-1]
+#     yy=np.concatenate((yy1[:,None],yy2[1:,None]))
     
-#for training samples
+#     plt.figure(figsize=(6,5))
+#     plt.plot(xx,my_out[k][0:35],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=1,label='True')
+#     plt.plot(xx,my_out[k][35:],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=1)
     
-model=load_model('./selected_model_p12_paper/P12_C5F7/model_cnn/final_cnn.hdf5') 
-pred_out = model.predict([xtr1])
-pred_out=pred_out*0.25
+#     plt.plot(xxxx,yy,'r',lw=3,label='CNN-C5F7')
+
+#     plt.xlim([-0.05,1.05])
+#     plt.ylim([-0.2,0.25])
+#     plt.legend(fontsize=20,frameon=False)
+#     plt.xlabel('X/c',fontsize=20)
+#     plt.ylabel('Y',fontsize=20)  
+#     #plt.axis('off')
+#     plt.figtext(0.40, 0.01, '(a)', wrap=True, horizontalalignment='center', fontsize=24) 
+#     plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
+#     plt.savefig('./plot/ts_%s_%s.tiff'%(k,name[k]),format='tiff',bbox_inches='tight',dpi=300)
+#     plt.show()
+    
+#    
+#for k in range(1):
+#    
+#    plt.figure(figsize=(6, 5))
+#    xp, yp = np.meshgrid(range(inp[0].shape[0]), range(inp[0].shape[1]))
+#    
+#    cp=plt.imshow(inp[k])
+#    #plt.axis('off')
+#    plt.xlabel('X-pixel',fontsize=20)
+#    plt.ylabel('Y-pixel',fontsize=20)
+#    plt.colorbar(cp)   
+#    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0.00, wspace = 0)
+#    plt.savefig('./plot/%s.tiff'%(name[k]), format='tiff', bbox_inches='tight', dpi=300)
+#    plt.show()    
+    
+    
 
 
 #calculate error norm
 train_l2=[]
-for k in range(len(pred_out)):    
+train_l1=[]
+for k in range(len(out)):    
     
-    tmp=ttr1[k,:]-pred_out[k,:]
+    tmp=my_out[k]-out[k]
     
-    train_l2.append( (1/100.)*(LA.norm(tmp)/LA.norm(ttr1[k,:]))*100)
+    train_l2.append( (LA.norm(tmp)/LA.norm(out[k])))
 
+    tmp2=tmp/out[k]
+    train_l1.append(sum(abs(tmp2))/len(out))
 
 #spread_plot
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot([-0.25,0.25],[-0.25,0.25],'k',lw=3)
-#plt.plot(my_out[0],out[0],'ro')
-for k in range(len(pred_out)):
+plt.plot([-2,1.5],[-2,1.5],'k',lw=3)
+plt.plot(my_out[0],out[0],'ro')
+for k in range(len(name)):
     
-    plt.plot(ttr1[k,:],pred_out[k,:],'+')
+    plt.plot(my_out[k],out[k],'ro')
 plt.legend(fontsize=20)
 plt.xlabel('True',fontsize=20)
 plt.ylabel('Prediction',fontsize=20)
@@ -128,6 +147,11 @@ plt.ylabel('Prediction',fontsize=20)
 #plt.ylim([-1.5,1.5])    
 plt.savefig('trainn_spread_1.png', bbox_inches='tight',dpi=100)
 plt.show()          
+
+
+#only for testing
+train_l2=np.asarray(train_l2)
+#train_l2=np.concatenate((train_l2,train_l2[200:220]),axis=0)
 
 
 #error plot
@@ -139,7 +163,7 @@ plt.figtext(0.40, 0.01, '(b)', wrap=True, horizontalalignment='center', fontsize
 plt.subplots_adjust(top = 0.95, bottom = 0.22, right = 0.9, left = 0, hspace = 0, wspace = 0.1)
 #plt.xlim([-0.05,1.3])
 #plt.xticks([0,0.5,1.])
-plt.savefig('ts_p12.tiff',format='tiff', bbox_inches='tight',dpi=300)
+plt.savefig('ts_tot_1.tiff',format='tiff', bbox_inches='tight',dpi=300)
 plt.show()
 
 

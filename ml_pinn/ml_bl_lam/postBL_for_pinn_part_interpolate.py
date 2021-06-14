@@ -15,7 +15,6 @@ import glob
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
-import pandas as pd
 from scipy import interpolate
 from os import listdir
 from os.path import isfile,isdir, join
@@ -51,7 +50,7 @@ indir = path
 #    tmp=[f for f in listdir(dir2) if isdir(join(dir2, f))]
 #    fname_2.append(tmp)
 
-Re=40000
+Re=100
     
 fname_2=[['bl_%s_0'%Re]]
 
@@ -118,11 +117,11 @@ d_=4.91*d_
 ###-vertical station samples
 
 new_coord=[]
-x11=np.linspace(0.01,4.5,30)
+x11=np.linspace(0.5,4.5,9)
 #y11=np.linspace((d_.max()/2)-(d_.max()*0.3),d_.max(),10)
 
 #BL gap points compressed
-y11=np.linspace((d_.max()/2)-(d_.max()*0.3),d_.max()+0.01,20)
+y11=np.linspace((d_.max()*0.9)+0.1,d_.max()+0.2,6)
 
 #y11=np.linspace(1.5,2,6)
 ty=0.005
@@ -140,7 +139,6 @@ plt.plot(new_coord[:,0],new_coord[:,1],'o')
 #plt.xlim([-2,2])
 #plt.ylim([-2,2])
 plt.show()
-
 
 #plot
 def interp(x,y,Var,new_coord):
@@ -169,12 +167,15 @@ aoa = np.array(map(float, aoa))
 st= [0]
 end=[1]
 
+
 '''np.random.seed(1234534)
 mylist=np.random.randint(0,4500,100)
 
 nco=[]
 for k in mylist:
     nco.append(coord[k])'''
+
+
 
 for jj in range(1):
 
@@ -310,7 +311,7 @@ for jj in range(1):
 #    with open(filepath+'/BL_inlet.pkl', 'wb') as outfile1:
 #        pickle.dump(data1, outfile1, pickle.HIGHEST_PROTOCOL)
     
-fp=open('./data_file/Re%s/bl_sample_x30_20.dat'%Re,'w')
+fp=open('./data_file/Re%s/bl_sample_x8_0p10.dat'%Re,'w')
 
 fp.write('x y p u v @ x= 0,0.5,1,.,,,4.5, y: 1.5-2.0 \n')
 for i in range(len(pi)):

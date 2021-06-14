@@ -15,7 +15,6 @@ import glob
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
-import pandas as pd
 from scipy import interpolate
 from os import listdir
 from os.path import isfile,isdir, join
@@ -63,11 +62,24 @@ indir = path
 #    tmp=[f for f in listdir(dir2) if isdir(join(dir2, f))]
 #    fname_2.append(tmp)
 
-Re=20000
+Re=10000
 
-#wos-combine
-fname_2=np.asarray([ ['bl_%s_0'%Re,'bl_%s_0_nodp_nodv_x8'%Re] ])    
-#fname_2.sort()
+#ws-review sample loc
+#fname_2=np.asarray([ ['bl_%s_0'%Re,'bl_100_0_nodp_nodv_x8','bl_%s_0_sample_p8'%Re,'bl_%s_0_sample_p10'%Re] ])   
+ 
+#ws-review noise
+#fname_2=np.asarray([ ['bl_%s_0'%Re,'bl_100_0_nodp_nodv_x8','bl_%s_0_sample_p8'%Re,'bl_%s_0_sample_p10'%Re] ]) 
+
+#BC-1,2,3 (wos)
+#fname_2=np.asarray([ ['bl_%s_0'%Re,'bl_%s_0_dp_dv'%Re,'bl_%s_0_nodp_nodv'%Re,'bl_%s_0_wos_4s_puv'%Re] ]) 
+
+#ws-S1,S2
+#fname_2=np.asarray([ ['bl_%s_0'%Re,'bl_%s_0_nodp_nodv_x8_away'%Re,'bl_%s_0_nodp_nodv_x8'%Re] ]) 
+
+#ws-res
+fname_2=np.asarray([ ['bl_%s_0'%Re,'bl_%s_0_nodp_nodv_x8'%Re] ]) 
+
+myxx=np.loadtxt('./bl_ml/xx.dat')
 
 '''
 Re100-629
@@ -90,19 +102,26 @@ tmp=np.asarray(tmp)
 foil=np.asarray(foil)
 
 #mylabel=['CFD','BC-1','BC-2','BC-3']
-
 #mylabel=['CFD','S-1','S-2']
 mylabel=['CFD','PINN']
+#mylabel=['CFD','PINN-sample @ 50%','PINN-sample @ 20%','PINN-sample @ 0%' ]
+#mylabel=['CFD','PINN','PINN-noise 5%','PINN-noise 10%' ]
 
-mu=1/float(Re)
+
+#mu=5/float(Re)
+nu=1/float(Re)
+xx=myxx
+rex=xx/nu
+cf=0.664/np.sqrt(rex)
+
 T=[]
-for jj in range(2):
+for jj in range(1):
     
         #load shearstress 
         tu1=[]
         tu2=[]
 
-        with open('./bl_ml/%s/188/wallShearStress'%(tmp[jj]), 'r') as infile:
+        with open('./bl_ml/%s/237/wallShearStress'%(tmp[jj]), 'r') as infile:
             
             data0=infile.readlines()
             ln=0
@@ -120,20 +139,22 @@ for jj in range(2):
         tu1 = np.array(map(float, tu1))
         tu2 = np.array(map(float, tu2))
         tu3=np.sqrt(tu1**2 + tu2**2) 
-        T.append(mu*abs(tu1)/0.5)  
+        T.append(abs(tu1)/0.5)  
       
    
 c=['g','g','b','r','r','m','darkorange','lime','pink','purple','peru','gold','olive','salmon','brown']          
 plt.figure(figsize=(6,5),dpi=100)
-plt.plot(np.linspace(0,5,199),T[0][:],'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=3,label='CFD')
-
-for i in range(1,2):
-    plt.plot(np.linspace(0,5,199),T[i][:],'%s'%c[i],lw=2,label='%s'%mylabel[i])
+#plt.plot(myxx,T[0][:],'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=3,label='CFD')
+plt.plot(myxx,cf,'o',mfc='None',mew=1.5,mec='k',ms=10,markevery=3,label='Blasius')
+#plt.plot(xx,cf)
+for i in range(1):
+    plt.plot(myxx,T[i][:],'%s'%c[i],lw=2,label='%s'%mylabel[i])
     
-plt.legend(loc='center left', fontsize=18, bbox_to_anchor=(0.5,0.75), ncol=1, frameon=False, fancybox=False, shadow=False)
+plt.legend(loc='center left', fontsize=18, bbox_to_anchor=(0.2,0.75), ncol=1, frameon=False, fancybox=False, shadow=False)
 plt.xlabel('X',fontsize=20)
 plt.ylabel('$C_f$',fontsize=20)  
-plt.ylim([-0.0, max(T[0])*1.1])
+#plt.ylim([-0.05, max(T[0])*1.1])
+plt.ylim([-0.005,0.1])
 plt.savefig('./plot/%s.tiff'%fname_2[0][1], format='tiff', bbox_inches='tight',dpi=300)
 plt.show()          
         

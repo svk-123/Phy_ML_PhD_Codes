@@ -40,36 +40,18 @@ import matplotlib
 #matplotlib.rc('xtick', labelsize=18) 
 #matplotlib.rc('ytick', labelsize=18) 
 
-##load data
-#xtmp=[]
-#ytmp=[]
-#p=[]
-#u=[]
-#v=[]
-#p_pred=[]
-#u_pred=[]
-#v_pred=[]
-#
+#blasius solution analytical
 
-#flist=['re40']
-#suff='bl'
-#for ii in range(len(flist)):
-#    #x,y,Re,u,v
-#    with open('./data_file/BL_0503.pkl', 'rb') as infile:
-#        result = pickle.load(infile)
-#    xtmp.extend(result[0])
-#    ytmp.extend(result[1])
-#    p.extend(result[2])
-#    u.extend(result[3])
-#    v.extend(result[4])    
-#
-#    
 
-#xtmp=np.asarray(xtmp)
-#ytmp=np.asarray(ytmp)
-#p=np.asarray(p)
-#u=np.asarray(u)
-#v=np.asarray(v)
+bla=np.loadtxt('Bla_velocity.dat')
+bla=bla[:35,:]
+
+
+
+
+
+
+
 
 Re=100
 suff='re%s_sample_p8'%Re    
@@ -91,13 +73,13 @@ graph = tf.get_default_graph()
 #load model
 with tf.Session() as sess1:
     
-    path1='./case_review/case_sample_p8/tf_model/'
+    path1='./tf_model/case_1_re100_nodp_nodv_with_samling_x8/tf_model/'
     new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
     new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
     #new with nx ny
     tf_dict = {'input1a:0': xtmp[:,None], 'input1b:0': ytmp[:,None], \
-               'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }
+                'input1c:0': ytmp[:,None]/ytmp.max(), 'input1d:0': ytmp[:,None]/ytmp.max() }
 
     '''#old-with out nx ny
     tf_dict = {'input0:0': xtmp[:,None], 'input1:0': ytmp[:,None] }'''
@@ -347,7 +329,7 @@ def plot_cp():
         pu2[j]=f2p(xu[j],yu[j])
     pl2=np.zeros(len(xl))
     for j in range(len(xl)):
-       pl2[j]=f2p(xl[j],yl[j])    
+        pl2[j]=f2p(xl[j],yl[j])    
     
     mei=1       
     plt.figure(figsize=(6,5),dpi=100)
@@ -476,48 +458,55 @@ def line_plotu_sub(i):
   
     mei=2
     
+    fac1=np.sqrt(1/(0.01*1))
     plt.figure(figsize=(6, 4), dpi=100)
     
     plt.subplot(1,3,1)
-    plt.plot(u1b,yb/d1,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
-    plt.plot(u2b,yb/d1,'g',linewidth=3,label='PINN')
+    plt.plot(bla[:,0],bla[:,1],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
+    plt.plot(u2b,yb*fac1,'g',linewidth=3,label='PINN')
+    #plt.plot(bla[:,0],bla[:,1])
     #plt.plot(u3a,ya,'r',linewidth=3,label='NN')
     #plt.legend(fontsize=14)
-    plt.ylabel('y/$\delta$(x)',fontsize=20)
+    plt.ylabel('$\eta$',fontsize=20)
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.05,1.05)    
     
+    fac1=np.sqrt(1/(0.01*2))
     plt.subplot(1,3,2)
-    plt.plot(u1c,yc/d2,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
-    plt.plot(u2c,yc/d2,'g',linewidth=3)
+    plt.plot(bla[:,0],bla[:,1],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei)
+    plt.plot(u2c,yc*fac1,'g',linewidth=3)
+
     #plt.plot(u3b,yb,'r',linewidth=3)
     plt.xlabel('u/U$_\inf$',fontsize=20)
     plt.yticks([])
     #plt.xlim(-0.1,1.2)
     #plt.ylim(-0.05,1.05)    
         
+    fac1=np.sqrt(1/(0.01*3))
     plt.subplot(1,3,3)
-    plt.plot(u1d,yd/d3,'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='CFD')
-    plt.plot(u2d,yd/d3,'g',linewidth=3,label='PINN')
+    plt.plot(bla[:,0],bla[:,1],'o',mfc='None',mew=1.5,mec='blue',ms=10,markevery=mei,label='Blasius')
+    plt.plot(u2d,yd*fac1,'g',linewidth=3,label='CFD')
+
     #plt.plot(u3d,yd,'r',linewidth=3,label='NN')
     plt.legend(loc="upper left", bbox_to_anchor=[-0.02, 0.9], ncol=1, fontsize=14, frameon=False, shadow=False, fancybox=False,title='')
     plt.yticks([])    
     #plt.xlim(-0.5,1.2)
     #plt.ylim(-0.05,1.05)    
     
-    plt.figtext(0.4, 0.00, '(a)', wrap=True, horizontalalignment='center', fontsize=24)
+    #plt.figtext(0.4, 0.00, '(a)', wrap=True, horizontalalignment='center', fontsize=24)
     plt.subplots_adjust(top = 0.95, bottom = 0.25, right = 0.9, left = 0.0, hspace = 0.0, wspace = 0.1)
-    #plt.savefig('./plot/u_%s_%s.png'%(i,suff), format='png', bbox_inches='tight',dpi=100)
+    plt.savefig('./plot/u_%s_%s.tiff'%(i,suff), format='tiff', bbox_inches='tight',dpi=100)
+    #plt.ylim([-0.05,7])
     plt.show()   
     plt.close()
     
-    fp=open('./paper_files/u_%s.dat'%suff,'w')
-    fp.write('u-cfd1 y1 u-pinn1 y1 u-cfd2 y2 u-pinn2 y2  ....\n')
-    for i in range(len(u1b)):
-        fp.write('%f %f %f %f %f %f %f %f %f %f %f %f\n'%(u1b[i],yb[i]/d1,u2b[i],yb[i]/d1,\
-                                  u1c[i],yc[i]/d2,u2c[i],yc[i]/d2,u1d[i],yd[i]/d3,u2d[i],yd[i]/d3))
+    # fp=open('./paper_files/u_%s.dat'%suff,'w')
+    # fp.write('u-cfd1 y1 u-pinn1 y1 u-cfd2 y2 u-pinn2 y2  ....\n')
+    # for i in range(len(u1b)):
+    #     fp.write('%f %f %f %f %f %f %f %f %f %f %f %f\n'%(u1b[i],yb[i]/d1,u2b[i],yb[i]/d1,\
+    #                               u1c[i],yc[i]/d2,u2c[i],yc[i]/d2,u1d[i],yd[i]/d3,u2d[i],yd[i]/d3))
 
-    fp.close()
+    # fp.close()
     
     mei=2
     
@@ -556,13 +545,13 @@ def line_plotu_sub(i):
     plt.show() 
     plt.close()    
     
-    fp=open('./paper_files/v_%s.dat'%suff,'w')
-    fp.write('u-cfd1 y1 u-pinn1 y1 u-cfd2 y2 u-pinn2 y2  ....\n')
-    for i in range(len(u1b)):
-        fp.write('%f %f %f %f %f %f %f %f %f %f %f %f\n'%(v1b[i],yb[i]/d1,v2b[i],yb[i]/d1,\
-                                  v1c[i],yc[i]/d2,v2c[i],yc[i]/d2,v1d[i],yd[i]/d3,v2d[i],yd[i]/d3))
+    # fp=open('./paper_files/v_%s.dat'%suff,'w')
+    # fp.write('u-cfd1 y1 u-pinn1 y1 u-cfd2 y2 u-pinn2 y2  ....\n')
+    # for i in range(len(u1b)):
+    #     fp.write('%f %f %f %f %f %f %f %f %f %f %f %f\n'%(v1b[i],yb[i]/d1,v2b[i],yb[i]/d1,\
+    #                               v1c[i],yc[i]/d2,v2c[i],yc[i]/d2,v1d[i],yd[i]/d3,v2d[i],yd[i]/d3))
 
-    fp.close()
+    # fp.close()
     
     
 line_plotu_sub(j)

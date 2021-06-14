@@ -916,7 +916,7 @@ def con_plot3nn():
     plt.close()
 
 
-con_plot3nn()
+#con_plot3nn()
     
     
     

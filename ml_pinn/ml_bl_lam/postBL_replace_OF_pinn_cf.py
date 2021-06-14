@@ -15,7 +15,6 @@ import glob
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
-import pandas as pd
 from scipy import interpolate
 from os import listdir
 from os.path import isfile,isdir, join
@@ -53,7 +52,7 @@ indir = path
 #    tmp=[f for f in listdir(dir2) if isdir(join(dir2, f))]
 #    fname_2.append(tmp)
 Re=100
-suff='nodp_nodv_ws_x8_150'    
+suff='sample_p10'    
 
 fname_2=np.asarray([['bl_%s_0'%Re]])
 
@@ -193,7 +192,7 @@ for jj in range(1):
         #load model
         with tf.Session() as sess1:
             
-            path1='./tf_model/case_1_re%s_nodp_nodv_with_samling_x8_nn150x8/tf_model/'%Re
+            path1='./case_review/case_sample_p10/tf_model/'
             new_saver1 = tf.train.import_meta_graph( path1 + 'model_0.meta')
             new_saver1.restore(sess1, tf.train.latest_checkpoint(path1))
 
@@ -222,7 +221,7 @@ for jj in range(1):
         p[I]=out[:,2]
         
                 
-        dst2='./bl_ml/%s_%s'%(tmp[ii],suff)
+        dst2='./bl_ml_review/%s_%s'%(tmp[ii],suff)
         
         if os.path.exists(dst2):
             shutil.rmtree(dst2)
